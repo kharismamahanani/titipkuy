@@ -1,4 +1,4 @@
-const HUB_CODE = "B";
+import { HUB_CONFIG } from "@/lib/constants";
 
 const BARANG_KODE_MAP: Record<string, string> = {
   kardus: "KD",
@@ -23,5 +23,5 @@ export function generateKodeLabel(
   const paketCode = getPaketCode(paket);
   const barangCode = BARANG_KODE_MAP[kategoriBarang] ?? "LN";
   const urutanStr = String(urutan).padStart(4, "0");
-  return `TK-${HUB_CODE}-${paketCode}-${barangCode}-${urutanStr}`;
+  return `TK-${HUB_CONFIG.suhat.kode}-${paketCode}-${barangCode}-${urutanStr}`;
 }

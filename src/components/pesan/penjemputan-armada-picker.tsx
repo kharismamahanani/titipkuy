@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { HUB_CONFIG, SLOT_SESI } from "@/lib/constants";
 import type {
   ArmadaTipe,
   Hub,
@@ -18,8 +19,8 @@ import type {
 } from "@/types/slot";
 
 const HUB_OPTIONS: { value: Hub; label: string; alamat: string }[] = [
-  { value: "suhat", label: "Hub Suhat", alamat: "Jl. Bunga Lely" },
-  { value: "tidar", label: "Hub Tidar", alamat: "Perum Tidar View" },
+  { value: "suhat", label: HUB_CONFIG.suhat.nama, alamat: HUB_CONFIG.suhat.alamat },
+  { value: "tidar", label: HUB_CONFIG.tidar.nama, alamat: HUB_CONFIG.tidar.alamat },
 ];
 
 const ARMADA_TIPE_LABEL: Record<ArmadaTipe, string> = {
@@ -173,7 +174,7 @@ export function PenjemputanArmadaPicker({
       {availability && !availability.liburLocked && (
         <div className="space-y-4">
           <Label>Pilih Sesi & Armada</Label>
-          {(["pagi", "siang"] as const).map((sesiWaktu) => {
+          {(Object.keys(SLOT_SESI) as SesiWaktu[]).map((sesiWaktu) => {
             const sesiInfo = availability.sesi[sesiWaktu];
             return (
               <div key={sesiWaktu} className="space-y-2">

@@ -4,11 +4,11 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { incrementSlotUsage } from "@/lib/slot";
 import { getClientIp, isRateLimited, recordAttempt } from "@/lib/rate-limit";
+import { HUB_CONFIG, SLOT_SESI } from "@/lib/constants";
 
-const HUB_CODE = "B";
 const MAX_NOMOR_REF_RETRY = 5;
-const VALID_HUB = ["suhat", "tidar"];
-const VALID_SESI = ["pagi", "siang"];
+const VALID_HUB = Object.keys(HUB_CONFIG);
+const VALID_SESI = Object.keys(SLOT_SESI);
 const MAX_TRANSAKSI_PER_JAM = 3;
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
 
@@ -16,7 +16,7 @@ function generateNomorRef() {
   const now = new Date();
   const yyyymm = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
   const random = Math.floor(1000 + Math.random() * 9000);
-  return `TK-${HUB_CODE}-${yyyymm}-${random}`;
+  return `TK-${HUB_CONFIG.suhat.kode}-${yyyymm}-${random}`;
 }
 
 export async function POST(request: Request) {

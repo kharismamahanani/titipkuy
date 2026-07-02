@@ -1,18 +1,19 @@
 "use client";
 
 import { FadeIn } from "@/components/shared/fade-in";
+import { HUB_CONFIG } from "@/lib/constants";
 
 const HUBS = [
   {
-    nama: "📍 Hub Suhat",
-    alamat: "Jl. Bunga Lely, Lowokwaru",
+    nama: `📍 ${HUB_CONFIG.suhat.nama}`,
+    alamat: HUB_CONFIG.suhat.alamat,
     deskripsi:
       "Dekat UB, UM, dan UIN. Pusat kos mahasiswa terpadat di Malang. Cocok untuk storage bulanan dan paket magang.",
     tags: ["Dekat UB", "Dekat UM", "Dekat UIN"],
   },
   {
-    nama: "📍 Hub Tidar",
-    alamat: "Perum Tidar View, Sukun",
+    nama: `📍 ${HUB_CONFIG.tidar.nama}`,
+    alamat: HUB_CONFIG.tidar.alamat,
     deskripsi:
       "Kawasan perumahan tenang dan aman 24 jam. Cocok untuk motor, barang bernilai tinggi, dan penyimpanan jangka panjang.",
     tags: ["Titip Motor", "Aman 24 Jam", "Jangka Panjang"],

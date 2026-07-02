@@ -4,18 +4,19 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { incrementSlotUsage } from "@/lib/slot";
+import { HUB_CONFIG, SLOT_SESI } from "@/lib/constants";
 
-const HUB_CODE = "B";
 const MAX_NOMOR_REF_RETRY = 5;
-const VALID_HUB = ["suhat", "tidar"];
-const VALID_SESI = ["pagi", "siang"];
+const VALID_HUB = Object.keys(HUB_CONFIG);
+const VALID_SESI = Object.keys(SLOT_SESI);
 const TOKEN_VALID_MS = 24 * 60 * 60 * 1000;
 
-function generateNomorRef() {
+function generateNomorRef(hub: string) {
   const now = new Date();
   const yyyymm = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
   const random = Math.floor(1000 + Math.random() * 9000);
-  return `TK-${HUB_CODE}-${yyyymm}-${random}`;
+  const kode = HUB_CONFIG[hub as keyof typeof HUB_CONFIG]?.kode ?? HUB_CONFIG.suhat.kode;
+  return `TK-${kode}-${yyyymm}-${random}`;
 }
 
 export async function POST(request: Request) {
@@ -98,7 +99,7 @@ export async function POST(request: Request) {
           const created = await tx.transaksi.create({
             data: {
               id,
-              nomorRef: generateNomorRef(),
+              nomorRef: generateNomorRef(hub),
               pelanggan: existingPelanggan
                 ? { connect: { id: existingPelanggan.id } }
                 : {

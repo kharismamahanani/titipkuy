@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import { getOrCreateKonfigurasi, parseTanggalMerah } from "@/lib/konfigurasi";
 import { getSlotAvailability, incrementSlotUsage } from "@/lib/slot";
 import { prisma } from "@/lib/prisma";
+import { HUB_CONFIG } from "@/lib/constants";
 
-const VALID_HUB = ["suhat", "tidar"];
+const VALID_HUB = Object.keys(HUB_CONFIG);
 
 // Tanpa query params: kembalikan info konfigurasi umum saja (dipakai untuk
 // menonaktifkan tanggal di date picker sebelum hub/tanggal dipilih).

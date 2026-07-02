@@ -26,14 +26,15 @@ import {
 } from "@/components/ui/select";
 import { cn, normalizeWhatsAppNumber } from "@/lib/utils";
 import { uploadToStorage } from "@/lib/supabase";
+import { HUB_CONFIG } from "@/lib/constants";
 import { PenjemputanArmadaPicker } from "@/components/pesan/penjemputan-armada-picker";
 import type { Paket } from "@/types/paket";
 import { EMPTY_PENJEMPUTAN, type Hub, type PenjemputanData } from "@/types/slot";
 
 const KAMPUS_OPTIONS = ["UB", "UM", "UIN", "Tidak Berlaku/Wisatawan"];
 const HUB_OPTIONS: { value: Hub; label: string; alamat: string }[] = [
-  { value: "suhat", label: "Hub Suhat", alamat: "Jl. Bunga Lely" },
-  { value: "tidar", label: "Hub Tidar", alamat: "Perum Tidar View" },
+  { value: "suhat", label: HUB_CONFIG.suhat.nama, alamat: HUB_CONFIG.suhat.alamat },
+  { value: "tidar", label: HUB_CONFIG.tidar.nama, alamat: HUB_CONFIG.tidar.alamat },
 ];
 const MAX_BUKTI_SIZE = 5 * 1024 * 1024;
 

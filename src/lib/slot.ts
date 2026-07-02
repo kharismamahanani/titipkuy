@@ -1,12 +1,12 @@
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getOrCreateKonfigurasi, parseTanggalMerah } from "@/lib/konfigurasi";
+import { SLOT_SESI } from "@/lib/constants";
 
-export const SESI_JAM_MULAI: Record<string, number> = { pagi: 8, siang: 13 };
-export const SESI_LABEL: Record<string, string> = {
-  pagi: "08.00 – 11.00 WIB",
-  siang: "13.00 – 16.00 WIB",
-};
+// Jam mulai tiap sesi diturunkan dari SLOT_SESI (mis. "08.00 – 11.00 WIB" -> 8).
+const SESI_JAM_MULAI: Record<string, number> = Object.fromEntries(
+  Object.entries(SLOT_SESI).map(([key, sesi]) => [key, parseInt(sesi.jam, 10)])
+);
 const TIPE_ARMADA = ["motor", "mobil"] as const;
 const H1_MS = 24 * 60 * 60 * 1000;
 
@@ -71,7 +71,12 @@ export async function getSlotAvailability(tanggal: string, hub: string) {
       }
     }
 
-    sesi[sesiWaktu] = { label: SESI_LABEL[sesiWaktu], locked, motor: perTipe.motor, mobil: perTipe.mobil };
+    sesi[sesiWaktu] = {
+      label: SLOT_SESI[sesiWaktu as keyof typeof SLOT_SESI].jam,
+      locked,
+      motor: perTipe.motor,
+      mobil: perTipe.mobil,
+    };
   }
 
   const liburLocked = (konfig.lockHariMinggu && hariMinggu) || tanggalMerah;
