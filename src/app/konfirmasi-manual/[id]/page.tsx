@@ -18,7 +18,7 @@ import { PerjanjianPdfDocument } from "@/components/konfirmasi/perjanjian-pdf";
 import { CHECKLIST_ITEMS, DEKLARASI_ITEM } from "@/lib/checklist-items";
 import { dataUrlToFile, formatRupiah } from "@/lib/utils";
 import { uploadToStorage } from "@/lib/supabase";
-import { getWhatsAppUrl } from "@/constants/site";
+import { ADMIN_NAME, formatWhatsAppDisplay, getWhatsAppUrl } from "@/constants/site";
 import type { ChecklistData } from "@/types/pesan";
 import type { TransaksiDetail, Foto } from "@/types/transaksi";
 
@@ -211,6 +211,9 @@ function KonfirmasiManualContent() {
             >
               Konfirmasi Pembayaran via WhatsApp
             </a>
+            <p className="text-xs text-foreground/50">
+              Admin: {ADMIN_NAME} &middot; {formatWhatsAppDisplay()}
+            </p>
           </div>
         </div>
       </div>

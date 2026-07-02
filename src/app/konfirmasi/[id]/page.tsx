@@ -11,7 +11,7 @@ import { pdf } from "@react-pdf/renderer";
 import { Button } from "@/components/ui/button";
 import { PerjanjianPdfDocument } from "@/components/konfirmasi/perjanjian-pdf";
 import { formatRupiah } from "@/lib/utils";
-import { getWhatsAppUrl } from "@/constants/site";
+import { ADMIN_NAME, formatWhatsAppDisplay, getWhatsAppUrl } from "@/constants/site";
 import { uploadToStorage } from "@/lib/supabase";
 import type { TransaksiDetail } from "@/types/transaksi";
 
@@ -159,6 +159,9 @@ export default function KonfirmasiPage({ params }: { params: { id: string } }) {
           >
             Konfirmasi Pembayaran via WhatsApp
           </a>
+          <p className="text-xs text-foreground/50">
+            Admin: {ADMIN_NAME} &middot; {formatWhatsAppDisplay()}
+          </p>
         </div>
 
         <Button

@@ -1,5 +1,11 @@
 import { MessageCircle } from "lucide-react";
-import { getWhatsAppUrl, INSTAGRAM_URL, TIKTOK_URL } from "@/constants/site";
+import {
+  ADMIN_NAME,
+  formatWhatsAppDisplay,
+  getWhatsAppUrl,
+  INSTAGRAM_URL,
+  TIKTOK_URL,
+} from "@/constants/site";
 
 export function Footer() {
   return (
@@ -26,19 +32,27 @@ export function Footer() {
           </a>
           <a
             href={INSTAGRAM_URL}
-            aria-label="Instagram TitipKuy! (segera hadir)"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Instagram TitipKuy!"
             className="text-sm font-semibold text-foreground/70 transition-colors hover:text-primary-from"
           >
             Instagram
           </a>
           <a
             href={TIKTOK_URL}
-            aria-label="TikTok TitipKuy! (segera hadir)"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="TikTok TitipKuy!"
             className="text-sm font-semibold text-foreground/70 transition-colors hover:text-primary-from"
           >
             TikTok
           </a>
         </div>
+
+        <p className="text-sm text-foreground/60">
+          Admin: {ADMIN_NAME} &middot; {formatWhatsAppDisplay()}
+        </p>
 
         <p className="text-xs text-foreground/50">
           © 2026 TitipKuy! Seluruh hak cipta dilindungi.

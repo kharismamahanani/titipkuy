@@ -25,6 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn, normalizeWhatsAppNumber } from "@/lib/utils";
+import { ADMIN_NAME } from "@/constants/site";
 import { uploadToStorage } from "@/lib/supabase";
 import { HUB_CONFIG } from "@/lib/constants";
 import { PenjemputanArmadaPicker } from "@/components/pesan/penjemputan-armada-picker";
@@ -192,8 +193,9 @@ export default function AdminBuatOrderManualPage() {
   const confirmUrl = successData
     ? `${window.location.origin}/konfirmasi-manual/${successData.id}?token=${successData.token}`
     : "";
+  // ✅ SUDAH DIISI — template pesan WhatsApp memakai ADMIN_NAME dari constants/site.ts
   const waMessage = successData
-    ? `Halo ${pelanggan.nama}! Pesanan TitipKuy!-mu sudah dibuat 🎉\nKlik link ini untuk baca perjanjian, tanda tangan digital, dan konfirmasi pembayaran: ${confirmUrl}\nLink berlaku 24 jam. Ada pertanyaan? Balas WA ini ya!`
+    ? `Halo ${pelanggan.nama}! Pesanan ${ADMIN_NAME}-mu sudah dibuat 🎉\nKlik link ini untuk baca perjanjian, tanda tangan digital, dan konfirmasi pembayaran: ${confirmUrl}\nLink berlaku 24 jam. Ada pertanyaan? Balas WA ini ya!`
     : "";
 
   return (
