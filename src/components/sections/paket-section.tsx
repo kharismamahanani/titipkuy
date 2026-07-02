@@ -139,7 +139,7 @@ export function PaketSection() {
                 </p>
 
                 <Link
-                  href={`/pesan?paket=${paket.id}`}
+                  href={`/pesan?paketId=${paket.id}`}
                   className="mt-6 block rounded-full border border-primary-from/60 py-2.5 text-center text-sm font-semibold text-foreground transition-colors hover:bg-primary/10"
                 >
                   Pilih Paket

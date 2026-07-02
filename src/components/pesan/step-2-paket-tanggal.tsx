@@ -24,6 +24,7 @@ interface Step2Props {
   deklarasi: DeklarasiData;
   antarJemputOption: AntarJemputOption | null;
   preselectedPaketId?: string;
+  preselectedMode?: "harian" | "bulanan";
   onPaketChange: (paket: Paket) => void;
   onTanggalChange: (date: Date) => void;
   onDeklarasiChange: (data: DeklarasiData) => void;
@@ -37,6 +38,7 @@ export function Step2PaketTanggal({
   deklarasi,
   antarJemputOption,
   preselectedPaketId,
+  preselectedMode,
   onPaketChange,
   onTanggalChange,
   onDeklarasiChange,
@@ -45,6 +47,7 @@ export function Step2PaketTanggal({
   const [paketList, setPaketList] = useState<Paket[]>([]);
   const [state, setState] = useState<"loading" | "success" | "error">("loading");
   const [isUploadingBukti, setIsUploadingBukti] = useState(false);
+  const [tab, setTab] = useState<"harian" | "bulanan">(preselectedMode ?? "harian");
 
   useEffect(() => {
     let isMounted = true;
@@ -61,7 +64,10 @@ export function Step2PaketTanggal({
 
           if (preselectedPaketId && !paket) {
             const match = data.find((item) => item.id === preselectedPaketId);
-            if (match) onPaketChange(match);
+            if (match) {
+              onPaketChange(match);
+              setTab(match.kategori === "harian" ? "harian" : "bulanan");
+            }
           }
         }
       })
@@ -99,6 +105,10 @@ export function Step2PaketTanggal({
       ? addDays(tanggalMasuk, paket.durasiHari ?? 1)
       : null;
 
+  const filteredPaketList = paketList.filter((item) =>
+    tab === "harian" ? item.kategori === "harian" : item.kategori !== "harian"
+  );
+
   return (
     <div className="space-y-8">
       <div>
@@ -106,6 +116,24 @@ export function Step2PaketTanggal({
         <p className="mt-1 text-sm text-foreground/60">
           Pilih paket yang sesuai, lalu tentukan tanggal masuk barang.
         </p>
+      </div>
+
+      <div className="flex justify-center gap-2">
+        {(["harian", "bulanan"] as const).map((t) => (
+          <button
+            key={t}
+            type="button"
+            onClick={() => setTab(t)}
+            className={cn(
+              "rounded-full border px-5 py-2 text-sm font-semibold transition-colors",
+              tab === t
+                ? "border-transparent bg-gradient-to-r from-primary-from to-primary-to text-white"
+                : "border-card-border text-foreground/70 hover:bg-primary/10"
+            )}
+          >
+            {t === "harian" ? "🧳 Harian" : "🎓 Bulanan"}
+          </button>
+        ))}
       </div>
 
       {state === "loading" && (
@@ -119,7 +147,7 @@ export function Step2PaketTanggal({
 
       {state === "success" && (
         <div className="grid gap-4 sm:grid-cols-2">
-          {paketList.map((item) => {
+          {filteredPaketList.map((item) => {
             const isSelected = paket?.id === item.id;
             return (
               <button

@@ -1,20 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { FadeIn } from "@/components/shared/fade-in";
-import type { KalkulatorMode } from "@/types/kalkulator";
 
 const TRUST_BADGES = ["🛡️ Segel Cable Tie", "📸 Foto Bukti", "🛵 Jemput ke Pintu"];
 
-interface HeroProps {
-  onSelectMode: (mode: KalkulatorMode) => void;
-}
-
-export function Hero({ onSelectMode }: HeroProps) {
-  function handleClick(mode: KalkulatorMode) {
-    onSelectMode(mode);
-    document.getElementById("kalkulator")?.scrollIntoView({ behavior: "smooth" });
-  }
-
+export function Hero() {
   return (
     <section className="relative overflow-hidden px-4 pt-20 pb-24 text-center sm:px-6">
       <div className="mx-auto max-w-3xl">
@@ -35,20 +26,18 @@ export function Hero({ onSelectMode }: HeroProps) {
 
         <FadeIn delay={0.2}>
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <button
-              type="button"
-              onClick={() => handleClick("harian")}
-              className="w-full rounded-full bg-gradient-to-r from-primary-from to-primary-to px-8 py-4 text-base font-semibold text-white shadow-lg shadow-primary/30 transition-transform hover:scale-105 sm:w-auto"
+            <Link
+              href="/pesan?mode=harian"
+              className="inline-block w-full rounded-full bg-gradient-to-r from-primary-from to-primary-to px-8 py-4 text-base font-semibold text-white shadow-lg shadow-primary/30 transition-transform hover:scale-105 sm:w-auto"
             >
               🧳 Titip Harian / Wisata
-            </button>
-            <button
-              type="button"
-              onClick={() => handleClick("bulanan")}
-              className="gradient-border w-full rounded-full bg-bg-dark px-8 py-4 text-base font-semibold text-white transition-transform hover:scale-105 sm:w-auto"
+            </Link>
+            <Link
+              href="/pesan?mode=bulanan"
+              className="gradient-border inline-block w-full rounded-full bg-bg-dark px-8 py-4 text-base font-semibold text-white transition-transform hover:scale-105 sm:w-auto"
             >
               🎓 Titip Bulanan / Kos
-            </button>
+            </Link>
           </div>
         </FadeIn>
 

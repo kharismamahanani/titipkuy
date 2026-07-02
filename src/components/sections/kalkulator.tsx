@@ -283,7 +283,7 @@ export function Kalkulator({ mode, onModeChange }: KalkulatorProps) {
                   </div>
 
                   <Link
-                    href={`/pesan?paket=${matchedPaket.id}&mode=${mode}`}
+                    href={`/pesan?paketId=${matchedPaket.id}&mode=${mode}`}
                     className="mt-6 block rounded-full bg-gradient-to-r from-primary-from to-primary-to py-3 text-center text-sm font-semibold text-white shadow-lg shadow-primary/30 transition-transform hover:scale-[1.02]"
                   >
                     Lanjut Pesan Sekarang →

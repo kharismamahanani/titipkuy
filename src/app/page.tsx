@@ -19,7 +19,7 @@ export default function Home() {
     <div className="bg-bg-dark">
       <Navbar />
       <main>
-        <Hero onSelectMode={setMode} />
+        <Hero />
         <HubLokasi />
         <Kalkulator mode={mode} onModeChange={setMode} />
         <KenapaTitipkuy />

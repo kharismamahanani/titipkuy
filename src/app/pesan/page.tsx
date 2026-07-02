@@ -29,7 +29,12 @@ const REQUIRED_CHECKS: (keyof ChecklistData)[] = [
 function PesanForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const preselectedPaketId = searchParams.get("paket") ?? undefined;
+  const preselectedPaketId = searchParams.get("paketId") ?? undefined;
+  const preselectedModeParam = searchParams.get("mode");
+  const preselectedMode =
+    preselectedModeParam === "harian" || preselectedModeParam === "bulanan"
+      ? preselectedModeParam
+      : undefined;
 
   const [transactionId] = useState(() => crypto.randomUUID());
   const [step, setStep] = useState(1);
@@ -141,6 +146,7 @@ function PesanForm() {
               deklarasi={formData.deklarasi}
               antarJemputOption={formData.antarJemputOption}
               preselectedPaketId={preselectedPaketId}
+              preselectedMode={preselectedMode}
               onPaketChange={(paket) => setFormData({ ...formData, paket })}
               onTanggalChange={(tanggalMasuk) =>
                 setFormData({ ...formData, tanggalMasuk })
