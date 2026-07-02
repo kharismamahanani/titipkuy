@@ -27,16 +27,17 @@ import {
 import { cn, normalizeWhatsAppNumber } from "@/lib/utils";
 import { ADMIN_NAME } from "@/constants/site";
 import { uploadToStorage } from "@/lib/supabase";
-import { HUB_CONFIG } from "@/lib/constants";
+import { AKTIF_HUB_KEYS, HUB_CONFIG } from "@/lib/constants";
 import { PenjemputanArmadaPicker } from "@/components/pesan/penjemputan-armada-picker";
 import type { Paket } from "@/types/paket";
 import { EMPTY_PENJEMPUTAN, type Hub, type PenjemputanData } from "@/types/slot";
 
 const KAMPUS_OPTIONS = ["UB", "UM", "UIN", "Tidak Berlaku/Wisatawan"];
-const HUB_OPTIONS: { value: Hub; label: string; alamat: string }[] = [
-  { value: "suhat", label: HUB_CONFIG.suhat.nama, alamat: HUB_CONFIG.suhat.alamat },
-  { value: "tidar", label: HUB_CONFIG.tidar.nama, alamat: HUB_CONFIG.tidar.alamat },
-];
+const HUB_OPTIONS: { value: Hub; label: string; alamat: string }[] = AKTIF_HUB_KEYS.map((key) => ({
+  value: key,
+  label: HUB_CONFIG[key].nama,
+  alamat: HUB_CONFIG[key].alamat,
+}));
 const MAX_BUKTI_SIZE = 5 * 1024 * 1024;
 
 const WHATSAPP_REGEX = /^(\+?62|0)8\d{8,11}$/;
@@ -62,7 +63,9 @@ export default function AdminBuatOrderManualPage() {
   const [paketId, setPaketId] = useState("");
   const [tanggalMasuk, setTanggalMasuk] = useState<Date | null>(null);
   const [tanggalJatuhTempo, setTanggalJatuhTempo] = useState<Date | null>(null);
-  const [hub, setHub] = useState<Hub | "">("");
+  const [hub, setHub] = useState<Hub | "">(
+    HUB_OPTIONS.length === 1 ? HUB_OPTIONS[0].value : ""
+  );
   const [zonaRak, setZonaRak] = useState("");
 
   const [deklarasi, setDeklarasi] = useState({
@@ -319,25 +322,32 @@ export default function AdminBuatOrderManualPage() {
           </div>
 
           <div className="space-y-2">
-            <Label>Pilih Hub *</Label>
-            <div className="flex flex-col gap-2 sm:flex-row">
-              {HUB_OPTIONS.map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => setHub(opt.value)}
-                  className={cn(
-                    "flex-1 rounded-xl border px-4 py-2.5 text-left text-sm transition-colors",
-                    hub === opt.value
-                      ? "border-transparent bg-gradient-to-r from-primary-from to-primary-to text-white"
-                      : "border-card-border text-foreground/80 hover:bg-primary/10"
-                  )}
-                >
-                  <span className="font-semibold">{opt.label}</span>{" "}
-                  <span className="opacity-80">({opt.alamat})</span>
-                </button>
-              ))}
-            </div>
+            <Label>Hub Penyimpanan *</Label>
+            {HUB_OPTIONS.length > 1 ? (
+              <div className="flex flex-col gap-2 sm:flex-row">
+                {HUB_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setHub(opt.value)}
+                    className={cn(
+                      "flex-1 rounded-xl border px-4 py-2.5 text-left text-sm transition-colors",
+                      hub === opt.value
+                        ? "border-transparent bg-gradient-to-r from-primary-from to-primary-to text-white"
+                        : "border-card-border text-foreground/80 hover:bg-primary/10"
+                    )}
+                  >
+                    <span className="font-semibold">{opt.label}</span>{" "}
+                    <span className="opacity-80">({opt.alamat})</span>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <p className="rounded-xl border border-card-border px-4 py-2.5 text-sm text-foreground/80">
+                <span className="font-semibold">{HUB_OPTIONS[0]?.label}</span>{" "}
+                <span className="opacity-80">({HUB_OPTIONS[0]?.alamat})</span>
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">

@@ -38,6 +38,7 @@ const EMPTY_FORM = {
   tipe: "motor",
   radiusLabel: "<3km",
   harga: "",
+  kapasitasLabel: "",
   aktif: true,
 };
 
@@ -59,6 +60,7 @@ export function AntarJemputFormDialog({ open, onOpenChange, option }: AntarJempu
         tipe: option.tipe,
         radiusLabel: option.radiusLabel,
         harga: String(option.harga),
+        kapasitasLabel: option.kapasitasLabel ?? "",
         aktif: option.aktif,
       });
     } else {
@@ -81,6 +83,7 @@ export function AntarJemputFormDialog({ open, onOpenChange, option }: AntarJempu
         tipe: form.tipe,
         radiusLabel: form.radiusLabel,
         harga: Number(form.harga),
+        kapasitasLabel: form.kapasitasLabel || undefined,
         aktif: form.aktif,
       };
 
@@ -173,6 +176,16 @@ export function AntarJemputFormDialog({ open, onOpenChange, option }: AntarJempu
               value={form.harga}
               onChange={(e) => setForm({ ...form, harga: e.target.value })}
               required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="kapasitasLabel">Kapasitas (opsional)</Label>
+            <Input
+              id="kapasitasLabel"
+              placeholder="Maks. 2 Box S atau 1 Koper Kabin"
+              value={form.kapasitasLabel}
+              onChange={(e) => setForm({ ...form, kapasitasLabel: e.target.value })}
             />
           </div>
 

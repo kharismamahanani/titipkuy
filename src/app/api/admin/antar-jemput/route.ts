@@ -19,7 +19,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { label, tipe, radiusLabel, harga, aktif, urutan } = body ?? {};
+    const { label, tipe, radiusLabel, harga, kapasitasLabel, aktif, urutan } = body ?? {};
 
     if (!label || !tipe || !radiusLabel || harga == null) {
       return NextResponse.json(
@@ -34,6 +34,7 @@ export async function POST(request: Request) {
         tipe,
         radiusLabel,
         harga: Number(harga),
+        kapasitasLabel: kapasitasLabel || null,
         aktif: aktif ?? true,
         urutan: urutan != null ? Number(urutan) : 0,
       },

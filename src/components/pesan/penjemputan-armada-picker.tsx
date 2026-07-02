@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { HUB_CONFIG, SLOT_SESI } from "@/lib/constants";
+import { AKTIF_HUB_KEYS, HUB_CONFIG, SLOT_SESI } from "@/lib/constants";
 import type {
   ArmadaTipe,
   Hub,
@@ -17,10 +17,11 @@ import type {
   SlotConfig,
 } from "@/types/slot";
 
-const HUB_OPTIONS: { value: Hub; label: string; alamat: string }[] = [
-  { value: "suhat", label: HUB_CONFIG.suhat.nama, alamat: HUB_CONFIG.suhat.alamat },
-  { value: "tidar", label: HUB_CONFIG.tidar.nama, alamat: HUB_CONFIG.tidar.alamat },
-];
+const HUB_OPTIONS: { value: Hub; label: string; alamat: string }[] = AKTIF_HUB_KEYS.map((key) => ({
+  value: key,
+  label: HUB_CONFIG[key].nama,
+  alamat: HUB_CONFIG[key].alamat,
+}));
 
 const ARMADA_TIPE_LABEL: Record<ArmadaTipe, string> = {
   motor: "Motor",
@@ -49,6 +50,13 @@ export function PenjemputanArmadaPicker({
       .then((res) => (res.ok ? res.json() : null))
       .then((data: SlotConfig | null) => setConfig(data))
       .catch(() => setConfig(null));
+  }, []);
+
+  useEffect(() => {
+    if (!penjemputan.hub && HUB_OPTIONS.length === 1) {
+      onChange({ ...penjemputan, hub: HUB_OPTIONS[0].value });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -112,27 +120,29 @@ export function PenjemputanArmadaPicker({
         </p>
       </div>
 
-      <div className="space-y-2">
-        <Label>Pilih Hub</Label>
-        <div className="flex flex-col gap-2 sm:flex-row">
-          {HUB_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => handleHubChange(opt.value)}
-              className={cn(
-                "flex-1 rounded-xl border px-4 py-2.5 text-left text-sm transition-colors",
-                penjemputan.hub === opt.value
-                  ? "border-transparent bg-gradient-to-r from-primary-from to-primary-to text-white"
-                  : "border-card-border text-foreground/80 hover:bg-primary/10"
-              )}
-            >
-              <span className="font-semibold">{opt.label}</span>{" "}
-              <span className="opacity-80">({opt.alamat})</span>
-            </button>
-          ))}
+      {HUB_OPTIONS.length > 1 && (
+        <div className="space-y-2">
+          <Label>Pilih Hub</Label>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            {HUB_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => handleHubChange(opt.value)}
+                className={cn(
+                  "flex-1 rounded-xl border px-4 py-2.5 text-left text-sm transition-colors",
+                  penjemputan.hub === opt.value
+                    ? "border-transparent bg-gradient-to-r from-primary-from to-primary-to text-white"
+                    : "border-card-border text-foreground/80 hover:bg-primary/10"
+                )}
+              >
+                <span className="font-semibold">{opt.label}</span>{" "}
+                <span className="opacity-80">({opt.alamat})</span>
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {penjemputan.hub && (
         <div className="space-y-2">

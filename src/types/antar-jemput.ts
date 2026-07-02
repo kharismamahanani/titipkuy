@@ -4,6 +4,7 @@ export interface AntarJemputOption {
   tipe: string;
   radiusLabel: string;
   harga: number;
+  kapasitasLabel: string | null;
   aktif: boolean;
   urutan: number;
 }

@@ -156,11 +156,56 @@ const PAKET_DATA = [
 ];
 
 const ANTAR_JEMPUT_OPTIONS = [
-  { label: "Motor - Radius <3 km dari hub", tipe: "motor", radiusLabel: "<3km", harga: 15000, aktif: true, urutan: 1 },
-  { label: "Motor - Radius 3–6 km dari hub", tipe: "motor", radiusLabel: "3-6km", harga: 25000, aktif: true, urutan: 2 },
-  { label: "Mobil - Radius <3 km dari hub", tipe: "mobil", radiusLabel: "<3km", harga: 45000, aktif: true, urutan: 3 },
-  { label: "Mobil - Radius 3–6 km dari hub", tipe: "mobil", radiusLabel: "3-6km", harga: 60000, aktif: true, urutan: 4 },
+  {
+    label: "Motor Honda Beat — Radius <3 km (Area UB, Polinema, Jatimulyo)",
+    tipe: "motor",
+    radiusLabel: "<3km",
+    harga: 15000,
+    kapasitasLabel: "Maks. 2 Box S atau 1 Koper Kabin",
+    aktif: true,
+    urutan: 1,
+  },
+  {
+    label: "Motor Honda Beat — Radius 3–6 km (Area UM, UIN, Dinoyo)",
+    tipe: "motor",
+    radiusLabel: "3-6km",
+    harga: 25000,
+    kapasitasLabel: "Maks. 2 Box S atau 1 Koper Kabin",
+    aktif: true,
+    urutan: 2,
+  },
+  {
+    label: "Mobil Chevrolet Spin — Radius <3 km",
+    tipe: "mobil",
+    radiusLabel: "<3km",
+    harga: 45000,
+    kapasitasLabel: "Maks. 6 Box L atau Koper Besar",
+    aktif: true,
+    urutan: 3,
+  },
+  {
+    label: "Mobil Chevrolet Spin — Radius 3–6 km",
+    tipe: "mobil",
+    radiusLabel: "3-6km",
+    harga: 60000,
+    kapasitasLabel: "Maks. 6 Box L atau Koper Besar",
+    aktif: true,
+    urutan: 4,
+  },
 ];
+
+const ARMADA_DATA = [
+  { nama: "Motor Honda Beat", tipe: "motor", slotPerHari: 6, aktif: true },
+  { nama: "Mobil Chevrolet Spin", tipe: "mobil", slotPerHari: 3, aktif: true },
+];
+
+const KONFIGURASI_OPERASIONAL = {
+  lockH1: true,
+  lockHariMinggu: true,
+  lockTanggalMerah: "[]",
+  pesanHariLibur:
+    "Armada TitipKuy! libur di hari Minggu & tanggal merah. Untuk kebutuhan mendesak, kirim mandiri via Grab/Lalamove dengan menghubungi admin via WhatsApp terlebih dahulu.",
+};
 
 async function seedPaket() {
   await prisma.$transaction([
@@ -178,9 +223,36 @@ async function seedAntarJemput() {
   console.log(`Seeded ${ANTAR_JEMPUT_OPTIONS.length} opsi antar-jemput.`);
 }
 
+async function seedArmada() {
+  for (const armada of ARMADA_DATA) {
+    const existing = await prisma.armada.findFirst({ where: { nama: armada.nama } });
+    if (existing) {
+      await prisma.armada.update({ where: { id: existing.id }, data: armada });
+    } else {
+      await prisma.armada.create({ data: armada });
+    }
+  }
+  console.log(`Seeded ${ARMADA_DATA.length} armada.`);
+}
+
+async function seedKonfigurasi() {
+  const existing = await prisma.konfigurasiOperasional.findFirst();
+  if (existing) {
+    await prisma.konfigurasiOperasional.update({
+      where: { id: existing.id },
+      data: KONFIGURASI_OPERASIONAL,
+    });
+  } else {
+    await prisma.konfigurasiOperasional.create({ data: KONFIGURASI_OPERASIONAL });
+  }
+  console.log("Konfigurasi operasional diperbarui.");
+}
+
 async function main() {
   await seedPaket();
   await seedAntarJemput();
+  await seedArmada();
+  await seedKonfigurasi();
 }
 
 main()

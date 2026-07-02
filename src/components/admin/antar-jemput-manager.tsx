@@ -81,6 +81,7 @@ export function AntarJemputManager({ initialOptions }: AntarJemputManagerProps) 
               <th className="px-4 py-3 font-medium">Label</th>
               <th className="px-4 py-3 font-medium">Tipe</th>
               <th className="px-4 py-3 font-medium">Radius</th>
+              <th className="px-4 py-3 font-medium">Kapasitas</th>
               <th className="px-4 py-3 font-medium">Harga</th>
               <th className="px-4 py-3 font-medium">Status Aktif</th>
               <th className="px-4 py-3 font-medium">Aksi</th>
@@ -89,7 +90,7 @@ export function AntarJemputManager({ initialOptions }: AntarJemputManagerProps) 
           <tbody>
             {initialOptions.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-foreground/50">
+                <td colSpan={7} className="px-4 py-6 text-center text-foreground/50">
                   Belum ada opsi antar-jemput. Klik &quot;Tambah Opsi&quot; untuk mulai.
                 </td>
               </tr>
@@ -99,6 +100,7 @@ export function AntarJemputManager({ initialOptions }: AntarJemputManagerProps) 
                 <td className="px-4 py-3 font-medium">{option.label}</td>
                 <td className="px-4 py-3 capitalize">{option.tipe}</td>
                 <td className="px-4 py-3">{option.radiusLabel}</td>
+                <td className="px-4 py-3 text-foreground/60">{option.kapasitasLabel ?? "-"}</td>
                 <td className="px-4 py-3">{formatRupiah(option.harga)}</td>
                 <td className="px-4 py-3">
                   <Switch

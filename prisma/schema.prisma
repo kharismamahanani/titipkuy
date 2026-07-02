@@ -146,12 +146,13 @@ model KonfigurasiOperasional {
 // Layanan antar-jemput sebagai add-on opsional di form pemesanan (bukan
 // paket tersendiri) — dipilih pelanggan setelah memilih paket utama.
 model AntarJemputOption {
-  id          String   @id @default(cuid())
-  label       String   // "Motor - Radius <3km", "Mobil - Radius 3-6km"
-  tipe        String   // "motor" | "mobil"
-  radiusLabel String   // "<3km" | "3-6km"
-  harga       Int
-  aktif       Boolean  @default(true)
-  urutan      Int      @default(0)
-  transaksi   Transaksi[]
+  id             String   @id @default(cuid())
+  label          String   // "Motor - Radius <3km", "Mobil - Radius 3-6km"
+  tipe           String   // "motor" | "mobil"
+  radiusLabel    String   // "<3km" | "3-6km"
+  harga          Int
+  kapasitasLabel String?  // "Maks. 2 Box S atau 1 Koper Kabin"
+  aktif          Boolean  @default(true)
+  urutan         Int      @default(0)
+  transaksi      Transaksi[]
 }
