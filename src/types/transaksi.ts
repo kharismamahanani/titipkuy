@@ -38,6 +38,7 @@ export interface TransaksiDetail {
   tanggalJatuhTempo: string;
   statusBayar: "BELUM_BAYAR" | "LUNAS";
   statusTransaksi: "AKTIF" | "SELESAI" | "DIBATALKAN";
+  hub: string | null;
   tandaTanganUrl: string | null;
   pdfUrl: string | null;
   createdAt: string;

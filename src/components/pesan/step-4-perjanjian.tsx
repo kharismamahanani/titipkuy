@@ -3,49 +3,14 @@
 import { format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import { addDays } from "date-fns";
-import { AlertTriangle, Ban, Clock, FileCheck, Loader2, ShieldAlert } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { SignatureCanvas } from "@/components/pesan/signature-canvas";
 import { PerjanjianDialog } from "@/components/pesan/perjanjian-dialog";
 import { formatRupiah } from "@/lib/utils";
+import { CHECKLIST_ITEMS, DEKLARASI_ITEM } from "@/lib/checklist-items";
 import type { ChecklistData, PesanFormData } from "@/types/pesan";
-
-const CHECKLIST_ITEMS: {
-  key: keyof ChecklistData;
-  icon: typeof ShieldAlert;
-  label: string;
-}[] = [
-  {
-    key: "limitGantiRugi",
-    icon: ShieldAlert,
-    label:
-      "Saya paham ganti rugi maksimal Rp500.000/kardus (atau sesuai nilai deklarasi jika ada).",
-  },
-  {
-    key: "barangTerlarang",
-    icon: Ban,
-    label:
-      "Saya tidak menitipkan barang terlarang (makanan, bahan berbahaya, barang ilegal).",
-  },
-  {
-    key: "jatuhTempo",
-    icon: Clock,
-    label: "Saya paham akan dikenakan denda jika terlambat mengambil barang.",
-  },
-  {
-    key: "lepasSetelah30Hari",
-    icon: AlertTriangle,
-    label:
-      "Saya paham barang yang tidak diambil lebih dari 30 hari bisa dilepas oleh TitipKuy!.",
-  },
-];
-
-const DEKLARASI_ITEM = {
-  key: "deklarasiBenar" as const,
-  icon: FileCheck,
-  label: "Saya menyatakan nilai deklarasi yang saya isi adalah benar.",
-};
 
 interface Step4Props {
   formData: PesanFormData;

@@ -49,8 +49,12 @@ model Transaksi {
   tanggalJatuhTempo DateTime
   statusBayar      StatusBayar @default(BELUM_BAYAR)
   statusTransaksi  StatusTransaksi @default(AKTIF)
+  hub              String?   // "suhat" | "tidar" — hub penyimpanan untuk order ini
   zonaRak          String?
   catatanAdmin     String?
+  // Order manual via WhatsApp (dibuat admin) — link konfirmasi berbasis token
+  konfirmasiToken          String?   @unique
+  konfirmasiTokenExpiresAt DateTime?
   // Perjanjian
   perjanjianDisetujui      Boolean   @default(false)
   waktuPersetujuan         DateTime?

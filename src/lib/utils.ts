@@ -13,6 +13,14 @@ export function formatRupiah(amount: number) {
   }).format(amount)
 }
 
+// Normalisasi nomor WhatsApp ("08xx" atau "+628xx") ke format wa.me (628xx).
+export function normalizeWhatsAppNumber(phone: string) {
+  const digits = phone.replace(/[^\d]/g, "")
+  if (digits.startsWith("62")) return digits
+  if (digits.startsWith("0")) return `62${digits.slice(1)}`
+  return digits
+}
+
 export function dataUrlToFile(dataUrl: string, filename: string) {
   const [header, base64] = dataUrl.split(",")
   const mime = header.match(/:(.*?);/)?.[1] ?? "image/png"

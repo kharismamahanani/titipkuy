@@ -30,8 +30,9 @@ const STATUS_FILTERS = [
 
 const LIMIT = 20;
 
-function getHub(nomorRef: string) {
-  return nomorRef.split("-")[1] ?? "-";
+function getHub(t: TransaksiSearchResult) {
+  if (t.hub) return t.hub;
+  return t.nomorRef.split("-")[1] ?? "-";
 }
 
 interface Filters {
@@ -119,10 +120,20 @@ export default function AdminTransaksiPage() {
 
   return (
     <div className="px-4 py-6 sm:px-6 lg:px-8">
-      <h1 className="font-heading text-2xl font-bold">Transaksi</h1>
-      <p className="mt-1 text-sm text-foreground/60">
-        Semua transaksi penitipan barang &middot; {total} total.
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="font-heading text-2xl font-bold">Transaksi</h1>
+          <p className="mt-1 text-sm text-foreground/60">
+            Semua transaksi penitipan barang &middot; {total} total.
+          </p>
+        </div>
+        <Link
+          href="/admin/transaksi/baru"
+          className="rounded-full bg-gradient-to-r from-primary-from to-primary-to px-5 py-2.5 text-sm font-semibold text-white"
+        >
+          + Buat Order Manual
+        </Link>
+      </div>
 
       <form onSubmit={handleSearchSubmit} className="mt-6 flex gap-2">
         <Input
@@ -198,7 +209,7 @@ export default function AdminTransaksiPage() {
                 <td className="px-4 py-3 font-medium">{t.nomorRef}</td>
                 <td className="px-4 py-3">{t.pelanggan.nama}</td>
                 <td className="px-4 py-3">{t.paket.nama}</td>
-                <td className="px-4 py-3">{getHub(t.nomorRef)}</td>
+                <td className="px-4 py-3 capitalize">{getHub(t)}</td>
                 <td className="px-4 py-3">
                   {format(new Date(t.tanggalMasuk), "d MMM yyyy", { locale: localeId })}
                 </td>
