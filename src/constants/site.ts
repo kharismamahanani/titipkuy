@@ -1,3 +1,6 @@
+// Domain produksi TitipKuy! (tersambung ke Vercel)
+export const SITE_URL = "https://titipkuy.online";
+
 // ✅ SUDAH DIISI — Nomor WhatsApp Business (format: 62xxxxxxxxxx, tanpa "+")
 export const WHATSAPP_NUMBER = "6282330736696";
 

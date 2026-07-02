@@ -3,6 +3,7 @@ import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { SITE_URL } from "@/constants/site";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -16,10 +17,30 @@ const inter = Inter({
 
 const FAVICON_EMOJI = "📦";
 
+const TITLE = "TitipKuy! | Titip Barang, Tenang Magang 🔥";
+const DESCRIPTION =
+  "Jasa penitipan barang untuk mahasiswa di Malang. Aman, gampang, dan bikin tenang pas magang, KKN, atau mudik.";
+
 export const metadata: Metadata = {
-  title: "TitipKuy! | Titip Barang, Tenang Magang 🔥",
-  description:
-    "Jasa penitipan barang untuk mahasiswa di Malang. Aman, gampang, dan bikin tenang pas magang, KKN, atau mudik.",
+  metadataBase: new URL(SITE_URL),
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    url: SITE_URL,
+    siteName: "TitipKuy!",
+    locale: "id_ID",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: TITLE,
+    description: DESCRIPTION,
+  },
   icons: {
     icon: `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">${FAVICON_EMOJI}</text></svg>`,
   },
