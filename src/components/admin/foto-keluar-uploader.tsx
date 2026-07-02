@@ -66,11 +66,24 @@ export function FotoKeluarUploader({ transaksiId, fotoKeluar }: FotoKeluarUpload
     setProgress(null);
   }
 
+  async function handleDelete(foto: Foto) {
+    try {
+      const res = await fetch(`/api/admin/foto/${foto.id}`, { method: "DELETE" });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Gagal menghapus foto");
+
+      toast.success("Foto dihapus");
+      router.refresh();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Gagal menghapus foto");
+    }
+  }
+
   const isUploading = progress !== null;
 
   return (
     <div className="space-y-4">
-      <FotoLightboxGrid fotos={fotoKeluar} emptyText="Belum ada foto keluar." />
+      <FotoLightboxGrid fotos={fotoKeluar} emptyText="Belum ada foto keluar." onDelete={handleDelete} />
 
       <div
         onDragOver={(e) => {

@@ -2,33 +2,53 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import type { Foto } from "@/types/transaksi";
 
 interface FotoLightboxGridProps {
   fotos: Foto[];
   emptyText: string;
+  onDelete?: (foto: Foto) => void;
 }
 
-export function FotoLightboxGrid({ fotos, emptyText }: FotoLightboxGridProps) {
+export function FotoLightboxGrid({ fotos, emptyText, onDelete }: FotoLightboxGridProps) {
   const [selected, setSelected] = useState<Foto | null>(null);
 
   if (fotos.length === 0) {
     return <p className="text-sm text-foreground/50">{emptyText}</p>;
   }
 
+  function handleDelete(e: React.MouseEvent, foto: Foto) {
+    e.stopPropagation();
+    if (!onDelete) return;
+    if (!window.confirm("Hapus foto ini? Tidak bisa dibatalkan")) return;
+    onDelete(foto);
+  }
+
   return (
     <>
       <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
         {fotos.map((foto) => (
-          <button
-            key={foto.id}
-            type="button"
-            onClick={() => setSelected(foto)}
-            className="relative aspect-square overflow-hidden rounded-xl"
-          >
-            <Image src={foto.url} alt={foto.fileName} fill className="object-cover" unoptimized />
-          </button>
+          <div key={foto.id} className="group relative aspect-square overflow-hidden rounded-xl">
+            <button
+              type="button"
+              onClick={() => setSelected(foto)}
+              className="absolute inset-0"
+            >
+              <Image src={foto.url} alt={foto.fileName} fill className="object-cover" unoptimized />
+            </button>
+            {onDelete && (
+              <button
+                type="button"
+                onClick={(e) => handleDelete(e, foto)}
+                aria-label="Hapus foto"
+                className="absolute right-1 top-1 rounded-full bg-black/60 p-1.5 text-white opacity-0 transition-opacity hover:bg-destructive group-hover:opacity-100"
+              >
+                <Trash2 size={14} />
+              </button>
+            )}
+          </div>
         ))}
       </div>
 

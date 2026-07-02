@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
-import { Loader2, Search } from "lucide-react";
+import { Loader2, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -104,6 +104,25 @@ function AdminLabelPageContent() {
   function handlePrint() {
     if (!selected) return;
     router.push(`/admin/label/print/${selected.id}`);
+  }
+
+  async function handleDeleteBarang(barangId: string) {
+    if (!selected) return;
+    if (!window.confirm("Hapus barang ini? Tidak bisa dibatalkan")) return;
+
+    try {
+      const res = await fetch(`/api/admin/label/${barangId}`, { method: "DELETE" });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Gagal menghapus barang");
+
+      setSelected({
+        ...selected,
+        barangLabel: selected.barangLabel.filter((b) => b.id !== barangId),
+      });
+      toast.success("Barang dihapus");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Gagal menghapus barang");
+    }
   }
 
   return (
@@ -257,7 +276,19 @@ function AdminLabelPageContent() {
                       <p className="font-medium">{b.deskripsi}</p>
                       <p className="text-xs text-foreground/60 capitalize">{b.kategori}</p>
                     </div>
-                    <span className="gradient-text font-heading font-bold">{b.kodeLabel}</span>
+                    <div className="flex items-center gap-3">
+                      <span className="gradient-text font-heading font-bold">{b.kodeLabel}</span>
+                      {selected.statusTransaksi === "AKTIF" && (
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteBarang(b.id)}
+                          aria-label="Hapus barang"
+                          className="text-foreground/40 hover:text-destructive"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>

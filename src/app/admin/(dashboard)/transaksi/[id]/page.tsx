@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import { prisma } from "@/lib/prisma";
 import { formatRupiah } from "@/lib/utils";
-import { FotoLightboxGrid } from "@/components/admin/foto-lightbox-grid";
+import { FotoMasukGrid } from "@/components/admin/foto-masuk-grid";
 import { FotoKeluarUploader } from "@/components/admin/foto-keluar-uploader";
 import { TandaiSelesaiButton } from "@/components/admin/tandai-selesai-button";
 
@@ -92,7 +92,7 @@ export default async function AdminTransaksiDetailPage({
 
       <section className="space-y-3">
         <h2 className="font-heading font-bold">Foto Saat Masuk</h2>
-        <FotoLightboxGrid fotos={fotoMasuk} emptyText="Tidak ada foto masuk." />
+        <FotoMasukGrid fotos={fotoMasuk} emptyText="Tidak ada foto masuk." />
       </section>
 
       <section className="space-y-3">
