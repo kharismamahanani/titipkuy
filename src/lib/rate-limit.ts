@@ -16,9 +16,9 @@ function sweepExpired() {
   callsSinceSweep = 0;
 
   const now = Date.now();
-  for (const [key, bucket] of buckets) {
+  buckets.forEach((bucket, key) => {
     if (bucket.resetAt < now) buckets.delete(key);
-  }
+  });
 }
 
 function getBucket(key: string, windowMs: number): Bucket {

@@ -143,7 +143,10 @@ export function PerjanjianPdfDocument({ transaksi }: PerjanjianPdfDocumentProps)
         </Text>
 
         <View style={styles.signatureBox}>
+          {/* Image di sini dari @react-pdf/renderer (elemen PDF, bukan <img>
+              HTML); tipenya tidak punya prop alt sama sekali. */}
           {transaksi.tandaTanganUrl && (
+            // eslint-disable-next-line jsx-a11y/alt-text
             <Image src={transaksi.tandaTanganUrl} style={styles.signatureImage} />
           )}
           <Text style={{ marginTop: 8 }}>{pelanggan.nama}</Text>

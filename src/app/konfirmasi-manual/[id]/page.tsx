@@ -106,11 +106,9 @@ function KonfirmasiManualContent() {
       const patchResult = await patchRes.json();
       if (!patchRes.ok) throw new Error(patchResult.error || "Gagal menyimpan konfirmasi");
 
-      const updated: TransaksiDetail = {
+      const updated: KonfirmasiManualData = {
         ...data,
         tandaTanganUrl,
-        perjanjianDisetujui: true,
-        klausulDeklarasiNilai: data.paket.perluDeklarasi,
       };
 
       try {
