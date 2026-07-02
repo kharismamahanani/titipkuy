@@ -102,3 +102,36 @@ enum StatusTransaksi {
   SELESAI
   DIBATALKAN
 }
+
+model Armada {
+  id           String   @id @default(cuid())
+  nama         String   // "Motor Honda Beat", "Mobil Chevrolet Spin"
+  tipe         String   // "motor" | "mobil"
+  platNomor    String?
+  slotPerHari  Int      @default(4)   // maksimal booking per hari
+  aktif        Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  slots        SlotArmada[]
+}
+
+model SlotArmada {
+  id          String   @id @default(cuid())
+  armada      Armada   @relation(fields:[armadaId], references:[id])
+  armadaId    String
+  tanggal     DateTime @db.Date   // tanggal slot
+  sesiWaktu   String   // "pagi" (08-11) | "siang" (13-16)
+  hub         String   // "suhat" | "tidar"
+  terpakai    Int      @default(0) // jumlah booking yang sudah masuk
+  createdAt   DateTime @default(now())
+  @@unique([armadaId, tanggal, sesiWaktu, hub])
+}
+
+model KonfigurasiOperasional {
+  id                    String  @id @default(cuid())
+  lockH1                Boolean @default(true)   // kunci slot kurang dari 24 jam
+  lockHariMinggu        Boolean @default(true)   // tidak ada armada hari Minggu
+  lockTanggalMerah      String  @default("[]")   // JSON array tanggal merah
+  pesanHariLibur        String  @default("Kirim mandiri via Grab/Lalamove tersedia 24 jam.")
+  updatedAt             DateTime @updatedAt
+}
