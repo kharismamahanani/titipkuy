@@ -6,7 +6,12 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
-export function TandaiLunasButton({ id }: { id: string }) {
+interface TandaiLunasButtonProps {
+  id: string;
+  onSuccess?: () => void;
+}
+
+export function TandaiLunasButton({ id, onSuccess }: TandaiLunasButtonProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -21,7 +26,11 @@ export function TandaiLunasButton({ id }: { id: string }) {
       if (!res.ok) throw new Error();
 
       toast.success("Ditandai lunas");
-      router.refresh();
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        router.refresh();
+      }
     } catch {
       toast.error("Gagal menandai lunas");
     } finally {

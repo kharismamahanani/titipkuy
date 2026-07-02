@@ -1,30 +1,48 @@
 import { NextResponse } from "next/server";
+import type { Prisma, StatusTransaksi } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+
+const VALID_STATUS: StatusTransaksi[] = ["AKTIF", "SELESAI", "DIBATALKAN"];
+const DEFAULT_LIMIT = 20;
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const q = searchParams.get("q")?.trim();
+    const search = (searchParams.get("search") ?? searchParams.get("q"))?.trim();
+    const status = searchParams.get("status")?.trim();
+    const paketId = searchParams.get("paketId")?.trim();
+    const page = Math.max(1, Number(searchParams.get("page")) || 1);
+    const limit = Math.max(1, Number(searchParams.get("limit")) || DEFAULT_LIMIT);
 
-    if (!q) {
-      return NextResponse.json([]);
-    }
+    const where: Prisma.TransaksiWhereInput = {
+      ...(search
+        ? {
+            OR: [
+              { nomorRef: { contains: search, mode: "insensitive" } },
+              { pelanggan: { nama: { contains: search, mode: "insensitive" } } },
+            ],
+          }
+        : {}),
+      ...(status && status !== "all" && VALID_STATUS.includes(status as StatusTransaksi)
+        ? { statusTransaksi: status as StatusTransaksi }
+        : {}),
+      ...(paketId ? { paketId } : {}),
+    };
 
-    const transaksi = await prisma.transaksi.findMany({
-      where: {
-        OR: [
-          { nomorRef: { contains: q, mode: "insensitive" } },
-          { pelanggan: { nama: { contains: q, mode: "insensitive" } } },
-        ],
-      },
-      include: { pelanggan: true, paket: true, barangLabel: true },
-      orderBy: { createdAt: "desc" },
-      take: 20,
-    });
+    const [data, total] = await Promise.all([
+      prisma.transaksi.findMany({
+        where,
+        include: { pelanggan: true, paket: true, barangLabel: true },
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      prisma.transaksi.count({ where }),
+    ]);
 
-    return NextResponse.json(transaksi);
+    return NextResponse.json({ data, total, page, limit });
   } catch (error) {
     console.error("[GET /api/admin/transaksi]", error);
-    return NextResponse.json({ error: "Gagal mencari transaksi" }, { status: 500 });
+    return NextResponse.json({ error: "Gagal mengambil data transaksi" }, { status: 500 });
   }
 }

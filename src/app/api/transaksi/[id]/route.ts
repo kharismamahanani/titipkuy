@@ -40,6 +40,13 @@ export async function PATCH(
       return NextResponse.json({ error: "pdfUrl wajib diisi" }, { status: 400 });
     }
 
+    if (typeof pdfUrl !== "string" || !pdfUrl.startsWith("https://")) {
+      return NextResponse.json(
+        { error: "pdfUrl harus berupa URL https:// yang valid" },
+        { status: 400 }
+      );
+    }
+
     const transaksi = await prisma.transaksi.update({
       where: { id: params.id },
       data: { pdfUrl },

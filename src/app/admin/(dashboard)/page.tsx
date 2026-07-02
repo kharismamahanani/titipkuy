@@ -172,7 +172,7 @@ export default async function AdminDashboardPage() {
                         Lihat Detail
                       </Link>
                       <Link
-                        href={`/admin/label?transaksi=${t.id}`}
+                        href={`/admin/label?transaksiId=${t.id}`}
                         className="rounded-lg border border-card-border px-3 py-1.5 text-xs hover:bg-primary/10"
                       >
                         Print Label

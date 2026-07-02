@@ -4,11 +4,12 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { FadeIn } from "@/components/shared/fade-in";
-import { formatRupiah } from "@/lib/utils";
+import { cn, formatRupiah } from "@/lib/utils";
 import { getWhatsAppUrl } from "@/constants/site";
 import type { Paket } from "@/types/paket";
 
 type FetchState = "loading" | "success" | "error";
+type Tab = "harian" | "bulanan";
 
 function isTerlaris(paket: Paket) {
   return paket.nama.toLowerCase().includes("magang 3 bulan");
@@ -17,6 +18,7 @@ function isTerlaris(paket: Paket) {
 export function PaketSection() {
   const [paketList, setPaketList] = useState<Paket[]>([]);
   const [state, setState] = useState<FetchState>("loading");
+  const [tab, setTab] = useState<Tab>("harian");
 
   useEffect(() => {
     let isMounted = true;
@@ -41,6 +43,10 @@ export function PaketSection() {
     };
   }, []);
 
+  const filteredPaket = paketList.filter((p) =>
+    tab === "harian" ? p.kategori === "harian" : p.kategori !== "harian"
+  );
+
   return (
     <section id="paket" className="px-4 py-24 sm:px-6">
       <div className="mx-auto max-w-6xl">
@@ -51,6 +57,26 @@ export function PaketSection() {
           <p className="mt-3 text-foreground/70">
             Harga jelas, langsung lunas, tanpa biaya tersembunyi.
           </p>
+        </FadeIn>
+
+        <FadeIn delay={0.1}>
+          <div className="mt-8 flex justify-center gap-2">
+            {(["harian", "bulanan"] as const).map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setTab(t)}
+                className={cn(
+                  "rounded-full border px-5 py-2 text-sm font-semibold transition-colors",
+                  tab === t
+                    ? "border-transparent bg-gradient-to-r from-primary-from to-primary-to text-white"
+                    : "border-card-border text-foreground/70 hover:bg-primary/10"
+                )}
+              >
+                {t === "harian" ? "🧳 Harian" : "🎓 Bulanan"}
+              </button>
+            ))}
+          </div>
         </FadeIn>
 
         {state === "loading" && (
@@ -73,15 +99,15 @@ export function PaketSection() {
           </div>
         )}
 
-        {state === "success" && paketList.length === 0 && (
+        {state === "success" && filteredPaket.length === 0 && (
           <p className="mt-12 text-center text-foreground/60">
-            Belum ada paket tersedia saat ini.
+            Belum ada paket tersedia untuk kategori ini.
           </p>
         )}
 
-        {state === "success" && paketList.length > 0 && (
+        {state === "success" && filteredPaket.length > 0 && (
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {paketList.map((paket, index) => (
+            {filteredPaket.map((paket, index) => (
               <motion.div
                 key={paket.id}
                 initial={{ opacity: 0, y: 32 }}

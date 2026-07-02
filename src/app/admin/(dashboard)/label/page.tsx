@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import { Loader2, Search } from "lucide-react";
@@ -26,16 +26,33 @@ const KATEGORI_BARANG_OPTIONS = [
   { value: "lainnya", label: "Lainnya" },
 ];
 
-export default function AdminLabelPage() {
+function AdminLabelPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const transaksiIdParam = searchParams.get("transaksiId");
+
   const [query, setQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const [isLoadingDeepLink, setIsLoadingDeepLink] = useState(!!transaksiIdParam);
   const [results, setResults] = useState<TransaksiSearchResult[]>([]);
   const [selected, setSelected] = useState<TransaksiSearchResult | null>(null);
 
   const [deskripsiBarang, setDeskripsiBarang] = useState("");
   const [kategoriBarang, setKategoriBarang] = useState("kardus");
   const [isAdding, setIsAdding] = useState(false);
+
+  useEffect(() => {
+    if (!transaksiIdParam) return;
+
+    fetch(`/api/admin/transaksi/${transaksiIdParam}`)
+      .then((res) => {
+        if (!res.ok) throw new Error();
+        return res.json();
+      })
+      .then((data: TransaksiSearchResult) => setSelected(data))
+      .catch(() => toast.error("Transaksi dari link tidak ditemukan"))
+      .finally(() => setIsLoadingDeepLink(false));
+  }, [transaksiIdParam]);
 
   async function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -44,11 +61,11 @@ export default function AdminLabelPage() {
     setIsSearching(true);
     setSelected(null);
     try {
-      const res = await fetch(`/api/admin/transaksi?q=${encodeURIComponent(query)}`);
+      const res = await fetch(`/api/admin/transaksi?search=${encodeURIComponent(query)}`);
       if (!res.ok) throw new Error();
-      const data: TransaksiSearchResult[] = await res.json();
-      setResults(data);
-      if (data.length === 0) toast.error("Transaksi tidak ditemukan");
+      const result: { data: TransaksiSearchResult[] } = await res.json();
+      setResults(result.data);
+      if (result.data.length === 0) toast.error("Transaksi tidak ditemukan");
     } catch {
       toast.error("Gagal mencari transaksi");
     } finally {
@@ -96,17 +113,26 @@ export default function AdminLabelPage() {
         Cari transaksi, tambahkan barang, lalu cetak label.
       </p>
 
-      <form onSubmit={handleSearch} className="mt-6 flex gap-2">
-        <Input
-          placeholder="Cari nama pelanggan atau nomor ref..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-        <Button type="submit" disabled={isSearching}>
-          {isSearching ? <Loader2 className="animate-spin" size={16} /> : <Search size={16} />}
-          Cari
-        </Button>
-      </form>
+      {isLoadingDeepLink && (
+        <p className="mt-6 flex items-center gap-2 text-sm text-foreground/60">
+          <Loader2 className="animate-spin" size={16} />
+          Memuat transaksi...
+        </p>
+      )}
+
+      {!isLoadingDeepLink && (
+        <form onSubmit={handleSearch} className="mt-6 flex gap-2">
+          <Input
+            placeholder="Cari nama pelanggan atau nomor ref..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          <Button type="submit" disabled={isSearching}>
+            {isSearching ? <Loader2 className="animate-spin" size={16} /> : <Search size={16} />}
+            Cari
+          </Button>
+        </form>
+      )}
 
       {!selected && results.length > 0 && (
         <div className="mt-4 space-y-2">
@@ -129,7 +155,15 @@ export default function AdminLabelPage() {
       {selected && (
         <div className="mt-6 space-y-6">
           <div className="glass-card space-y-2 rounded-2xl p-5 text-sm">
-            <Button type="button" size="sm" variant="outline" onClick={() => setSelected(null)}>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setSelected(null);
+                if (transaksiIdParam) router.replace("/admin/label");
+              }}
+            >
               &larr; Cari transaksi lain
             </Button>
             <div className="flex justify-between pt-2">
@@ -232,5 +266,13 @@ export default function AdminLabelPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function AdminLabelPage() {
+  return (
+    <Suspense fallback={null}>
+      <AdminLabelPageContent />
+    </Suspense>
   );
 }

@@ -52,3 +52,15 @@ export interface TransaksiFull extends TransaksiDetail {
   fotoMasuk: Foto[];
   fotoKeluar: Foto[];
 }
+
+// Data minimal untuk halaman verifikasi publik (dibuka lewat scan QR) —
+// sengaja TIDAK memuat nama lengkap, No. KTP/KTM, alamat, No. WhatsApp,
+// atau nilai deklarasi.
+export interface VerifikasiPublik {
+  namaDepan: string;
+  paketNama: string;
+  statusTransaksi: "AKTIF" | "SELESAI" | "DIBATALKAN";
+  tanggalMasuk: string;
+  tanggalJatuhTempo: string;
+  kodeLabel: string[];
+}
