@@ -3,11 +3,14 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { incrementSlotUsage } from "@/lib/slot";
+import { getClientIp, isRateLimited, recordAttempt } from "@/lib/rate-limit";
 
 const HUB_CODE = "B";
 const MAX_NOMOR_REF_RETRY = 5;
 const VALID_HUB = ["suhat", "tidar"];
 const VALID_SESI = ["pagi", "siang"];
+const MAX_TRANSAKSI_PER_JAM = 3;
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
 
 function generateNomorRef() {
   const now = new Date();
@@ -18,6 +21,18 @@ function generateNomorRef() {
 
 export async function POST(request: Request) {
   try {
+    const rateLimitKey = `transaksi:${getClientIp(request)}`;
+
+    if (isRateLimited(rateLimitKey, MAX_TRANSAKSI_PER_JAM, RATE_LIMIT_WINDOW_MS)) {
+      return NextResponse.json(
+        {
+          error: `Maksimal ${MAX_TRANSAKSI_PER_JAM} pesanan per jam dari alamat yang sama. Coba lagi nanti atau hubungi kami via WhatsApp.`,
+        },
+        { status: 429 }
+      );
+    }
+    recordAttempt(rateLimitKey, RATE_LIMIT_WINDOW_MS);
+
     const body = await request.json();
     const {
       id,
