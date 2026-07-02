@@ -76,7 +76,8 @@ interface PerjanjianPdfDocumentProps {
 }
 
 export function PerjanjianPdfDocument({ transaksi }: PerjanjianPdfDocumentProps) {
-  const { pelanggan, paket } = transaksi;
+  const { pelanggan, paket, antarJemputOption } = transaksi;
+  const totalAkhir = paket.harga + (antarJemputOption?.harga ?? 0);
 
   return (
     <Document title={`Perjanjian ${transaksi.nomorRef}`}>
@@ -90,7 +91,16 @@ export function PerjanjianPdfDocument({ transaksi }: PerjanjianPdfDocumentProps)
           <Row label="Alamat Kos" value={pelanggan.alamatKos} />
           <Row label="Kampus" value={pelanggan.kampus ?? "-"} />
           <Row label="Paket" value={paket.nama} />
-          <Row label="Harga" value={formatRupiah(paket.harga)} />
+          <Row label="Harga Paket" value={formatRupiah(paket.harga)} />
+          <Row
+            label="Antar-Jemput"
+            value={
+              antarJemputOption
+                ? `${antarJemputOption.label} (+${formatRupiah(antarJemputOption.harga)})`
+                : "Mandiri (Grab/Lalamove)"
+            }
+          />
+          <Row label="TOTAL" value={formatRupiah(totalAkhir)} />
           <Row label="Tanggal Masuk" value={formatTanggal(transaksi.tanggalMasuk)} />
           <Row
             label="Tanggal Jatuh Tempo"

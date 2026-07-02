@@ -53,12 +53,22 @@ export function Step4Perjanjian({
         </div>
         <div className="flex justify-between">
           <span className="text-foreground/60">Paket</span>
-          <span className="font-medium">{paket?.nama}</span>
+          <span className="font-medium">
+            {paket?.nama} {paket ? `— ${formatRupiah(paket.harga)}` : ""}
+          </span>
         </div>
-        <div className="flex justify-between">
-          <span className="text-foreground/60">Harga</span>
-          <span className="gradient-text font-bold">
-            {paket ? formatRupiah(paket.harga) : "-"}
+        {formData.antarJemputOption && (
+          <div className="flex justify-between">
+            <span className="text-foreground/60">Antar-jemput</span>
+            <span className="font-medium">
+              {formData.antarJemputOption.label} — +{formatRupiah(formData.antarJemputOption.harga)}
+            </span>
+          </div>
+        )}
+        <div className="flex justify-between border-t border-card-border pt-2">
+          <span className="font-heading font-bold">TOTAL</span>
+          <span className="gradient-text font-heading text-lg font-extrabold">
+            {formatRupiah((paket?.harga ?? 0) + (formData.antarJemputOption?.harga ?? 0))}
           </span>
         </div>
         <div className="flex justify-between">

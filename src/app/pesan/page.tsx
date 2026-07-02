@@ -2,7 +2,6 @@
 
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { format } from "date-fns";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ProgressBar } from "@/components/pesan/progress-bar";
@@ -46,13 +45,7 @@ function PesanForm() {
       setStep1Errors(errors);
       if (Object.keys(errors).length > 0) return;
     } else if (step === 2) {
-      const errors = validateStep2(
-        formData.paket,
-        formData.tanggalMasuk,
-        formData.deklarasi,
-        formData.antarJemput,
-        formData.penjemputan
-      );
+      const errors = validateStep2(formData.paket, formData.tanggalMasuk, formData.deklarasi);
       if (errors.length > 0) {
         toast.error(errors[0]);
         return;
@@ -69,22 +62,6 @@ function PesanForm() {
 
   function handleBack() {
     setStep((s) => Math.max(s - 1, 1));
-  }
-
-  function handleKirimMandiri() {
-    const errors = validateStep2(
-      formData.paket,
-      formData.tanggalMasuk,
-      formData.deklarasi,
-      false,
-      formData.penjemputan
-    );
-    if (errors.length > 0) {
-      toast.error(errors[0]);
-      return;
-    }
-    setFormData({ ...formData, antarJemput: false });
-    setStep((s) => Math.min(s + 1, 4));
   }
 
   const requiredChecks = formData.paket?.perluDeklarasi
@@ -108,20 +85,6 @@ function PesanForm() {
         signatureFile
       );
 
-      const penjemputan =
-        formData.antarJemput &&
-        formData.penjemputan.hub &&
-        formData.penjemputan.tanggal &&
-        formData.penjemputan.sesiWaktu &&
-        formData.penjemputan.armadaId
-          ? {
-              hub: formData.penjemputan.hub,
-              tanggal: format(formData.penjemputan.tanggal, "yyyy-MM-dd"),
-              sesiWaktu: formData.penjemputan.sesiWaktu,
-              armadaId: formData.penjemputan.armadaId,
-            }
-          : undefined;
-
       const res = await fetch("/api/transaksi", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -138,7 +101,7 @@ function PesanForm() {
           fotoMasukUrls: formData.fotoMasukUrls,
           tandaTanganUrl,
           checklist: formData.checklist,
-          penjemputan,
+          antarJemputId: formData.antarJemputOption?.id || undefined,
         }),
       });
 
@@ -176,8 +139,7 @@ function PesanForm() {
               paket={formData.paket}
               tanggalMasuk={formData.tanggalMasuk}
               deklarasi={formData.deklarasi}
-              antarJemput={formData.antarJemput}
-              penjemputan={formData.penjemputan}
+              antarJemputOption={formData.antarJemputOption}
               preselectedPaketId={preselectedPaketId}
               onPaketChange={(paket) => setFormData({ ...formData, paket })}
               onTanggalChange={(tanggalMasuk) =>
@@ -186,13 +148,9 @@ function PesanForm() {
               onDeklarasiChange={(deklarasi) =>
                 setFormData({ ...formData, deklarasi })
               }
-              onAntarJemputChange={(antarJemput) =>
-                setFormData({ ...formData, antarJemput })
+              onAntarJemputOptionChange={(antarJemputOption) =>
+                setFormData({ ...formData, antarJemputOption })
               }
-              onPenjemputanChange={(penjemputan) =>
-                setFormData({ ...formData, penjemputan })
-              }
-              onKirimMandiri={handleKirimMandiri}
             />
           )}
 

@@ -52,6 +52,9 @@ model Transaksi {
   hub              String?   // "suhat" | "tidar" — hub penyimpanan untuk order ini
   zonaRak          String?
   catatanAdmin     String?
+  // Layanan antar-jemput (add-on opsional, bukan paket terpisah)
+  antarJemputOption AntarJemputOption? @relation(fields:[antarJemputId], references:[id])
+  antarJemputId     String?
   // Order manual via WhatsApp (dibuat admin) — link konfirmasi berbasis token
   konfirmasiToken          String?   @unique
   konfirmasiTokenExpiresAt DateTime?
@@ -138,4 +141,17 @@ model KonfigurasiOperasional {
   lockTanggalMerah      String  @default("[]")   // JSON array tanggal merah
   pesanHariLibur        String  @default("Kirim mandiri via Grab/Lalamove tersedia 24 jam.")
   updatedAt             DateTime @updatedAt
+}
+
+// Layanan antar-jemput sebagai add-on opsional di form pemesanan (bukan
+// paket tersendiri) — dipilih pelanggan setelah memilih paket utama.
+model AntarJemputOption {
+  id          String   @id @default(cuid())
+  label       String   // "Motor - Radius <3km", "Mobil - Radius 3-6km"
+  tipe        String   // "motor" | "mobil"
+  radiusLabel String   // "<3km" | "3-6km"
+  harga       Int
+  aktif       Boolean  @default(true)
+  urutan      Int      @default(0)
+  transaksi   Transaksi[]
 }

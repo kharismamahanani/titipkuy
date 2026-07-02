@@ -1,4 +1,5 @@
 import type { Paket } from "@/types/paket";
+import type { AntarJemputOption } from "@/types/antar-jemput";
 
 export interface Pelanggan {
   id: string;
@@ -39,6 +40,7 @@ export interface TransaksiDetail {
   statusBayar: "BELUM_BAYAR" | "LUNAS";
   statusTransaksi: "AKTIF" | "SELESAI" | "DIBATALKAN";
   hub: string | null;
+  antarJemputOption: AntarJemputOption | null;
   tandaTanganUrl: string | null;
   pdfUrl: string | null;
   createdAt: string;

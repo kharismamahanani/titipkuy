@@ -13,7 +13,7 @@ async function findValidTransaksi(id: string, token: string | null) {
 
   const transaksi = await prisma.transaksi.findFirst({
     where: { id, konfirmasiToken: token },
-    include: { pelanggan: true, paket: true, fotoMasuk: true },
+    include: { pelanggan: true, paket: true, fotoMasuk: true, antarJemputOption: true },
   });
 
   if (!transaksi) return { error: "NOT_FOUND" as const };

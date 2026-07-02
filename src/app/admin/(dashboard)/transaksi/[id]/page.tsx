@@ -13,7 +13,13 @@ export const dynamic = "force-dynamic";
 async function getTransaksi(id: string) {
   return prisma.transaksi.findUnique({
     where: { id },
-    include: { pelanggan: true, paket: true, fotoMasuk: true, fotoKeluar: true },
+    include: {
+      pelanggan: true,
+      paket: true,
+      fotoMasuk: true,
+      fotoKeluar: true,
+      antarJemputOption: true,
+    },
   });
 }
 
@@ -69,6 +75,14 @@ export default async function AdminTransaksiDetailPage({
         <Row label="Alamat Kos" value={pelanggan.alamatKos} />
         <Row label="Kampus" value={pelanggan.kampus ?? "-"} />
         <Row label="Paket" value={`${paket.nama} · ${formatRupiah(paket.harga)}`} />
+        <Row
+          label="Antar-Jemput"
+          value={
+            transaksi.antarJemputOption
+              ? `${transaksi.antarJemputOption.label} — ${formatRupiah(transaksi.antarJemputOption.harga)}`
+              : "Mandiri (Grab/Lalamove)"
+          }
+        />
         <Row
           label="Masuk"
           value={format(transaksi.tanggalMasuk, "d MMMM yyyy", { locale: localeId })}

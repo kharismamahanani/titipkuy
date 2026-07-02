@@ -7,14 +7,13 @@ import { toast } from "sonner";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { cn, formatRupiah } from "@/lib/utils";
 import { uploadToStorage } from "@/lib/supabase";
-import { PenjemputanArmadaPicker } from "@/components/pesan/penjemputan-armada-picker";
+import { AntarJemputPicker } from "@/components/pesan/antar-jemput-picker";
 import type { Paket } from "@/types/paket";
 import type { DeklarasiData } from "@/types/pesan";
-import type { PenjemputanData } from "@/types/slot";
+import type { AntarJemputOption } from "@/types/antar-jemput";
 
 const MAX_BUKTI_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -23,15 +22,12 @@ interface Step2Props {
   paket: Paket | null;
   tanggalMasuk: Date | null;
   deklarasi: DeklarasiData;
-  antarJemput: boolean;
-  penjemputan: PenjemputanData;
+  antarJemputOption: AntarJemputOption | null;
   preselectedPaketId?: string;
   onPaketChange: (paket: Paket) => void;
   onTanggalChange: (date: Date) => void;
   onDeklarasiChange: (data: DeklarasiData) => void;
-  onAntarJemputChange: (value: boolean) => void;
-  onPenjemputanChange: (data: PenjemputanData) => void;
-  onKirimMandiri: () => void;
+  onAntarJemputOptionChange: (option: AntarJemputOption | null) => void;
 }
 
 export function Step2PaketTanggal({
@@ -39,15 +35,12 @@ export function Step2PaketTanggal({
   paket,
   tanggalMasuk,
   deklarasi,
-  antarJemput,
-  penjemputan,
+  antarJemputOption,
   preselectedPaketId,
   onPaketChange,
   onTanggalChange,
   onDeklarasiChange,
-  onAntarJemputChange,
-  onPenjemputanChange,
-  onKirimMandiri,
+  onAntarJemputOptionChange,
 }: Step2Props) {
   const [paketList, setPaketList] = useState<Paket[]>([]);
   const [state, setState] = useState<"loading" | "success" | "error">("loading");
@@ -238,26 +231,7 @@ export function Step2PaketTanggal({
       )}
 
       {paket && tanggalMasuk && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between rounded-lg border border-card-border px-3 py-2">
-            <Label htmlFor="antarJemput" className="cursor-pointer">
-              Perlu layanan antar-jemput?
-            </Label>
-            <Switch
-              id="antarJemput"
-              checked={antarJemput}
-              onCheckedChange={(checked) => onAntarJemputChange(checked === true)}
-            />
-          </div>
-
-          {antarJemput && (
-            <PenjemputanArmadaPicker
-              penjemputan={penjemputan}
-              onChange={onPenjemputanChange}
-              onKirimMandiri={onKirimMandiri}
-            />
-          )}
-        </div>
+        <AntarJemputPicker value={antarJemputOption} onChange={onAntarJemputOptionChange} />
       )}
     </div>
   );

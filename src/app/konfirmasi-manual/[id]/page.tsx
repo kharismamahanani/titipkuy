@@ -176,7 +176,17 @@ function KonfirmasiManualContent() {
           <div className="glass-card space-y-2 rounded-2xl p-6 text-sm">
             <SummaryRow label="Nama" value={pelanggan.nama} />
             <SummaryRow label="Paket" value={paket.nama} />
-            <SummaryRow label="Harga" value={formatRupiah(paket.harga)} />
+            <SummaryRow label="Harga Paket" value={formatRupiah(paket.harga)} />
+            {data.antarJemputOption && (
+              <SummaryRow
+                label="Antar-Jemput"
+                value={`+${formatRupiah(data.antarJemputOption.harga)}`}
+              />
+            )}
+            <SummaryRow
+              label="TOTAL"
+              value={formatRupiah(paket.harga + (data.antarJemputOption?.harga ?? 0))}
+            />
             <SummaryRow
               label="Masuk"
               value={format(new Date(data.tanggalMasuk), "d MMM yyyy", { locale: localeId })}
@@ -233,7 +243,17 @@ function KonfirmasiManualContent() {
           <SummaryRow label="Nomor Ref" value={data.nomorRef} />
           <SummaryRow label="Nama" value={pelanggan.nama} />
           <SummaryRow label="Paket" value={paket.nama} />
-          <SummaryRow label="Harga" value={formatRupiah(paket.harga)} />
+          <SummaryRow label="Harga Paket" value={formatRupiah(paket.harga)} />
+          {data.antarJemputOption && (
+            <SummaryRow
+              label="Antar-Jemput"
+              value={`+${formatRupiah(data.antarJemputOption.harga)}`}
+            />
+          )}
+          <SummaryRow
+            label="TOTAL"
+            value={formatRupiah(paket.harga + (data.antarJemputOption?.harga ?? 0))}
+          />
           <SummaryRow
             label="Masuk"
             value={format(new Date(data.tanggalMasuk), "d MMM yyyy", { locale: localeId })}

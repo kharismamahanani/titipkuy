@@ -8,7 +8,7 @@ export async function GET(
   try {
     const transaksi = await prisma.transaksi.findUnique({
       where: { id: params.id },
-      include: { pelanggan: true, paket: true },
+      include: { pelanggan: true, paket: true, antarJemputOption: true },
     });
 
     if (!transaksi) {

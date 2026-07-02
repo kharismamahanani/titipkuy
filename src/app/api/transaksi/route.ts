@@ -46,6 +46,7 @@ export async function POST(request: Request) {
       tandaTanganUrl,
       checklist,
       penjemputan,
+      antarJemputId,
     } = body ?? {};
 
     if (
@@ -110,6 +111,18 @@ export async function POST(request: Request) {
       );
     }
 
+    if (antarJemputId) {
+      const antarJemputOption = await prisma.antarJemputOption.findUnique({
+        where: { id: antarJemputId },
+      });
+      if (!antarJemputOption || !antarJemputOption.aktif) {
+        return NextResponse.json(
+          { error: "Opsi antar-jemput tidak valid" },
+          { status: 400 }
+        );
+      }
+    }
+
     const tanggalMasukDate = new Date(tanggalMasuk);
     const tanggalJatuhTempo = addDays(tanggalMasukDate, paket.durasiHari ?? 1);
     const ipAddress = request.headers.get("x-forwarded-for") ?? undefined;
@@ -139,6 +152,9 @@ export async function POST(request: Request) {
               buktiKepemilikanUrl: paket.perluDeklarasi ? buktiKepemilikanUrl : null,
               tanggalMasuk: tanggalMasukDate,
               tanggalJatuhTempo,
+              antarJemputOption: antarJemputId
+                ? { connect: { id: antarJemputId } }
+                : undefined,
               perjanjianDisetujui: true,
               waktuPersetujuan: new Date(),
               ipAddress,
