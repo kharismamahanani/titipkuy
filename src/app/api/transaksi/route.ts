@@ -2,9 +2,12 @@ import { addDays } from "date-fns";
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { incrementSlotUsage } from "@/lib/slot";
 
 const HUB_CODE = "B";
 const MAX_NOMOR_REF_RETRY = 5;
+const VALID_HUB = ["suhat", "tidar"];
+const VALID_SESI = ["pagi", "siang"];
 
 function generateNomorRef() {
   const now = new Date();
@@ -27,6 +30,7 @@ export async function POST(request: Request) {
       fotoMasukUrls,
       tandaTanganUrl,
       checklist,
+      penjemputan,
     } = body ?? {};
 
     if (
@@ -78,6 +82,19 @@ export async function POST(request: Request) {
       );
     }
 
+    if (
+      penjemputan &&
+      (!VALID_HUB.includes(penjemputan.hub) ||
+        !VALID_SESI.includes(penjemputan.sesiWaktu) ||
+        !penjemputan.armadaId ||
+        !penjemputan.tanggal)
+    ) {
+      return NextResponse.json(
+        { error: "Data penjemputan tidak lengkap" },
+        { status: 400 }
+      );
+    }
+
     const tanggalMasukDate = new Date(tanggalMasuk);
     const tanggalJatuhTempo = addDays(tanggalMasukDate, paket.durasiHari ?? 1);
     const ipAddress = request.headers.get("x-forwarded-for") ?? undefined;
@@ -85,43 +102,56 @@ export async function POST(request: Request) {
 
     for (let attempt = 0; attempt < MAX_NOMOR_REF_RETRY; attempt++) {
       try {
-        const transaksi = await prisma.transaksi.create({
-          data: {
-            id,
-            nomorRef: generateNomorRef(),
-            pelanggan: {
-              create: {
-                nama: pelanggan.nama,
-                whatsapp: pelanggan.whatsapp,
-                alamatKos: pelanggan.alamatKos,
-                kampus: pelanggan.kampus || null,
-                noKtpKtm: pelanggan.noKtpKtm || null,
+        const transaksi = await prisma.$transaction(async (tx) => {
+          const created = await tx.transaksi.create({
+            data: {
+              id,
+              nomorRef: generateNomorRef(),
+              pelanggan: {
+                create: {
+                  nama: pelanggan.nama,
+                  whatsapp: pelanggan.whatsapp,
+                  alamatKos: pelanggan.alamatKos,
+                  kampus: pelanggan.kampus || null,
+                  noKtpKtm: pelanggan.noKtpKtm || null,
+                },
+              },
+              paket: {
+                connect: { id: paket.id },
+              },
+              nilaiDeklarasi: paket.perluDeklarasi ? Number(nilaiDeklarasi) : null,
+              deskripsiDeklarasi: paket.perluDeklarasi ? deskripsiDeklarasi : null,
+              buktiKepemilikanUrl: paket.perluDeklarasi ? buktiKepemilikanUrl : null,
+              tanggalMasuk: tanggalMasukDate,
+              tanggalJatuhTempo,
+              perjanjianDisetujui: true,
+              waktuPersetujuan: new Date(),
+              ipAddress,
+              userAgent,
+              tandaTanganUrl,
+              klausulLimitGantiRugi: true,
+              klausulBarangTerlarang: true,
+              klausulJatuhTempo: true,
+              klausulDeklarasiNilai: paket.perluDeklarasi,
+              fotoMasuk: {
+                create: fotoMasukUrls.map((url: string) => ({
+                  url,
+                  fileName: url.split("/").pop() ?? "foto.jpg",
+                })),
               },
             },
-            paket: {
-              connect: { id: paket.id },
-            },
-            nilaiDeklarasi: paket.perluDeklarasi ? Number(nilaiDeklarasi) : null,
-            deskripsiDeklarasi: paket.perluDeklarasi ? deskripsiDeklarasi : null,
-            buktiKepemilikanUrl: paket.perluDeklarasi ? buktiKepemilikanUrl : null,
-            tanggalMasuk: tanggalMasukDate,
-            tanggalJatuhTempo,
-            perjanjianDisetujui: true,
-            waktuPersetujuan: new Date(),
-            ipAddress,
-            userAgent,
-            tandaTanganUrl,
-            klausulLimitGantiRugi: true,
-            klausulBarangTerlarang: true,
-            klausulJatuhTempo: true,
-            klausulDeklarasiNilai: paket.perluDeklarasi,
-            fotoMasuk: {
-              create: fotoMasukUrls.map((url: string) => ({
-                url,
-                fileName: url.split("/").pop() ?? "foto.jpg",
-              })),
-            },
-          },
+          });
+
+          if (penjemputan) {
+            await incrementSlotUsage(tx, {
+              armadaId: penjemputan.armadaId,
+              tanggal: penjemputan.tanggal,
+              sesiWaktu: penjemputan.sesiWaktu,
+              hub: penjemputan.hub,
+            });
+          }
+
+          return created;
         });
 
         return NextResponse.json({ id: transaksi.id, nomorRef: transaksi.nomorRef });
@@ -139,6 +169,12 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   } catch (error) {
+    if (error instanceof Error && error.message === "SLOT_PENUH") {
+      return NextResponse.json(
+        { error: "Slot yang kamu pilih baru saja penuh, silakan pilih jadwal lain." },
+        { status: 409 }
+      );
+    }
     console.error("[POST /api/transaksi]", error);
     return NextResponse.json({ error: "Gagal menyimpan pesanan" }, { status: 500 });
   }

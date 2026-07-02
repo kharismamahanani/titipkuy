@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { ArmadaManager } from "@/components/admin/armada-manager";
 import { KonfigurasiOperasional } from "@/components/admin/konfigurasi-operasional";
+import { getOrCreateKonfigurasi, parseTanggalMerah } from "@/lib/konfigurasi";
 
 export const dynamic = "force-dynamic";
 
@@ -24,12 +25,7 @@ export default async function AdminArmadaPage() {
     );
   }
 
-  let tanggalMerah: string[] = [];
-  try {
-    tanggalMerah = JSON.parse(data.konfigurasi.lockTanggalMerah);
-  } catch {
-    tanggalMerah = [];
-  }
+  const tanggalMerah = parseTanggalMerah(data.konfigurasi.lockTanggalMerah);
 
   return (
     <div className="px-4 py-6 sm:px-6 lg:px-8">
@@ -77,10 +73,4 @@ async function getData() {
   ]);
 
   return { armadaList, konfigurasi };
-}
-
-async function getOrCreateKonfigurasi() {
-  const existing = await prisma.konfigurasiOperasional.findFirst();
-  if (existing) return existing;
-  return prisma.konfigurasiOperasional.create({ data: {} });
 }

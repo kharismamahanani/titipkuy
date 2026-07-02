@@ -1,4 +1,5 @@
 import type { Paket } from "@/types/paket";
+import { EMPTY_PENJEMPUTAN, type PenjemputanData } from "@/types/slot";
 
 export const KAMPUS_OPTIONS = ["UB", "UM", "UIN", "Lainnya"] as const;
 export type Kampus = (typeof KAMPUS_OPTIONS)[number];
@@ -30,6 +31,8 @@ export interface PesanFormData {
   paket: Paket | null;
   tanggalMasuk: Date | null;
   deklarasi: DeklarasiData;
+  antarJemput: boolean;
+  penjemputan: PenjemputanData;
   fotoMasukUrls: string[];
   checklist: ChecklistData;
   tandaTanganDataUrl: string | null;
@@ -50,6 +53,8 @@ export const INITIAL_FORM_DATA: PesanFormData = {
     deskripsiDeklarasi: "",
     buktiKepemilikanUrl: null,
   },
+  antarJemput: false,
+  penjemputan: EMPTY_PENJEMPUTAN,
   fotoMasukUrls: [],
   checklist: {
     limitGantiRugi: false,

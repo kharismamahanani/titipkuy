@@ -1,5 +1,6 @@
 import type { Paket } from "@/types/paket";
 import type { DeklarasiData, PelangganData } from "@/types/pesan";
+import type { PenjemputanData } from "@/types/slot";
 
 const WHATSAPP_REGEX = /^08\d{8,11}$/;
 
@@ -34,7 +35,9 @@ export function validateStep3(fotoMasukUrls: string[]) {
 export function validateStep2(
   paket: Paket | null,
   tanggalMasuk: Date | null,
-  deklarasi: DeklarasiData
+  deklarasi: DeklarasiData,
+  antarJemput = false,
+  penjemputan?: PenjemputanData
 ) {
   const errors: string[] = [];
 
@@ -50,6 +53,14 @@ export function validateStep2(
     }
     if (!deklarasi.deskripsiDeklarasi.trim()) {
       errors.push("Isi deskripsi detail barang");
+    }
+  }
+
+  if (antarJemput) {
+    if (!penjemputan?.hub) errors.push("Pilih hub penjemputan");
+    if (!penjemputan?.tanggal) errors.push("Pilih tanggal penjemputan");
+    if (!penjemputan?.sesiWaktu || !penjemputan?.armadaTipe || !penjemputan?.armadaId) {
+      errors.push("Pilih sesi dan armada penjemputan");
     }
   }
 

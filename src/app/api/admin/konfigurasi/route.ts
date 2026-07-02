@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getOrCreateKonfigurasi, parseTanggalMerah } from "@/lib/konfigurasi";
 
 function serialize(config: {
   id: string;
@@ -9,27 +10,14 @@ function serialize(config: {
   pesanHariLibur: string;
   updatedAt: Date;
 }) {
-  let tanggalMerah: string[] = [];
-  try {
-    tanggalMerah = JSON.parse(config.lockTanggalMerah);
-  } catch {
-    tanggalMerah = [];
-  }
-
   return {
     id: config.id,
     lockH1: config.lockH1,
     lockHariMinggu: config.lockHariMinggu,
-    tanggalMerah,
+    tanggalMerah: parseTanggalMerah(config.lockTanggalMerah),
     pesanHariLibur: config.pesanHariLibur,
     updatedAt: config.updatedAt,
   };
-}
-
-async function getOrCreateKonfigurasi() {
-  const existing = await prisma.konfigurasiOperasional.findFirst();
-  if (existing) return existing;
-  return prisma.konfigurasiOperasional.create({ data: {} });
 }
 
 export async function GET() {
