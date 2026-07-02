@@ -1,27 +1,125 @@
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+}
+
+@layer base {
+  :root {
+    /* Brand TitipKuy! (Gen Z) */
+    --primary-from: #6c3fc4;
+    --primary-to: #e8337c;
+    --accent: #f5e642;
+    --accent-foreground: #0d0d1a;
+    --bg-dark: #0d0d1a;
+    --card-dark: #1a1a2e;
+    --card-border: rgba(108, 63, 196, 0.3);
+
+    /* Catatan: --destructive, --input, --muted, --ring sengaja ditulis
+       sebagai angka mentah (tanpa dibungkus oklch()/hsl()) supaya Tailwind
+       bisa menambahkan opacity secara dinamis, misal class "bg-destructive/20" */
+    --background: var(--bg-dark);
+    --foreground: oklch(0.985 0 0);
+    --card: var(--card-dark);
+    --card-foreground: oklch(0.985 0 0);
+    --popover: var(--card-dark);
+    --popover-foreground: oklch(0.985 0 0);
+    --secondary: oklch(0.269 0 0);
+    --secondary-foreground: oklch(0.985 0 0);
+    --muted: 0.269 0 0;
+    --muted-foreground: oklch(0.708 0 0);
+    --destructive: 0.704 0.191 22.216;
+    --border: var(--card-border);
+    --input: 1 0 0;
+    --ring: 260.3 53% 50.8%;
+    --chart-1: oklch(0.87 0 0);
+    --chart-2: oklch(0.556 0 0);
+    --chart-3: oklch(0.439 0 0);
+    --chart-4: oklch(0.371 0 0);
+    --chart-5: oklch(0.269 0 0);
+    --radius: 0.625rem;
+    --sidebar: var(--card-dark);
+    --sidebar-foreground: oklch(0.985 0 0);
+    --sidebar-primary: var(--primary-from);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: var(--accent);
+    --sidebar-accent-foreground: var(--accent-foreground);
+    --sidebar-border: var(--card-border);
+    --sidebar-ring: var(--primary-from);
+  }
+  .dark {
+    --background: var(--bg-dark);
+    --foreground: oklch(0.985 0 0);
+    --card: var(--card-dark);
+    --card-foreground: oklch(0.985 0 0);
+    --popover: var(--card-dark);
+    --popover-foreground: oklch(0.985 0 0);
+    --secondary: oklch(0.269 0 0);
+    --secondary-foreground: oklch(0.985 0 0);
+    --muted: 0.269 0 0;
+    --muted-foreground: oklch(0.708 0 0);
+    --destructive: 0.704 0.191 22.216;
+    --border: var(--card-border);
+    --input: 1 0 0;
+    --ring: 260.3 53% 50.8%;
+    --chart-1: oklch(0.87 0 0);
+    --chart-2: oklch(0.556 0 0);
+    --chart-3: oklch(0.439 0 0);
+    --chart-4: oklch(0.371 0 0);
+    --chart-5: oklch(0.269 0 0);
+    --sidebar: var(--card-dark);
+    --sidebar-foreground: oklch(0.985 0 0);
+    --sidebar-primary: var(--primary-from);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: var(--accent);
+    --sidebar-accent-foreground: var(--accent-foreground);
+    --sidebar-border: var(--card-border);
+    --sidebar-ring: var(--primary-from);
+  }
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-heading;
+  }
+}
+
+@layer utilities {
+  .gradient-text {
+    background-image: linear-gradient(135deg, var(--primary-from), var(--primary-to));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .glass-card {
+    background: rgba(26, 26, 46, 0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--card-border);
+  }
+
+  .gradient-border {
+    border: 1px solid transparent;
+    background-image: linear-gradient(var(--card-dark), var(--card-dark)),
+      linear-gradient(135deg, var(--primary-from), var(--primary-to));
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
   }
 }

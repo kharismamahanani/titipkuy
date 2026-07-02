@@ -1,0 +1,104 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Pelanggan {
+  id          String        @id @default(cuid())
+  nama        String
+  whatsapp    String
+  alamatKos   String
+  noKtpKtm    String?
+  kampus      String?
+  createdAt   DateTime      @default(now())
+  transaksi   Transaksi[]
+}
+
+model Paket {
+  id               String      @id @default(cuid())
+  nama             String      // "Magang 3 Bulan", "Bulanan 5 Kardus", dll
+  deskripsi        String?
+  harga            Int         // dalam rupiah, selalu lunas
+  durasiHari       Int?        // null = harian (dihitung per hari)
+  kategori         String      // "harian" | "bulanan" | "magang" | "pindahan" | "motor"
+  perluDeklarasi   Boolean     @default(false) // true = barang bernilai tinggi
+  aktif            Boolean     @default(true)
+  urutan           Int         @default(0)     // urutan tampil di landing page
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  transaksi        Transaksi[]
+}
+
+model Transaksi {
+  id               String      @id @default(cuid())
+  nomorRef         String      @unique // TK-[HUB]-[YYYYMM]-[XXXX]
+  pelanggan        Pelanggan   @relation(fields:[pelangganId], references:[id])
+  pelangganId      String
+  paket            Paket       @relation(fields:[paketId], references:[id])
+  paketId          String
+  nilaiDeklarasi   Int?        // diisi jika perluDeklarasi = true
+  deskripsiDeklarasi String?   // merek, model, no seri barang bernilai tinggi
+  buktiKepemilikanUrl String?  // URL bukti kepemilikan (STNK/BPKB/nota) di Supabase Storage
+  tanggalMasuk     DateTime
+  tanggalJatuhTempo DateTime
+  statusBayar      StatusBayar @default(BELUM_BAYAR)
+  statusTransaksi  StatusTransaksi @default(AKTIF)
+  zonaRak          String?
+  catatanAdmin     String?
+  // Perjanjian
+  perjanjianDisetujui      Boolean   @default(false)
+  waktuPersetujuan         DateTime?
+  ipAddress                String?
+  userAgent                String?
+  pdfUrl                   String?   // URL PDF perjanjian di Supabase Storage
+  // Centang per klausul (untuk pembuktian hukum)
+  klausulLimitGantiRugi    Boolean   @default(false)
+  klausulBarangTerlarang   Boolean   @default(false)
+  klausulJatuhTempo        Boolean   @default(false)
+  klausulDeklarasiNilai    Boolean   @default(false) // hanya jika perluDeklarasi
+  tandaTanganUrl           String?   // URL gambar TTD di Supabase Storage
+  // Dokumentasi foto
+  fotoMasuk     FotoBarang[]  @relation("FotoMasuk")
+  fotoKeluar    FotoBarang[]  @relation("FotoKeluar")
+  barangLabel   BarangLabel[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model FotoBarang {
+  id              String    @id @default(cuid())
+  transaksiMasuk  Transaksi? @relation("FotoMasuk", fields:[transaksiMasukId], references:[id])
+  transaksiMasukId String?
+  transaksiKeluar Transaksi? @relation("FotoKeluar", fields:[transaksiKeluarId], references:[id])
+  transaksiKeluarId String?
+  url             String    // URL foto di Supabase Storage
+  fileName        String
+  uploadedAt      DateTime  @default(now())
+}
+
+model BarangLabel {
+  id          String    @id @default(cuid())
+  transaksi   Transaksi @relation(fields:[transaksiId], references:[id])
+  transaksiId String
+  kodeLabel   String    @unique // TK-[HUB]-[PAKET]-[BARANG]-[XXXX]
+  deskripsi   String    // "Kardus 1 - Pakaian", "Laptop Asus", dll
+  kategori    String    // "kardus" | "elektronik" | "motor" | "lainnya"
+  createdAt   DateTime  @default(now())
+}
+
+enum StatusBayar {
+  BELUM_BAYAR
+  LUNAS
+}
+
+enum StatusTransaksi {
+  AKTIF
+  SELESAI
+  DIBATALKAN
+}

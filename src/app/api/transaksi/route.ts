@@ -1,0 +1,145 @@
+import { addDays } from "date-fns";
+import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
+
+const HUB_CODE = "B";
+const MAX_NOMOR_REF_RETRY = 5;
+
+function generateNomorRef() {
+  const now = new Date();
+  const yyyymm = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
+  const random = Math.floor(1000 + Math.random() * 9000);
+  return `TK-${HUB_CODE}-${yyyymm}-${random}`;
+}
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const {
+      id,
+      pelanggan,
+      paketId,
+      tanggalMasuk,
+      nilaiDeklarasi,
+      deskripsiDeklarasi,
+      buktiKepemilikanUrl,
+      fotoMasukUrls,
+      tandaTanganUrl,
+      checklist,
+    } = body ?? {};
+
+    if (
+      !id ||
+      !pelanggan?.nama ||
+      !pelanggan?.whatsapp ||
+      !pelanggan?.alamatKos ||
+      !paketId ||
+      !tanggalMasuk ||
+      !tandaTanganUrl ||
+      !Array.isArray(fotoMasukUrls) ||
+      fotoMasukUrls.length < 3
+    ) {
+      return NextResponse.json(
+        { error: "Data pemesanan tidak lengkap" },
+        { status: 400 }
+      );
+    }
+
+    const paket = await prisma.paket.findUnique({ where: { id: paketId } });
+    if (!paket || !paket.aktif) {
+      return NextResponse.json({ error: "Paket tidak ditemukan" }, { status: 400 });
+    }
+
+    const requiredChecklist = [
+      "limitGantiRugi",
+      "barangTerlarang",
+      "jatuhTempo",
+      "lepasSetelah30Hari",
+    ] as const;
+    const checklistOk = requiredChecklist.every((key) => checklist?.[key] === true);
+    const deklarasiChecklistOk =
+      !paket.perluDeklarasi || checklist?.deklarasiBenar === true;
+
+    if (!checklistOk || !deklarasiChecklistOk) {
+      return NextResponse.json(
+        { error: "Semua persetujuan wajib dicentang" },
+        { status: 400 }
+      );
+    }
+
+    if (
+      paket.perluDeklarasi &&
+      (!nilaiDeklarasi || !buktiKepemilikanUrl || !deskripsiDeklarasi)
+    ) {
+      return NextResponse.json(
+        { error: "Data deklarasi barang belum lengkap" },
+        { status: 400 }
+      );
+    }
+
+    const tanggalMasukDate = new Date(tanggalMasuk);
+    const tanggalJatuhTempo = addDays(tanggalMasukDate, paket.durasiHari ?? 1);
+    const ipAddress = request.headers.get("x-forwarded-for") ?? undefined;
+    const userAgent = request.headers.get("user-agent") ?? undefined;
+
+    for (let attempt = 0; attempt < MAX_NOMOR_REF_RETRY; attempt++) {
+      try {
+        const transaksi = await prisma.transaksi.create({
+          data: {
+            id,
+            nomorRef: generateNomorRef(),
+            pelanggan: {
+              create: {
+                nama: pelanggan.nama,
+                whatsapp: pelanggan.whatsapp,
+                alamatKos: pelanggan.alamatKos,
+                kampus: pelanggan.kampus || null,
+                noKtpKtm: pelanggan.noKtpKtm || null,
+              },
+            },
+            paket: {
+              connect: { id: paket.id },
+            },
+            nilaiDeklarasi: paket.perluDeklarasi ? Number(nilaiDeklarasi) : null,
+            deskripsiDeklarasi: paket.perluDeklarasi ? deskripsiDeklarasi : null,
+            buktiKepemilikanUrl: paket.perluDeklarasi ? buktiKepemilikanUrl : null,
+            tanggalMasuk: tanggalMasukDate,
+            tanggalJatuhTempo,
+            perjanjianDisetujui: true,
+            waktuPersetujuan: new Date(),
+            ipAddress,
+            userAgent,
+            tandaTanganUrl,
+            klausulLimitGantiRugi: true,
+            klausulBarangTerlarang: true,
+            klausulJatuhTempo: true,
+            klausulDeklarasiNilai: paket.perluDeklarasi,
+            fotoMasuk: {
+              create: fotoMasukUrls.map((url: string) => ({
+                url,
+                fileName: url.split("/").pop() ?? "foto.jpg",
+              })),
+            },
+          },
+        });
+
+        return NextResponse.json({ id: transaksi.id, nomorRef: transaksi.nomorRef });
+      } catch (error) {
+        const isDuplicateNomorRef =
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === "P2002";
+
+        if (!isDuplicateNomorRef) throw error;
+      }
+    }
+
+    return NextResponse.json(
+      { error: "Gagal membuat nomor referensi, coba lagi" },
+      { status: 500 }
+    );
+  } catch (error) {
+    console.error("[POST /api/transaksi]", error);
+    return NextResponse.json({ error: "Gagal menyimpan pesanan" }, { status: 500 });
+  }
+}

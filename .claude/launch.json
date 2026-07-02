@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "titipkuy-dev",
+      "runtimeExecutable": "/Users/kharismamahanani/.local/share/mise/shims/npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 3000
+    }
+  ]
+}
