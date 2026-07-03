@@ -1,58 +1,28 @@
-// Rate limiter in-memory sederhana — cukup untuk skala kecil single-instance,
-// bukan pengganti Redis untuk deployment multi-instance.
+// Rate limiter berbasis Upstash Redis — persisten lintas instance
+// serverless (Vercel), berbeda dengan Map in-memory yang counter-nya
+// tidak tershare antar cold start/instance.
 
-interface Bucket {
-  count: number;
-  resetAt: number;
-}
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 
-const buckets = new Map<string, Bucket>();
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+});
 
-let callsSinceSweep = 0;
+export const loginRatelimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(5, "15 m"), // 5x per 15 menit
+  analytics: false,
+  prefix: "titipkuy:login",
+});
 
-function sweepExpired() {
-  callsSinceSweep += 1;
-  if (callsSinceSweep < 200) return;
-  callsSinceSweep = 0;
-
-  const now = Date.now();
-  buckets.forEach((bucket, key) => {
-    if (bucket.resetAt < now) buckets.delete(key);
-  });
-}
-
-function getBucket(key: string, windowMs: number): Bucket {
-  sweepExpired();
-
-  const now = Date.now();
-  const existing = buckets.get(key);
-  if (existing && existing.resetAt > now) return existing;
-
-  const fresh: Bucket = { count: 0, resetAt: now + windowMs };
-  buckets.set(key, fresh);
-  return fresh;
-}
-
-/**
- * Cek apakah `key` sudah melebihi `limit` dalam window saat ini.
- * Tidak menambah counter — panggil recordAttempt() terpisah untuk itu.
- * Return `null` jika belum kena limit, atau timestamp reset (ms) jika kena.
- */
-export function isRateLimited(key: string, limit: number, windowMs: number): number | null {
-  const bucket = getBucket(key, windowMs);
-  return bucket.count >= limit ? bucket.resetAt : null;
-}
-
-/** Tambah satu percobaan ke counter `key`. */
-export function recordAttempt(key: string, windowMs: number) {
-  const bucket = getBucket(key, windowMs);
-  bucket.count += 1;
-}
-
-/** Hapus counter `key`, mis. setelah login berhasil. */
-export function resetRateLimit(key: string) {
-  buckets.delete(key);
-}
+export const bookingRatelimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(3, "1 h"), // 3x per jam
+  analytics: false,
+  prefix: "titipkuy:booking",
+});
 
 /** Ambil IP klien dari header (dukung proxy/load balancer di depan Next.js). */
 export function getClientIp(request: Request): string {

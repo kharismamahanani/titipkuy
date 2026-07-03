@@ -7,7 +7,8 @@ export async function PUT(
 ) {
   try {
     const body = await request.json();
-    const { label, tipe, radiusLabel, harga, kapasitasLabel, aktif, urutan } = body ?? {};
+    const { label, tipe, radiusLabel, harga, kapasitasLabel, tipeArmada, aktif, urutan } =
+      body ?? {};
 
     if (!label || !tipe || !radiusLabel || harga == null) {
       return NextResponse.json(
@@ -24,6 +25,7 @@ export async function PUT(
         radiusLabel,
         harga: Number(harga),
         kapasitasLabel: kapasitasLabel || null,
+        tipeArmada: tipeArmada || tipe,
         aktif: !!aktif,
         urutan: urutan != null ? Number(urutan) : 0,
       },

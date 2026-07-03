@@ -4,16 +4,14 @@ import {
   ADMIN_SESSION_MAX_AGE,
   hashCredentials,
 } from "@/lib/admin-auth";
-import { getClientIp, isRateLimited, recordAttempt, resetRateLimit } from "@/lib/rate-limit";
-
-const MAX_ATTEMPTS = 5;
-const WINDOW_MS = 15 * 60 * 1000;
+import { getClientIp, loginRatelimit } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
-    const rateLimitKey = `login:${getClientIp(request)}`;
+    const ip = getClientIp(request);
+    const { success } = await loginRatelimit.limit(ip);
 
-    if (isRateLimited(rateLimitKey, MAX_ATTEMPTS, WINDOW_MS)) {
+    if (!success) {
       return NextResponse.json(
         { error: "Terlalu banyak percobaan. Coba lagi dalam 15 menit." },
         { status: 429 }
@@ -27,14 +25,12 @@ export async function POST(request: Request) {
       password === process.env.ADMIN_PASSWORD;
 
     if (!isValid) {
-      recordAttempt(rateLimitKey, WINDOW_MS);
       return NextResponse.json(
         { error: "Username atau password salah" },
         { status: 401 }
       );
     }
 
-    resetRateLimit(rateLimitKey);
     const sessionHash = await hashCredentials(username, password);
     const response = NextResponse.json({ ok: true });
     response.cookies.set(ADMIN_SESSION_COOKIE, sessionHash, {

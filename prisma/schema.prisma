@@ -152,6 +152,11 @@ model AntarJemputOption {
   radiusLabel    String   // "<3km" | "3-6km"
   harga          Int
   kapasitasLabel String?  // "Maks. 2 Box S atau 1 Koper Kabin"
+  // Referensi opsional ke Armada.tipe ("motor" | "mobil") — dipakai untuk
+  // mencocokkan opsi ini dengan kapasitas slot Armada saat booking, tanpa
+  // menggabungkan kedua sistem (Armada tetap sumber kebenaran kapasitas
+  // slot per hari, AntarJemputOption tetap sumber harga & pilihan publik).
+  tipeArmada     String?
   aktif          Boolean  @default(true)
   urutan         Int      @default(0)
   transaksi      Transaksi[]

@@ -4,11 +4,10 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { incrementSlotUsage } from "@/lib/slot";
-import { HUB_CONFIG, SLOT_SESI } from "@/lib/constants";
+import { HUB_CONFIG } from "@/lib/constants";
+import { TransaksiManualSchema } from "@/lib/schemas";
 
 const MAX_NOMOR_REF_RETRY = 5;
-const VALID_HUB = Object.keys(HUB_CONFIG);
-const VALID_SESI = Object.keys(SLOT_SESI);
 const TOKEN_VALID_MS = 24 * 60 * 60 * 1000;
 
 function generateNomorRef(hub: string) {
@@ -22,6 +21,15 @@ function generateNomorRef(hub: string) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    const parsed = TransaksiManualSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Data tidak valid", details: parsed.error.flatten() },
+        { status: 400 }
+      );
+    }
+
     const {
       id,
       pelanggan,
@@ -36,21 +44,7 @@ export async function POST(request: Request) {
       antarJemput,
       penjemputan,
       catatanAdmin,
-    } = body ?? {};
-
-    if (
-      !id ||
-      !pelanggan?.nama ||
-      !pelanggan?.whatsapp ||
-      !paketId ||
-      !tanggalMasuk ||
-      !VALID_HUB.includes(hub)
-    ) {
-      return NextResponse.json(
-        { error: "Data pesanan tidak lengkap" },
-        { status: 400 }
-      );
-    }
+    } = parsed.data;
 
     const paket = await prisma.paket.findUnique({ where: { id: paketId } });
     if (!paket || !paket.aktif) {
@@ -67,14 +61,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if (
-      antarJemput &&
-      penjemputan &&
-      (!VALID_HUB.includes(penjemputan.hub) ||
-        !VALID_SESI.includes(penjemputan.sesiWaktu) ||
-        !penjemputan.armadaId ||
-        !penjemputan.tanggal)
-    ) {
+    if (antarJemput && !penjemputan) {
       return NextResponse.json(
         { error: "Data penjemputan tidak lengkap" },
         { status: 400 }

@@ -7,6 +7,9 @@ export interface Armada {
   aktif: boolean;
   createdAt: string;
   updatedAt: string;
+  // Jumlah AntarJemputOption aktif yang tipeArmada-nya cocok dengan armada
+  // ini — dihitung server-side, hanya ada di response GET /api/admin/armada.
+  jumlahAntarJemputOption?: number;
 }
 
 export interface KonfigurasiOperasional {

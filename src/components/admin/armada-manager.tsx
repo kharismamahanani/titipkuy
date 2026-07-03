@@ -81,6 +81,7 @@ export function ArmadaManager({ initialArmada }: ArmadaManagerProps) {
               <th className="px-4 py-3 font-medium">Tipe</th>
               <th className="px-4 py-3 font-medium">Plat</th>
               <th className="px-4 py-3 font-medium">Slot/Hari</th>
+              <th className="px-4 py-3 font-medium">Dipakai Antar-Jemput</th>
               <th className="px-4 py-3 font-medium">Status Aktif</th>
               <th className="px-4 py-3 font-medium">Aksi</th>
             </tr>
@@ -88,7 +89,7 @@ export function ArmadaManager({ initialArmada }: ArmadaManagerProps) {
           <tbody>
             {initialArmada.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-foreground/50">
+                <td colSpan={7} className="px-4 py-6 text-center text-foreground/50">
                   Belum ada armada. Klik &quot;Tambah Armada&quot; untuk mulai.
                 </td>
               </tr>
@@ -99,6 +100,11 @@ export function ArmadaManager({ initialArmada }: ArmadaManagerProps) {
                 <td className="px-4 py-3 capitalize">{armada.tipe}</td>
                 <td className="px-4 py-3">{armada.platNomor ?? "-"}</td>
                 <td className="px-4 py-3">{armada.slotPerHari}</td>
+                <td className="px-4 py-3 text-foreground/60">
+                  {armada.jumlahAntarJemputOption
+                    ? `Dipakai oleh ${armada.jumlahAntarJemputOption} opsi antar-jemput`
+                    : "Belum dipakai opsi antar-jemput"}
+                </td>
                 <td className="px-4 py-3">
                   <Switch
                     checked={armada.aktif}

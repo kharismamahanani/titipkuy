@@ -3,14 +3,11 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { incrementSlotUsage } from "@/lib/slot";
-import { getClientIp, isRateLimited, recordAttempt } from "@/lib/rate-limit";
-import { HUB_CONFIG, SLOT_SESI } from "@/lib/constants";
+import { bookingRatelimit, getClientIp } from "@/lib/rate-limit";
+import { HUB_CONFIG } from "@/lib/constants";
+import { TransaksiSchema } from "@/lib/schemas";
 
 const MAX_NOMOR_REF_RETRY = 5;
-const VALID_HUB = Object.keys(HUB_CONFIG);
-const VALID_SESI = Object.keys(SLOT_SESI);
-const MAX_TRANSAKSI_PER_JAM = 3;
-const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
 
 function generateNomorRef() {
   const now = new Date();
@@ -21,19 +18,28 @@ function generateNomorRef() {
 
 export async function POST(request: Request) {
   try {
-    const rateLimitKey = `transaksi:${getClientIp(request)}`;
+    const ip = getClientIp(request);
+    const { success } = await bookingRatelimit.limit(ip);
 
-    if (isRateLimited(rateLimitKey, MAX_TRANSAKSI_PER_JAM, RATE_LIMIT_WINDOW_MS)) {
+    if (!success) {
       return NextResponse.json(
         {
-          error: `Maksimal ${MAX_TRANSAKSI_PER_JAM} pesanan per jam dari alamat yang sama. Coba lagi nanti atau hubungi kami via WhatsApp.`,
+          error: "Maksimal 3 pesanan per jam dari alamat yang sama. Coba lagi nanti atau hubungi kami via WhatsApp.",
         },
         { status: 429 }
       );
     }
-    recordAttempt(rateLimitKey, RATE_LIMIT_WINDOW_MS);
 
     const body = await request.json();
+    const parsed = TransaksiSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Data tidak valid", details: parsed.error.flatten() },
+        { status: 400 }
+      );
+    }
+
     const {
       id,
       pelanggan,
@@ -47,24 +53,7 @@ export async function POST(request: Request) {
       checklist,
       penjemputan,
       antarJemputId,
-    } = body ?? {};
-
-    if (
-      !id ||
-      !pelanggan?.nama ||
-      !pelanggan?.whatsapp ||
-      !pelanggan?.alamatKos ||
-      !paketId ||
-      !tanggalMasuk ||
-      !tandaTanganUrl ||
-      !Array.isArray(fotoMasukUrls) ||
-      fotoMasukUrls.length < 3
-    ) {
-      return NextResponse.json(
-        { error: "Data pemesanan tidak lengkap" },
-        { status: 400 }
-      );
-    }
+    } = parsed.data;
 
     const paket = await prisma.paket.findUnique({ where: { id: paketId } });
     if (!paket || !paket.aktif) {
@@ -98,19 +87,6 @@ export async function POST(request: Request) {
       );
     }
 
-    if (
-      penjemputan &&
-      (!VALID_HUB.includes(penjemputan.hub) ||
-        !VALID_SESI.includes(penjemputan.sesiWaktu) ||
-        !penjemputan.armadaId ||
-        !penjemputan.tanggal)
-    ) {
-      return NextResponse.json(
-        { error: "Data penjemputan tidak lengkap" },
-        { status: 400 }
-      );
-    }
-
     if (antarJemputId) {
       const antarJemputOption = await prisma.antarJemputOption.findUnique({
         where: { id: antarJemputId },
@@ -120,6 +96,24 @@ export async function POST(request: Request) {
           { error: "Opsi antar-jemput tidak valid" },
           { status: 400 }
         );
+      }
+
+      // AntarJemputOption menyimpan harga & pilihan untuk pelanggan, tapi
+      // ketersediaan armadanya tetap dikelola lewat tabel Armada (tipeArmada
+      // mencocokkan AntarJemputOption.tipeArmada dengan Armada.tipe).
+      if (antarJemputOption.tipeArmada) {
+        const armadaTersedia = await prisma.armada.findFirst({
+          where: { tipe: antarJemputOption.tipeArmada, aktif: true },
+        });
+        if (!armadaTersedia) {
+          return NextResponse.json(
+            {
+              error:
+                "Armada untuk opsi antar-jemput ini sedang tidak tersedia. Hubungi admin via WhatsApp.",
+            },
+            { status: 409 }
+          );
+        }
       }
     }
 

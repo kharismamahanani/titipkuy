@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { PaketSchema } from "@/lib/schemas";
 
 export async function GET() {
   try {
@@ -16,34 +17,28 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const {
-      nama,
-      deskripsi,
-      harga,
-      durasiHari,
-      kategori,
-      perluDeklarasi,
-      aktif,
-      urutan,
-    } = body ?? {};
+    const parsed = PaketSchema.safeParse(body);
 
-    if (!nama || !kategori || harga == null) {
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Nama, kategori, dan harga wajib diisi" },
+        { error: "Data tidak valid", details: parsed.error.flatten() },
         { status: 400 }
       );
     }
+
+    const { nama, deskripsi, harga, durasiHari, kategori, perluDeklarasi, aktif, urutan } =
+      parsed.data;
 
     const paket = await prisma.paket.create({
       data: {
         nama,
         deskripsi: deskripsi || null,
-        harga: Number(harga),
-        durasiHari: durasiHari ? Number(durasiHari) : null,
+        harga,
+        durasiHari: durasiHari ?? null,
         kategori,
-        perluDeklarasi: !!perluDeklarasi,
-        aktif: aktif ?? true,
-        urutan: urutan != null ? Number(urutan) : 0,
+        perluDeklarasi,
+        aktif,
+        urutan,
       },
     });
 

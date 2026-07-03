@@ -3,8 +3,25 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
-    const armada = await prisma.armada.findMany({ orderBy: { createdAt: "asc" } });
-    return NextResponse.json(armada);
+    const [armada, antarJemputCounts] = await Promise.all([
+      prisma.armada.findMany({ orderBy: { createdAt: "asc" } }),
+      prisma.antarJemputOption.groupBy({
+        by: ["tipeArmada"],
+        where: { aktif: true, tipeArmada: { not: null } },
+        _count: { _all: true },
+      }),
+    ]);
+
+    const countByTipe = new Map(
+      antarJemputCounts.map((row) => [row.tipeArmada, row._count._all])
+    );
+
+    return NextResponse.json(
+      armada.map((item) => ({
+        ...item,
+        jumlahAntarJemputOption: countByTipe.get(item.tipe) ?? 0,
+      }))
+    );
   } catch (error) {
     console.error("[GET /api/admin/armada]", error);
     return NextResponse.json({ error: "Gagal mengambil data armada" }, { status: 500 });
