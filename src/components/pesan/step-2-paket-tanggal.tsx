@@ -126,7 +126,9 @@ export function Step2PaketTanggal({
   );
 
   const isSunday = tanggalMasuk ? tanggalMasuk.getDay() === 0 : false;
+  const isSaturday = tanggalMasuk ? tanggalMasuk.getDay() === 6 : false;
   const armadaValid = tanggalMasuk ? isTanggalValidUntukArmada(tanggalMasuk) : true;
+  const saturdaySatuHariConflict = isSaturday && paket?.durasiHari === 1;
 
   useEffect(() => {
     if (tanggalMasuk && !armadaValid && metodePengiriman === "armada") {
@@ -135,6 +137,14 @@ export function Step2PaketTanggal({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tanggalMasuk, armadaValid]);
+
+  function handleTanggalChange(date: Date) {
+    if (date.getDay() === 0) {
+      toast.error("Hub tutup di hari Minggu. Silakan pilih hari lain.");
+      return;
+    }
+    onTanggalChange(date);
+  }
 
   return (
     <div className="space-y-8">
@@ -176,14 +186,17 @@ export function Step2PaketTanggal({
         <div className="grid gap-4 sm:grid-cols-2">
           {filteredPaketList.map((item) => {
             const isSelected = paket?.id === item.id;
+            const isBlocked = isSaturday && item.durasiHari === 1;
             return (
               <button
                 key={item.id}
                 type="button"
-                onClick={() => onPaketChange(item)}
+                disabled={isBlocked}
+                onClick={() => !isBlocked && onPaketChange(item)}
                 className={cn(
                   "glass-card rounded-2xl p-4 text-left transition-transform hover:scale-[1.02]",
-                  isSelected && "gradient-border ring-2 ring-primary-from"
+                  isSelected && "gradient-border ring-2 ring-primary-from",
+                  isBlocked && "cursor-not-allowed opacity-40 hover:scale-100"
                 )}
               >
                 <p className="font-heading font-bold">{item.nama}</p>
@@ -206,10 +219,17 @@ export function Step2PaketTanggal({
             <Calendar
               mode="single"
               selected={tanggalMasuk ?? undefined}
-              onSelect={(date) => date && onTanggalChange(date)}
-              disabled={{ before: new Date() }}
+              onSelect={(date) => date && handleTanggalChange(date)}
+              disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0)) || date.getDay() === 0}
             />
           </div>
+
+          {saturdaySatuHariConflict && (
+            <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-200">
+              ⚠️ Titip 1 hari di hari Sabtu tidak tersedia karena hub tutup di hari Minggu. Pilih
+              durasi minimal 2 hari, atau pilih hari lain.
+            </div>
+          )}
 
           {tanggalMasuk && tanggalJatuhTempo && (
             <p className="text-sm text-foreground/70">

@@ -33,6 +33,16 @@ export function validateStep2(
   if (!paket) errors.push("Pilih salah satu paket dahulu");
   if (!tanggalMasuk) errors.push("Pilih tanggal masuk barang");
 
+  if (tanggalMasuk?.getDay() === 0) {
+    errors.push("Hub tutup di hari Minggu. Silakan pilih hari lain.");
+  }
+
+  if (tanggalMasuk?.getDay() === 6 && paket?.durasiHari === 1) {
+    errors.push(
+      "Titip 1 hari di hari Sabtu tidak tersedia karena hub tutup di hari Minggu. Pilih durasi minimal 2 hari, atau pilih hari lain."
+    );
+  }
+
   if (paket?.perluDeklarasi) {
     if (!deklarasi.nilaiDeklarasi.trim()) {
       errors.push("Isi nilai deklarasi barang");
