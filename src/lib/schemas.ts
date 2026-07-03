@@ -40,6 +40,7 @@ export const TransaksiSchema = z.object({
     deklarasiBenar: z.boolean().optional(),
   }),
   penjemputan: PenjemputanSchema.optional().nullable(),
+  metodePengiriman: z.enum(["armada", "mandiri"]).optional().nullable(),
   antarJemputId: z.string().cuid().optional().nullable(),
 });
 

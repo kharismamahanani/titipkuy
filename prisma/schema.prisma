@@ -52,6 +52,12 @@ model Transaksi {
   hub              String?   // "suhat" | "tidar" — hub penyimpanan untuk order ini
   zonaRak          String?
   catatanAdmin     String?
+  // Nomor urut sekuensial, dipakai untuk membangun Kode Unik (mis. LELY-0089)
+  nomorUrut        Int       @default(autoincrement())
+  // "armada" (dijemput TitipKuy!) | "mandiri" (kirim sendiri/Grab/ekspedisi)
+  metodePengiriman String?
+  // Dicentang admin setelah barang kiriman mandiri benar-benar tiba di hub
+  barangTibaMandiri Boolean  @default(false)
   // Layanan antar-jemput (add-on opsional, bukan paket terpisah)
   antarJemputOption AntarJemputOption? @relation(fields:[antarJemputId], references:[id])
   antarJemputId     String?

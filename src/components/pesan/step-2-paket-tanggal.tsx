@@ -11,8 +11,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn, formatRupiah } from "@/lib/utils";
 import { uploadToStorage } from "@/lib/supabase";
 import { AntarJemputPicker } from "@/components/pesan/antar-jemput-picker";
+import { HUB_CONFIG, JAM_DROP_OFF_MANDIRI } from "@/lib/constants";
 import type { Paket } from "@/types/paket";
-import type { DeklarasiData } from "@/types/pesan";
+import type { DeklarasiData, MetodePengiriman } from "@/types/pesan";
 import type { AntarJemputOption } from "@/types/antar-jemput";
 
 const MAX_BUKTI_SIZE = 5 * 1024 * 1024; // 5MB
@@ -22,12 +23,14 @@ interface Step2Props {
   paket: Paket | null;
   tanggalMasuk: Date | null;
   deklarasi: DeklarasiData;
+  metodePengiriman: MetodePengiriman;
   antarJemputOption: AntarJemputOption | null;
   preselectedPaketId?: string;
   preselectedMode?: "harian" | "bulanan";
   onPaketChange: (paket: Paket) => void;
   onTanggalChange: (date: Date) => void;
   onDeklarasiChange: (data: DeklarasiData) => void;
+  onMetodePengirimanChange: (metode: MetodePengiriman) => void;
   onAntarJemputOptionChange: (option: AntarJemputOption | null) => void;
 }
 
@@ -36,12 +39,14 @@ export function Step2PaketTanggal({
   paket,
   tanggalMasuk,
   deklarasi,
+  metodePengiriman,
   antarJemputOption,
   preselectedPaketId,
   preselectedMode,
   onPaketChange,
   onTanggalChange,
   onDeklarasiChange,
+  onMetodePengirimanChange,
   onAntarJemputOptionChange,
 }: Step2Props) {
   const [paketList, setPaketList] = useState<Paket[]>([]);
@@ -259,7 +264,65 @@ export function Step2PaketTanggal({
       )}
 
       {paket && tanggalMasuk && (
-        <AntarJemputPicker value={antarJemputOption} onChange={onAntarJemputOptionChange} />
+        <div className="glass-card space-y-4 rounded-2xl p-5">
+          <Label>🚚 Bagaimana barang kamu sampai ke hub?</Label>
+
+          <div className="space-y-2">
+            <button
+              type="button"
+              onClick={() => onMetodePengirimanChange("armada")}
+              className={cn(
+                "w-full rounded-xl border px-4 py-3 text-left text-sm transition-colors",
+                metodePengiriman === "armada"
+                  ? "border-transparent bg-gradient-to-r from-primary-from to-primary-to text-white"
+                  : "border-card-border text-foreground/80 hover:bg-primary/10"
+              )}
+            >
+              <span className="font-semibold">◉ Dijemput armada TitipKuy!</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                onMetodePengirimanChange("mandiri");
+                onAntarJemputOptionChange(null);
+              }}
+              className={cn(
+                "w-full rounded-xl border px-4 py-3 text-left text-sm transition-colors",
+                metodePengiriman === "mandiri"
+                  ? "border-transparent bg-gradient-to-r from-primary-from to-primary-to text-white"
+                  : "border-card-border text-foreground/80 hover:bg-primary/10"
+              )}
+            >
+              <span className="font-semibold">
+                ○ Saya kirim sendiri atau via Grab/Lalamove/ekspedisi
+              </span>
+              <span
+                className={cn(
+                  "mt-1 block text-xs",
+                  metodePengiriman === "mandiri" ? "text-white/80" : "text-foreground/50"
+                )}
+              >
+                Info: {HUB_CONFIG.suhat.nama}, {HUB_CONFIG.suhat.alamat}. Jam drop-off:{" "}
+                {JAM_DROP_OFF_MANDIRI} (Senin–Sabtu).
+              </span>
+            </button>
+          </div>
+
+          {metodePengiriman === "armada" ? (
+            <AntarJemputPicker
+              value={antarJemputOption}
+              onChange={onAntarJemputOptionChange}
+              hideMandiriOption
+            />
+          ) : (
+            <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/10 p-3 text-xs text-yellow-200">
+              📌 Jam drop-off ke {HUB_CONFIG.suhat.nama}: {JAM_DROP_OFF_MANDIRI} (Senin–Sabtu).
+              Alamat: {HUB_CONFIG.suhat.alamat}. Setelah submit, kamu akan dapat Kode Unik di
+              halaman konfirmasi — tulis kode itu di kardus/koper sebelum dikirim.
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

@@ -38,9 +38,17 @@ export async function PATCH(
 ) {
   try {
     const body = await request.json();
-    const { statusBayar, statusTransaksi } = body ?? {};
+    const { statusBayar, statusTransaksi, barangTibaMandiri } = body ?? {};
 
-    const data: { statusBayar?: StatusBayar; statusTransaksi?: StatusTransaksi } = {};
+    const data: {
+      statusBayar?: StatusBayar;
+      statusTransaksi?: StatusTransaksi;
+      barangTibaMandiri?: boolean;
+    } = {};
+
+    if (barangTibaMandiri !== undefined) {
+      data.barangTibaMandiri = !!barangTibaMandiri;
+    }
 
     if (statusBayar !== undefined) {
       if (statusBayar !== "LUNAS" && statusBayar !== "BELUM_BAYAR") {

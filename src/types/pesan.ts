@@ -26,11 +26,14 @@ export interface ChecklistData {
   deklarasiBenar: boolean;
 }
 
+export type MetodePengiriman = "armada" | "mandiri";
+
 export interface PesanFormData {
   pelanggan: PelangganData;
   paket: Paket | null;
   tanggalMasuk: Date | null;
   deklarasi: DeklarasiData;
+  metodePengiriman: MetodePengiriman;
   antarJemputOption: AntarJemputOption | null;
   fotoMasukUrls: string[];
   checklist: ChecklistData;
@@ -52,6 +55,7 @@ export const INITIAL_FORM_DATA: PesanFormData = {
     deskripsiDeklarasi: "",
     buktiKepemilikanUrl: null,
   },
+  metodePengiriman: "armada",
   antarJemputOption: null,
   fotoMasukUrls: [],
   checklist: {

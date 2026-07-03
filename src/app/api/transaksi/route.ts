@@ -52,6 +52,7 @@ export async function POST(request: Request) {
       tandaTanganUrl,
       checklist,
       penjemputan,
+      metodePengiriman,
       antarJemputId,
     } = parsed.data;
 
@@ -146,6 +147,7 @@ export async function POST(request: Request) {
               buktiKepemilikanUrl: paket.perluDeklarasi ? buktiKepemilikanUrl : null,
               tanggalMasuk: tanggalMasukDate,
               tanggalJatuhTempo,
+              metodePengiriman: metodePengiriman ?? null,
               antarJemputOption: antarJemputId
                 ? { connect: { id: antarJemputId } }
                 : undefined,

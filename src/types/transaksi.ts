@@ -30,6 +30,7 @@ export interface Foto {
 export interface TransaksiDetail {
   id: string;
   nomorRef: string;
+  nomorUrut: number;
   pelanggan: Pelanggan;
   paket: Paket;
   nilaiDeklarasi: number | null;
@@ -40,6 +41,8 @@ export interface TransaksiDetail {
   statusBayar: "BELUM_BAYAR" | "LUNAS";
   statusTransaksi: "AKTIF" | "SELESAI" | "DIBATALKAN";
   hub: string | null;
+  metodePengiriman: "armada" | "mandiri" | null;
+  barangTibaMandiri: boolean;
   antarJemputOption: AntarJemputOption | null;
   tandaTanganUrl: string | null;
   pdfUrl: string | null;

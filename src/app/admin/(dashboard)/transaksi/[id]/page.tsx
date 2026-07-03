@@ -7,6 +7,7 @@ import { formatRupiah } from "@/lib/utils";
 import { FotoMasukGrid } from "@/components/admin/foto-masuk-grid";
 import { FotoKeluarUploader } from "@/components/admin/foto-keluar-uploader";
 import { TandaiSelesaiButton } from "@/components/admin/tandai-selesai-button";
+import { TandaiBarangTibaButton } from "@/components/admin/tandai-barang-tiba-button";
 
 export const dynamic = "force-dynamic";
 
@@ -76,11 +77,13 @@ export default async function AdminTransaksiDetailPage({
         <Row label="Kampus" value={pelanggan.kampus ?? "-"} />
         <Row label="Paket" value={`${paket.nama} · ${formatRupiah(paket.harga)}`} />
         <Row
-          label="Antar-Jemput"
+          label="Metode Pengiriman"
           value={
-            transaksi.antarJemputOption
-              ? `${transaksi.antarJemputOption.label} — ${formatRupiah(transaksi.antarJemputOption.harga)}`
-              : "Mandiri (Grab/Lalamove)"
+            transaksi.metodePengiriman === "armada"
+              ? `🛵 Dijemput armada${transaksi.antarJemputOption ? ` — ${transaksi.antarJemputOption.label}` : ""} (${format(transaksi.tanggalMasuk, "d MMM yyyy", { locale: localeId })})`
+              : transaksi.metodePengiriman === "mandiri"
+                ? "📦 Kirim mandiri"
+                : "-"
           }
         />
         <Row
@@ -135,6 +138,16 @@ export default async function AdminTransaksiDetailPage({
           <p className="text-sm text-foreground/50">Belum ada tanda tangan.</p>
         )}
       </section>
+
+      {transaksi.metodePengiriman === "mandiri" && (
+        <section className="space-y-2">
+          <h2 className="font-heading font-bold">Kiriman Mandiri</h2>
+          <TandaiBarangTibaButton
+            transaksiId={transaksi.id}
+            barangTibaMandiri={transaksi.barangTibaMandiri}
+          />
+        </section>
+      )}
 
       <TandaiSelesaiButton
         transaksiId={transaksi.id}

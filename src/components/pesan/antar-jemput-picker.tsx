@@ -10,9 +10,10 @@ import type { AntarJemputOption } from "@/types/antar-jemput";
 interface AntarJemputPickerProps {
   value: AntarJemputOption | null;
   onChange: (option: AntarJemputOption | null) => void;
+  hideMandiriOption?: boolean;
 }
 
-export function AntarJemputPicker({ value, onChange }: AntarJemputPickerProps) {
+export function AntarJemputPicker({ value, onChange, hideMandiriOption }: AntarJemputPickerProps) {
   const [options, setOptions] = useState<AntarJemputOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -43,18 +44,20 @@ export function AntarJemputPicker({ value, onChange }: AntarJemputPickerProps) {
         </p>
       ) : (
         <div className="space-y-2">
-          <button
-            type="button"
-            onClick={() => onChange(null)}
-            className={cn(
-              "w-full rounded-xl border px-4 py-2.5 text-left text-sm transition-colors",
-              value === null
-                ? "border-transparent bg-gradient-to-r from-primary-from to-primary-to text-white"
-                : "border-card-border text-foreground/80 hover:bg-primary/10"
-            )}
-          >
-            Tidak perlu, saya antar sendiri / kirim via Grab
-          </button>
+          {!hideMandiriOption && (
+            <button
+              type="button"
+              onClick={() => onChange(null)}
+              className={cn(
+                "w-full rounded-xl border px-4 py-2.5 text-left text-sm transition-colors",
+                value === null
+                  ? "border-transparent bg-gradient-to-r from-primary-from to-primary-to text-white"
+                  : "border-card-border text-foreground/80 hover:bg-primary/10"
+              )}
+            >
+              Tidak perlu, saya antar sendiri / kirim via Grab
+            </button>
+          )}
 
           {options.map((option) => {
             const isSelected = value?.id === option.id;
@@ -90,7 +93,7 @@ export function AntarJemputPicker({ value, onChange }: AntarJemputPickerProps) {
         </div>
       )}
 
-      {value === null ? (
+      {value === null && !hideMandiriOption ? (
         <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/10 p-3 text-xs text-yellow-200">
           📌 Jam drop-off: {JAM_DROP_OFF_MANDIRI} (Senin–Sabtu). Setelah submit, kamu
           akan menerima Kode Unik via WhatsApp. Tulis kode itu di kardus/koper

@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import Image from "next/image";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { CheckCircle2, Copy, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { pdf } from "@react-pdf/renderer";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { PerjanjianPdfDocument } from "@/components/konfirmasi/perjanjian-pdf";
 import { formatRupiah } from "@/lib/utils";
 import { ADMIN_NAME, formatWhatsAppDisplay, getWhatsAppUrl } from "@/constants/site";
 import { uploadToStorage } from "@/lib/supabase";
+import { HUB_CONFIG, JAM_DROP_OFF_MANDIRI, generateKodeUnik } from "@/lib/constants";
 import type { TransaksiDetail } from "@/types/transaksi";
 
 type FetchState = "loading" | "success" | "error";
@@ -97,10 +98,63 @@ export default function KonfirmasiPage({ params }: { params: { id: string } }) {
 
   const { pelanggan, paket } = transaksi;
   const waMessage = `Halo TitipKuy! Saya sudah bayar order ${transaksi.nomorRef} a.n ${pelanggan.nama}. Bukti terlampir.`;
+  const kodeUnik = generateKodeUnik(transaksi.nomorUrut);
+
+  function handleCopyKode() {
+    navigator.clipboard
+      .writeText(kodeUnik)
+      .then(() => toast.success("Kode disalin!"))
+      .catch(() => toast.error("Gagal menyalin kode"));
+  }
 
   return (
     <div className="min-h-screen bg-bg-dark px-4 py-12 sm:px-6">
       <div className="mx-auto max-w-xl space-y-6">
+        <div className="glass-card gradient-border rounded-2xl p-6 text-center">
+          <p className="text-sm font-medium text-foreground/70">
+            🔑 Kode Unik Barangmu
+          </p>
+          <div className="mt-2 flex items-center justify-center gap-3">
+            <p className="gradient-text font-heading text-4xl font-extrabold sm:text-5xl">
+              {kodeUnik}
+            </p>
+            <button
+              type="button"
+              onClick={handleCopyKode}
+              aria-label="Salin Kode"
+              className="flex items-center gap-1 rounded-full border border-primary-from/60 px-3 py-1.5 text-xs font-semibold text-foreground/80 transition-colors hover:bg-primary/10"
+            >
+              <Copy size={14} />
+              Salin Kode
+            </button>
+          </div>
+          <p className="mt-2 text-xs text-foreground/60">
+            Tulis kode ini di luar kardus/koper kamu
+          </p>
+        </div>
+
+        {transaksi.metodePengiriman === "mandiri" && (
+          <div className="glass-card space-y-3 rounded-2xl border border-yellow-500/30 bg-yellow-500/10 p-5 text-sm text-yellow-200">
+            <p>
+              📦 Kamu memilih kirim sendiri / via Grab/Lalamove
+              <br />
+              Jam drop-off ke Hub Suhat: {JAM_DROP_OFF_MANDIRI}
+              <br />
+              Alamat: {HUB_CONFIG.suhat.alamat}, Malang
+            </p>
+            <a
+              href={getWhatsAppUrl(
+                `Halo TitipKuy! Saya sudah/akan kirim barang dengan Kode Unik ${kodeUnik} a.n ${pelanggan.nama}.`
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block rounded-full border border-yellow-500/50 py-2 text-center text-sm font-semibold text-yellow-100 hover:bg-yellow-500/10"
+            >
+              Beritahu Admin via WA
+            </a>
+          </div>
+        )}
+
         <div className="text-center">
           <CheckCircle2
             className="mx-auto text-primary-from"

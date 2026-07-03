@@ -106,6 +106,7 @@ function PesanForm() {
           fotoMasukUrls: formData.fotoMasukUrls,
           tandaTanganUrl,
           checklist: formData.checklist,
+          metodePengiriman: formData.metodePengiriman,
           antarJemputId: formData.antarJemputOption?.id || undefined,
         }),
       });
@@ -134,7 +135,7 @@ function PesanForm() {
             <Step1DataPelanggan
               data={formData.pelanggan}
               errors={step1Errors}
-              onChange={(pelanggan) => setFormData({ ...formData, pelanggan })}
+              onChange={(pelanggan) => setFormData((prev) => ({ ...prev, pelanggan }))}
             />
           )}
 
@@ -144,18 +145,22 @@ function PesanForm() {
               paket={formData.paket}
               tanggalMasuk={formData.tanggalMasuk}
               deklarasi={formData.deklarasi}
+              metodePengiriman={formData.metodePengiriman}
               antarJemputOption={formData.antarJemputOption}
               preselectedPaketId={preselectedPaketId}
               preselectedMode={preselectedMode}
-              onPaketChange={(paket) => setFormData({ ...formData, paket })}
+              onPaketChange={(paket) => setFormData((prev) => ({ ...prev, paket }))}
               onTanggalChange={(tanggalMasuk) =>
-                setFormData({ ...formData, tanggalMasuk })
+                setFormData((prev) => ({ ...prev, tanggalMasuk }))
               }
               onDeklarasiChange={(deklarasi) =>
-                setFormData({ ...formData, deklarasi })
+                setFormData((prev) => ({ ...prev, deklarasi }))
+              }
+              onMetodePengirimanChange={(metodePengiriman) =>
+                setFormData((prev) => ({ ...prev, metodePengiriman }))
               }
               onAntarJemputOptionChange={(antarJemputOption) =>
-                setFormData({ ...formData, antarJemputOption })
+                setFormData((prev) => ({ ...prev, antarJemputOption }))
               }
             />
           )}
@@ -165,7 +170,7 @@ function PesanForm() {
               transactionId={transactionId}
               fotoMasukUrls={formData.fotoMasukUrls}
               onChange={(fotoMasukUrls) =>
-                setFormData({ ...formData, fotoMasukUrls })
+                setFormData((prev) => ({ ...prev, fotoMasukUrls }))
               }
             />
           )}
@@ -174,10 +179,10 @@ function PesanForm() {
             <Step4Perjanjian
               formData={formData}
               onChecklistChange={(checklist) =>
-                setFormData({ ...formData, checklist })
+                setFormData((prev) => ({ ...prev, checklist }))
               }
               onTandaTanganChange={(tandaTanganDataUrl) =>
-                setFormData({ ...formData, tandaTanganDataUrl })
+                setFormData((prev) => ({ ...prev, tandaTanganDataUrl }))
               }
               onSubmit={handleSubmit}
               isSubmitting={isSubmitting}
