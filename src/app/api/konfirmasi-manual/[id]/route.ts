@@ -67,7 +67,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     }
 
     const body = await request.json();
-    const { checklist, tandaTanganUrl, fotoMasukUrls } = body ?? {};
+    const { checklist, tandaTanganUrl } = body ?? {};
 
     const checklistOk = REQUIRED_CHECKLIST.every((key) => checklist?.[key] === true);
     const deklarasiChecklistOk =
@@ -102,16 +102,9 @@ export async function PATCH(request: Request, { params }: { params: { id: string
         klausulBarangTerlarang: true,
         klausulJatuhTempo: true,
         klausulDeklarasiNilai: transaksi.paket.perluDeklarasi,
-        ...(Array.isArray(fotoMasukUrls) && fotoMasukUrls.length > 0
-          ? {
-              fotoMasuk: {
-                create: fotoMasukUrls.map((url: string) => ({
-                  url,
-                  fileName: url.split("/").pop() ?? "foto.jpg",
-                })),
-              },
-            }
-          : {}),
+        // Foto kondisi barang sekarang diambil admin saat barang tiba di
+        // hub (lihat FotoMasukUploader di panel admin), bukan diupload
+        // pelanggan di halaman ini.
       },
     });
 

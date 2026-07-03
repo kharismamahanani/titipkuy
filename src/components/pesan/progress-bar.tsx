@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 
-const STEP_LABELS = ["Data Diri", "Paket & Tanggal", "Foto Barang", "Perjanjian"];
+const STEP_LABELS = ["Data Diri", "Paket & Metode Pengiriman", "Perjanjian"];
 
 interface ProgressBarProps {
   currentStep: number;

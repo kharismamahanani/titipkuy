@@ -7,15 +7,10 @@ import { Button } from "@/components/ui/button";
 import { ProgressBar } from "@/components/pesan/progress-bar";
 import { Step1DataPelanggan } from "@/components/pesan/step-1-data-pelanggan";
 import { Step2PaketTanggal } from "@/components/pesan/step-2-paket-tanggal";
-import { Step3UploadFoto } from "@/components/pesan/step-3-upload-foto";
-import { Step4Perjanjian } from "@/components/pesan/step-4-perjanjian";
+import { Step3Perjanjian } from "@/components/pesan/step-3-perjanjian";
 import { dataUrlToFile } from "@/lib/utils";
 import { uploadToStorage } from "@/lib/supabase";
-import {
-  validateStep1,
-  validateStep2,
-  validateStep3,
-} from "@/lib/pesan-validation";
+import { validateStep1, validateStep2 } from "@/lib/pesan-validation";
 import { INITIAL_FORM_DATA, type ChecklistData, type PesanFormData } from "@/types/pesan";
 import type { PelangganData } from "@/types/pesan";
 
@@ -55,14 +50,8 @@ function PesanForm() {
         toast.error(errors[0]);
         return;
       }
-    } else if (step === 3) {
-      const errors = validateStep3(formData.fotoMasukUrls);
-      if (errors.length > 0) {
-        toast.error(errors[0]);
-        return;
-      }
     }
-    setStep((s) => Math.min(s + 1, 4));
+    setStep((s) => Math.min(s + 1, 3));
   }
 
   function handleBack() {
@@ -103,7 +92,6 @@ function PesanForm() {
             : undefined,
           deskripsiDeklarasi: formData.deklarasi.deskripsiDeklarasi || undefined,
           buktiKepemilikanUrl: formData.deklarasi.buktiKepemilikanUrl || undefined,
-          fotoMasukUrls: formData.fotoMasukUrls,
           tandaTanganUrl,
           checklist: formData.checklist,
           metodePengiriman: formData.metodePengiriman,
@@ -166,17 +154,7 @@ function PesanForm() {
           )}
 
           {step === 3 && (
-            <Step3UploadFoto
-              transactionId={transactionId}
-              fotoMasukUrls={formData.fotoMasukUrls}
-              onChange={(fotoMasukUrls) =>
-                setFormData((prev) => ({ ...prev, fotoMasukUrls }))
-              }
-            />
-          )}
-
-          {step === 4 && (
-            <Step4Perjanjian
+            <Step3Perjanjian
               formData={formData}
               onChecklistChange={(checklist) =>
                 setFormData((prev) => ({ ...prev, checklist }))
@@ -190,7 +168,7 @@ function PesanForm() {
             />
           )}
 
-          {step < 4 && (
+          {step < 3 && (
             <div className="mt-8 flex justify-between">
               <Button
                 type="button"
@@ -210,7 +188,7 @@ function PesanForm() {
             </div>
           )}
 
-          {step === 4 && (
+          {step === 3 && (
             <div className="mt-4">
               <Button type="button" variant="outline" onClick={handleBack}>
                 Kembali

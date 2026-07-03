@@ -12,7 +12,7 @@ const ALASAN = [
   {
     icon: Camera,
     title: "📸 Foto Bukti Masuk & Keluar",
-    desc: "Foto kondisi barang didokumentasikan saat masuk dan keluar — tersimpan di database, bisa kamu cek kapan saja.",
+    desc: "Tim kami memotret kondisi barang saat diterima dan saat dikembalikan. Foto dikirim ke WhatsApp kamu sebagai bukti.",
   },
   {
     icon: Bike,

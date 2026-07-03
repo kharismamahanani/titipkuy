@@ -51,9 +51,9 @@ export function buildStoragePath(folder: string, originalFileName: string) {
   return `${folder}/${sanitizeFileName(unique)}`;
 }
 
-// Dipakai khusus untuk upload FOTO (Step 3 form pemesanan, foto keluar,
-// dll). Nama file asli dari user (bisa berisi spasi/karakter aneh) TIDAK
-// pernah dipakai sama sekali — path selalu berbentuk
+// Dipakai khusus untuk upload FOTO oleh admin (foto masuk & foto keluar).
+// Nama file asli (bisa berisi spasi/karakter aneh) TIDAK pernah dipakai
+// sama sekali — path selalu berbentuk
 // "<folder>/<timestamp>-<random>.jpg" supaya konsisten dan aman untuk
 // Supabase Storage.
 export function buildFotoPath(folder: string) {

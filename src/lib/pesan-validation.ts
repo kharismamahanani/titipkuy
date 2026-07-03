@@ -23,14 +23,6 @@ export function validateStep1(data: PelangganData) {
   return errors;
 }
 
-export function validateStep3(fotoMasukUrls: string[]) {
-  const errors: string[] = [];
-  if (fotoMasukUrls.length < 3) {
-    errors.push("Upload minimal 3 foto barang");
-  }
-  return errors;
-}
-
 export function validateStep2(
   paket: Paket | null,
   tanggalMasuk: Date | null,

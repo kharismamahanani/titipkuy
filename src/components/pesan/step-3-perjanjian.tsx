@@ -12,7 +12,7 @@ import { formatRupiah } from "@/lib/utils";
 import { CHECKLIST_ITEMS, DEKLARASI_ITEM } from "@/lib/checklist-items";
 import type { ChecklistData, PesanFormData } from "@/types/pesan";
 
-interface Step4Props {
+interface Step3Props {
   formData: PesanFormData;
   onChecklistChange: (checklist: ChecklistData) => void;
   onTandaTanganChange: (dataUrl: string | null) => void;
@@ -21,14 +21,14 @@ interface Step4Props {
   canSubmit: boolean;
 }
 
-export function Step4Perjanjian({
+export function Step3Perjanjian({
   formData,
   onChecklistChange,
   onTandaTanganChange,
   onSubmit,
   isSubmitting,
   canSubmit,
-}: Step4Props) {
+}: Step3Props) {
   const { pelanggan, paket, tanggalMasuk, checklist } = formData;
   const items = paket?.perluDeklarasi
     ? [...CHECKLIST_ITEMS, DEKLARASI_ITEM]

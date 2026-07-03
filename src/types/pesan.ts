@@ -35,7 +35,6 @@ export interface PesanFormData {
   deklarasi: DeklarasiData;
   metodePengiriman: MetodePengiriman;
   antarJemputOption: AntarJemputOption | null;
-  fotoMasukUrls: string[];
   checklist: ChecklistData;
   tandaTanganDataUrl: string | null;
 }
@@ -57,7 +56,6 @@ export const INITIAL_FORM_DATA: PesanFormData = {
   },
   metodePengiriman: "armada",
   antarJemputOption: null,
-  fotoMasukUrls: [],
   checklist: {
     limitGantiRugi: false,
     barangTerlarang: false,

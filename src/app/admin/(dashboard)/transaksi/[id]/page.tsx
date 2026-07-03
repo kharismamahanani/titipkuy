@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import { prisma } from "@/lib/prisma";
 import { formatRupiah } from "@/lib/utils";
-import { FotoMasukGrid } from "@/components/admin/foto-masuk-grid";
+import { FotoMasukUploader } from "@/components/admin/foto-masuk-uploader";
 import { FotoKeluarUploader } from "@/components/admin/foto-keluar-uploader";
 import { TandaiSelesaiButton } from "@/components/admin/tandai-selesai-button";
 import { TandaiBarangTibaButton } from "@/components/admin/tandai-barang-tiba-button";
@@ -109,7 +109,10 @@ export default async function AdminTransaksiDetailPage({
 
       <section className="space-y-3">
         <h2 className="font-heading font-bold">Foto Saat Masuk</h2>
-        <FotoMasukGrid fotos={fotoMasuk} emptyText="Tidak ada foto masuk." />
+        <p className="text-sm text-foreground/60">
+          Upload foto kondisi barang saat tiba di hub.
+        </p>
+        <FotoMasukUploader transaksiId={transaksi.id} fotoMasuk={fotoMasuk} />
       </section>
 
       <section className="space-y-3">

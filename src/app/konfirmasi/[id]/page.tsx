@@ -201,6 +201,11 @@ export default function KonfirmasiPage({ params }: { params: { id: string } }) {
           />
         </div>
 
+        <div className="glass-card rounded-2xl p-5 text-center text-sm text-foreground/70">
+          📸 Foto kondisi barangmu akan dikirim ke WhatsApp setelah barang diterima dan
+          dicek oleh tim kami di hub.
+        </div>
+
         <div className="glass-card flex flex-col items-center gap-3 rounded-2xl p-6">
           <p className="text-sm font-medium">Scan QRIS atau transfer ke rekening di bawah</p>
           <div className="rounded-xl bg-white p-4">

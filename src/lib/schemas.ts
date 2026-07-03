@@ -30,7 +30,6 @@ export const TransaksiSchema = z.object({
   nilaiDeklarasi: z.number().positive().optional().nullable(),
   deskripsiDeklarasi: z.string().optional().nullable(),
   buktiKepemilikanUrl: z.string().url().optional().nullable(),
-  fotoMasukUrls: z.array(z.string().url()).min(3),
   tandaTanganUrl: z.string().url(),
   checklist: z.object({
     limitGantiRugi: z.boolean(),

@@ -13,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PerjanjianDialog } from "@/components/pesan/perjanjian-dialog";
 import { SignatureCanvas } from "@/components/pesan/signature-canvas";
-import { Step3UploadFoto } from "@/components/pesan/step-3-upload-foto";
 import { PerjanjianPdfDocument } from "@/components/konfirmasi/perjanjian-pdf";
 import { CHECKLIST_ITEMS, DEKLARASI_ITEM } from "@/lib/checklist-items";
 import { dataUrlToFile, formatRupiah } from "@/lib/utils";
@@ -57,7 +56,6 @@ function KonfirmasiManualContent() {
 
   const [checklist, setChecklist] = useState<ChecklistData>(EMPTY_CHECKLIST);
   const [tandaTanganDataUrl, setTandaTanganDataUrl] = useState<string | null>(null);
-  const [fotoMasukUrls, setFotoMasukUrls] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -101,7 +99,7 @@ function KonfirmasiManualContent() {
       const patchRes = await fetch(`/api/konfirmasi-manual/${data.id}?token=${token}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ checklist, tandaTanganUrl, fotoMasukUrls }),
+        body: JSON.stringify({ checklist, tandaTanganUrl }),
       });
       const patchResult = await patchRes.json();
       if (!patchRes.ok) throw new Error(patchResult.error || "Gagal menyimpan konfirmasi");
@@ -302,16 +300,9 @@ function KonfirmasiManualContent() {
           <SignatureCanvas onChange={setTandaTanganDataUrl} />
         </div>
 
-        <div className="glass-card space-y-3 rounded-2xl p-5">
-          <p className="text-sm font-semibold">Upload Foto Barang (opsional)</p>
-          <p className="text-xs text-foreground/60">
-            Kalau belum sempat foto, admin akan foto barangmu saat sampai di hub.
-          </p>
-          <Step3UploadFoto
-            transactionId={data.id}
-            fotoMasukUrls={fotoMasukUrls}
-            onChange={setFotoMasukUrls}
-          />
+        <div className="glass-card rounded-2xl p-5 text-center text-sm text-foreground/70">
+          📸 Foto kondisi barangmu akan dikirim ke WhatsApp setelah barang diterima dan
+          dicek oleh tim kami di hub.
         </div>
 
         <Button

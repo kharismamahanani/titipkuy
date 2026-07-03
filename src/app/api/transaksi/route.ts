@@ -48,7 +48,6 @@ export async function POST(request: Request) {
       nilaiDeklarasi,
       deskripsiDeklarasi,
       buktiKepemilikanUrl,
-      fotoMasukUrls,
       tandaTanganUrl,
       checklist,
       penjemputan,
@@ -160,12 +159,9 @@ export async function POST(request: Request) {
               klausulBarangTerlarang: true,
               klausulJatuhTempo: true,
               klausulDeklarasiNilai: paket.perluDeklarasi,
-              fotoMasuk: {
-                create: fotoMasukUrls.map((url: string) => ({
-                  url,
-                  fileName: url.split("/").pop() ?? "foto.jpg",
-                })),
-              },
+              // Foto kondisi barang sekarang diambil admin saat barang
+              // benar-benar tiba di hub (lihat FotoKeluarUploader/foto
+              // masuk di panel admin), bukan diupload pelanggan di sini.
             },
           });
 
