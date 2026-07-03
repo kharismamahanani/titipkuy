@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { Hero } from "@/components/sections/hero";
-import { HubLokasi } from "@/components/sections/hub-lokasi";
 import { Kalkulator } from "@/components/sections/kalkulator";
 import { KenapaTitipkuy } from "@/components/sections/kenapa-titipkuy";
 import { LokasiJam } from "@/components/sections/lokasi-jam";
@@ -17,13 +16,12 @@ export default function Home() {
   const [mode, setMode] = useState<KalkulatorMode>("harian");
 
   return (
-    <div className="bg-bg-dark">
+    <div className="bg-tk-cream">
       <Navbar />
       <main>
         <Hero />
         <PaketSection />
         <Kalkulator mode={mode} onModeChange={setMode} />
-        <HubLokasi />
         <KenapaTitipkuy />
         <LokasiJam />
         <CaraTitipMandiri />

@@ -1,7 +1,8 @@
 "use client";
 
 import { MessageCircle } from "lucide-react";
-import { FadeIn } from "@/components/shared/fade-in";
+import { TkCard } from "@/components/ui/tk-card";
+import { tkButtonVariants } from "@/components/ui/tk-button";
 import { HUB_CONFIG, JAM_DROP_OFF_MANDIRI, JAM_OPERASIONAL_HUB_SUHAT } from "@/lib/constants";
 import {
   INSTAGRAM_URL,
@@ -14,64 +15,60 @@ const MAPS_URL = "https://maps.google.com/?q=Jl+Bunga+Lely+Lowokwaru+Malang";
 
 export function LokasiJam() {
   return (
-    <section id="lokasi" className="px-4 py-24 sm:px-6">
+    <section id="lokasi" className="bg-tk-cream-alt px-4 py-24 sm:px-6">
       <div className="mx-auto max-w-2xl">
-        <FadeIn className="text-center">
-          <h2 className="font-heading text-3xl font-bold sm:text-4xl">
-            Lokasi &amp; Jam <span className="gradient-text">Operasional</span> 📍
-          </h2>
-        </FadeIn>
+        <h2 className="text-center text-[28px] font-extrabold text-tk-charcoal">
+          Lokasi &amp; Jam Operasional 📍
+        </h2>
 
-        <FadeIn delay={0.1}>
-          <div className="glass-card gradient-border mt-10 space-y-5 rounded-2xl p-6 text-center sm:p-8">
-            <p className="font-heading font-bold">
-              📍 {HUB_CONFIG.suhat.nama} — {HUB_CONFIG.suhat.alamat}, Malang
-            </p>
+        <TkCard className="mx-auto mt-10 max-w-[560px] space-y-5 text-center sm:p-8">
+          <p className="font-extrabold text-tk-charcoal">
+            📍 {HUB_CONFIG.suhat.nama} — {HUB_CONFIG.suhat.alamat}, Malang
+          </p>
 
-            <div className="space-y-1 border-y border-card-border py-4 text-sm text-foreground/80">
-              <p>⏰ {JAM_OPERASIONAL_HUB_SUHAT.hari}</p>
-              <p>🚫 {JAM_OPERASIONAL_HUB_SUHAT.libur}</p>
-              <p>Drop-off mandiri: {JAM_DROP_OFF_MANDIRI}</p>
-            </div>
+          <div className="space-y-1 border-y-[1.5px] border-[#D6CEC4] py-4 text-sm text-tk-muted">
+            <p>⏰ {JAM_OPERASIONAL_HUB_SUHAT.hari}</p>
+            <p>🚫 {JAM_OPERASIONAL_HUB_SUHAT.libur}</p>
+            <p>Drop-off mandiri: {JAM_DROP_OFF_MANDIRI}</p>
+          </div>
 
-            <div className="space-y-2 text-sm">
-              <a
-                href={getWhatsAppUrl("Halo TitipKuy! Saya mau tanya-tanya.")}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 text-foreground/80 transition-colors hover:text-primary-from"
-              >
-                <MessageCircle size={16} />
-                WhatsApp: {formatWhatsAppDisplay()}
-              </a>
-              <a
-                href={INSTAGRAM_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block text-foreground/80 transition-colors hover:text-primary-from"
-              >
-                📸 Instagram: @titipkuy.malang
-              </a>
-              <a
-                href={TIKTOK_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block text-foreground/80 transition-colors hover:text-primary-from"
-              >
-                🎵 TikTok: @titipkuy.malang
-              </a>
-            </div>
-
+          <div className="space-y-2 border-b-[1.5px] border-[#D6CEC4] pb-5 text-sm">
             <a
-              href={MAPS_URL}
+              href={getWhatsAppUrl("Halo TitipKuy! Saya mau tanya-tanya.")}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block text-sm font-semibold text-primary-from underline underline-offset-4 hover:text-primary-to"
+              className="flex items-center justify-center gap-2 font-bold text-tk-charcoal transition-colors hover:text-tk-orange"
             >
-              Lihat di Google Maps →
+              <MessageCircle size={16} />
+              {formatWhatsAppDisplay()}
+            </a>
+            <a
+              href={INSTAGRAM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block font-bold text-tk-charcoal transition-colors hover:text-tk-orange"
+            >
+              📸 @titipkuy.malang
+            </a>
+            <a
+              href={TIKTOK_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block font-bold text-tk-charcoal transition-colors hover:text-tk-orange"
+            >
+              🎵 @titipkuy.malang
             </a>
           </div>
-        </FadeIn>
+
+          <a
+            href={MAPS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={tkButtonVariants({ variant: "secondary", size: "sm" })}
+          >
+            Lihat di Google Maps →
+          </a>
+        </TkCard>
       </div>
     </section>
   );

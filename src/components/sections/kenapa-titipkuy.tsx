@@ -1,54 +1,83 @@
 "use client";
 
 import { Tag, Camera, Bike, FileText } from "lucide-react";
-import { FadeIn } from "@/components/shared/fade-in";
+import { TkCard } from "@/components/ui/tk-card";
+import { cn } from "@/lib/utils";
+import type { TkCardProps } from "@/components/ui/tk-card";
 
-const ALASAN = [
+const ALASAN: {
+  icon: typeof Tag;
+  title: string;
+  desc: string;
+  variant: NonNullable<TkCardProps["variant"]>;
+}[] = [
   {
     icon: Tag,
     title: "🏷️ Label Bernomor Seri",
     desc: "Setiap barang dapat label unik bernomor seri. Scan QR di label untuk cek status barangmu kapan saja.",
+    variant: "orange",
   },
   {
     icon: Camera,
     title: "📸 Foto Bukti Masuk & Keluar",
     desc: "Tim kami memotret kondisi barang saat diterima dan saat dikembalikan. Foto dikirim ke WhatsApp kamu sebagai bukti.",
+    variant: "sage",
   },
   {
     icon: Bike,
     title: "🛵 Antar-Jemput ke Pintumu",
     desc: "Males ke hub? Armada kami yang ke kos/hotel kamu. Motor untuk area sekitar, mobil untuk barang banyak.",
+    variant: "default",
   },
   {
     icon: FileText,
     title: "📄 Surat Perjanjian Digital",
     desc: "Semua transaksi dilindungi surat perjanjian digital yang tersimpan rapi dan bisa diunduh kapan saja.",
+    variant: "default",
   },
 ];
 
 export function KenapaTitipkuy() {
   return (
-    <section className="px-4 py-24 sm:px-6">
+    <section className="bg-tk-card px-4 py-24 sm:px-6">
       <div className="mx-auto max-w-6xl">
-        <FadeIn className="text-center">
-          <h2 className="font-heading text-3xl font-bold sm:text-4xl">
-            Kenapa <span className="gradient-text">TitipKuy!</span>? 🤔
-          </h2>
-        </FadeIn>
+        <h2 className="text-center text-[28px] font-extrabold text-tk-charcoal">
+          Kenapa pilih TitipKuy!? 🤔
+        </h2>
 
         <div className="mt-12 grid gap-6 sm:grid-cols-2">
-          {ALASAN.map((item, index) => {
+          {ALASAN.map((item) => {
             const Icon = item.icon;
+            const isColored = item.variant === "orange" || item.variant === "sage";
             return (
-              <FadeIn key={item.title} delay={index * 0.1}>
-                <div className="glass-card flex h-full gap-4 rounded-2xl p-6">
-                  <Icon className="mt-1 shrink-0 text-primary-from" size={28} />
-                  <div>
-                    <h3 className="font-heading font-bold">{item.title}</h3>
-                    <p className="mt-2 text-sm text-foreground/70">{item.desc}</p>
-                  </div>
+              <TkCard key={item.title} variant={item.variant} className="flex h-full gap-4">
+                <Icon
+                  className={cn("mt-1 shrink-0", isColored ? "text-tk-charcoal" : "text-tk-orange")}
+                  size={28}
+                />
+                <div>
+                  <h3
+                    className={cn(
+                      "font-extrabold",
+                      item.variant === "sage" ? "text-tk-cream" : "text-tk-charcoal"
+                    )}
+                  >
+                    {item.title}
+                  </h3>
+                  <p
+                    className={cn(
+                      "mt-2 text-sm",
+                      item.variant === "sage"
+                        ? "text-tk-cream/90"
+                        : item.variant === "orange"
+                          ? "text-tk-charcoal/80"
+                          : "text-tk-muted"
+                    )}
+                  >
+                    {item.desc}
+                  </p>
                 </div>
-              </FadeIn>
+              </TkCard>
             );
           })}
         </div>

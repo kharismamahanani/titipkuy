@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { FadeIn } from "@/components/shared/fade-in";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -12,6 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { TkCard } from "@/components/ui/tk-card";
+import { tkButtonVariants } from "@/components/ui/tk-button";
 import { cn, formatRupiah } from "@/lib/utils";
 import type { KalkulatorMode } from "@/types/kalkulator";
 
@@ -54,6 +55,12 @@ const ANTAR_JEMPUT_HARGA: Record<string, Record<string, number>> = {
   mobil: { "<3km": 45000, "3-6km": 60000 },
 };
 
+const inputClass =
+  "h-auto w-full rounded-lg border-2 border-tk-charcoal bg-tk-card px-[14px] py-[10px] font-sans text-sm text-tk-charcoal focus-visible:border-tk-charcoal focus-visible:ring-2 focus-visible:ring-tk-orange/40";
+
+const triggerClass =
+  "h-auto w-full rounded-lg border-2 border-tk-charcoal bg-tk-card px-[14px] py-[10px] font-sans text-sm text-tk-charcoal focus-visible:border-tk-charcoal focus-visible:ring-2 focus-visible:ring-tk-orange/40";
+
 interface KalkulatorProps {
   mode: KalkulatorMode;
   onModeChange: (mode: KalkulatorMode) => void;
@@ -87,224 +94,214 @@ export function Kalkulator({ mode, onModeChange }: KalkulatorProps) {
       : `${jenisBulananOpt.label} × ${jumlah} unit × ${durasiBulananNum} bulan`;
 
   return (
-    <section id="kalkulator" className="px-4 py-24 sm:px-6">
+    <section id="kalkulator" className="bg-tk-cream px-4 py-24 sm:px-6">
       <div className="mx-auto max-w-4xl">
-        <FadeIn className="text-center">
-          <h2 className="font-heading text-3xl font-bold sm:text-4xl">
-            Hitung <span className="gradient-text">Biayamu</span> Dulu ⚡
+        <div className="text-center">
+          <h2 className="text-[28px] font-extrabold text-tk-charcoal">
+            Hitung Biaya Sekarang ⚡
           </h2>
-          <p className="mt-3 text-foreground/70">
-            Langsung tahu total sebelum pesan.
-          </p>
-        </FadeIn>
+          <p className="mt-3 text-tk-muted">Tahu total tagihan sebelum booking.</p>
+        </div>
 
-        <FadeIn delay={0.1}>
-          <div className="mt-8 flex justify-center gap-2">
-            {(["harian", "bulanan"] as const).map((m) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => onModeChange(m)}
-                className={cn(
-                  "rounded-full border px-5 py-2 text-sm font-semibold transition-colors",
-                  mode === m
-                    ? "border-transparent bg-gradient-to-r from-primary-from to-primary-to text-white"
-                    : "border-card-border text-foreground/70 hover:bg-primary/10"
-                )}
-              >
-                {m === "harian" ? "🧳 Harian" : "🎓 Bulanan"}
-              </button>
-            ))}
-          </div>
-        </FadeIn>
+        <div className="mt-8 flex justify-center gap-3">
+          {(["harian", "bulanan"] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => onModeChange(m)}
+              className={cn(
+                "rounded-lg border-2 border-tk-charcoal px-5 py-2 text-sm font-bold transition-colors",
+                mode === m ? "bg-tk-charcoal text-tk-cream" : "bg-tk-cream text-tk-charcoal"
+              )}
+            >
+              {m === "harian" ? "🧳 Harian" : "🎓 Bulanan"}
+            </button>
+          ))}
+        </div>
 
         <div className="mt-10 grid gap-6 lg:grid-cols-2">
-          <FadeIn delay={0.15}>
-            <div className="glass-card space-y-5 rounded-2xl p-6">
-              {mode === "harian" ? (
-                <>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground/80">Jenis Barang</label>
-                    <Select value={jenisHarian} onValueChange={(v) => v && setJenisHarian(v)}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue>
-                          {(v: string) =>
-                            JENIS_HARIAN.find((opt) => opt.value === v)?.label ?? v
-                          }
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {JENIS_HARIAN.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label} — {formatRupiah(opt.harga)}/hari
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+          <TkCard className="space-y-5">
+            {mode === "harian" ? (
+              <>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-tk-charcoal">Jenis Barang</label>
+                  <Select value={jenisHarian} onValueChange={(v) => v && setJenisHarian(v)}>
+                    <SelectTrigger className={triggerClass}>
+                      <SelectValue>
+                        {(v: string) =>
+                          JENIS_HARIAN.find((opt) => opt.value === v)?.label ?? v
+                        }
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {JENIS_HARIAN.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label} — {formatRupiah(opt.harga)}/hari
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground/80">Durasi (hari)</label>
-                    <Input
-                      type="number"
-                      min={1}
-                      max={30}
-                      value={durasiHari}
-                      onChange={(e) =>
-                        setDurasiHari(Math.min(30, Math.max(1, Number(e.target.value) || 1)))
-                      }
-                    />
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground/80">Jenis</label>
-                    <Select value={jenisBulanan} onValueChange={(v) => v && setJenisBulanan(v)}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue>
-                          {(v: string) =>
-                            JENIS_BULANAN.find((opt) => opt.value === v)?.label ?? v
-                          }
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {JENIS_BULANAN.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label} — {formatRupiah(opt.harga)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-tk-charcoal">Durasi (hari)</label>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={30}
+                    value={durasiHari}
+                    onChange={(e) =>
+                      setDurasiHari(Math.min(30, Math.max(1, Number(e.target.value) || 1)))
+                    }
+                    className={inputClass}
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-tk-charcoal">Jenis</label>
+                  <Select value={jenisBulanan} onValueChange={(v) => v && setJenisBulanan(v)}>
+                    <SelectTrigger className={triggerClass}>
+                      <SelectValue>
+                        {(v: string) =>
+                          JENIS_BULANAN.find((opt) => opt.value === v)?.label ?? v
+                        }
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {JENIS_BULANAN.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label} — {formatRupiah(opt.harga)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground/80">Jumlah Unit</label>
-                    <Input
-                      type="number"
-                      min={1}
-                      max={20}
-                      value={jumlah}
-                      onChange={(e) =>
-                        setJumlah(Math.min(20, Math.max(1, Number(e.target.value) || 1)))
-                      }
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-tk-charcoal">Jumlah Unit</label>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={20}
+                    value={jumlah}
+                    onChange={(e) =>
+                      setJumlah(Math.min(20, Math.max(1, Number(e.target.value) || 1)))
+                    }
+                    className={inputClass}
+                  />
+                </div>
 
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground/80">Durasi</label>
-                    <Select value={durasiBulanan} onValueChange={(v) => v && setDurasiBulanan(v)}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue>
-                          {(v: string) =>
-                            DURASI_BULANAN.find((opt) => opt.value === v)?.label ?? v
-                          }
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {DURASI_BULANAN.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </>
-              )}
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-tk-charcoal">Durasi</label>
+                  <Select value={durasiBulanan} onValueChange={(v) => v && setDurasiBulanan(v)}>
+                    <SelectTrigger className={triggerClass}>
+                      <SelectValue>
+                        {(v: string) =>
+                          DURASI_BULANAN.find((opt) => opt.value === v)?.label ?? v
+                        }
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {DURASI_BULANAN.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            )}
 
-              <div className="flex items-center justify-between pt-2">
-                <label className="text-sm font-medium text-foreground/80">
-                  Layanan Antar-Jemput
-                </label>
-                <Switch checked={antarJemput} onCheckedChange={(v) => setAntarJemput(!!v)} />
+            <div className="flex items-center justify-between pt-2">
+              <label className="text-sm font-bold text-tk-charcoal">Layanan Antar-Jemput</label>
+              <Switch checked={antarJemput} onCheckedChange={(v) => setAntarJemput(!!v)} />
+            </div>
+
+            {antarJemput && (
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-tk-muted">Armada</label>
+                  <Select value={armadaTipe} onValueChange={(v) => v && setArmadaTipe(v)}>
+                    <SelectTrigger className={triggerClass}>
+                      <SelectValue>
+                        {(v: string) =>
+                          ANTAR_JEMPUT_TIPE.find((opt) => opt.value === v)?.label ?? v
+                        }
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ANTAR_JEMPUT_TIPE.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-tk-muted">Radius</label>
+                  <Select value={radius} onValueChange={(v) => v && setRadius(v)}>
+                    <SelectTrigger className={triggerClass}>
+                      <SelectValue>
+                        {(v: string) =>
+                          ANTAR_JEMPUT_RADIUS.find((opt) => opt.value === v)?.label ?? v
+                        }
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ANTAR_JEMPUT_RADIUS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
+            )}
+          </TkCard>
 
+          <TkCard variant="outline" className="flex h-full flex-col">
+            <p className="text-sm font-extrabold text-tk-charcoal">Rincian Biaya</p>
+
+            <div className="mt-4 flex-1 space-y-2 border-t-2 border-tk-charcoal pt-4 text-sm">
+              <div className="flex justify-between text-tk-muted">
+                <span>{rincianLabel}</span>
+                <span>{formatRupiah(subtotal)}</span>
+              </div>
               {antarJemput && (
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <label className="text-xs font-medium text-foreground/60">Armada</label>
-                    <Select value={armadaTipe} onValueChange={(v) => v && setArmadaTipe(v)}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue>
-                          {(v: string) =>
-                            ANTAR_JEMPUT_TIPE.find((opt) => opt.value === v)?.label ?? v
-                          }
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {ANTAR_JEMPUT_TIPE.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-xs font-medium text-foreground/60">Radius</label>
-                    <Select value={radius} onValueChange={(v) => v && setRadius(v)}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue>
-                          {(v: string) =>
-                            ANTAR_JEMPUT_RADIUS.find((opt) => opt.value === v)?.label ?? v
-                          }
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {ANTAR_JEMPUT_RADIUS.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div className="flex justify-between text-tk-muted">
+                  <span>
+                    Antar-jemput ({ANTAR_JEMPUT_TIPE.find((t) => t.value === armadaTipe)?.label}
+                    , {radius})
+                  </span>
+                  <span>+{formatRupiah(antarJemputFee)}</span>
                 </div>
               )}
             </div>
-          </FadeIn>
 
-          <FadeIn delay={0.2}>
-            <div className="glass-card gradient-border flex h-full flex-col rounded-2xl p-6">
-              <p className="text-sm font-semibold text-foreground/80">Rincian Biaya</p>
-
-              <div className="mt-4 flex-1 space-y-2 border-t border-card-border pt-4 text-sm">
-                <div className="flex justify-between text-foreground/70">
-                  <span>{rincianLabel}</span>
-                  <span>{formatRupiah(subtotal)}</span>
-                </div>
-                {antarJemput && (
-                  <div className="flex justify-between text-foreground/70">
-                    <span>
-                      Antar-jemput ({ANTAR_JEMPUT_TIPE.find((t) => t.value === armadaTipe)?.label}
-                      , {radius})
-                    </span>
-                    <span>+{formatRupiah(antarJemputFee)}</span>
-                  </div>
-                )}
-              </div>
-
-              <div className="mt-4 flex items-center justify-between border-t border-card-border pt-4">
-                <span className="font-heading font-bold">TOTAL</span>
-                <span className="gradient-text font-heading text-2xl font-extrabold">
-                  {formatRupiah(total)}
-                </span>
-              </div>
-
-              <Link
-                href="/pesan"
-                className="mt-6 block rounded-full bg-gradient-to-r from-primary-from to-primary-to py-3 text-center text-sm font-semibold text-white shadow-lg shadow-primary/30 transition-transform hover:scale-[1.02]"
-              >
-                Pesan Sekarang →
-              </Link>
-
-              <p className="mt-4 text-center text-xs text-foreground/50">
-                Harga dapat berubah. Total final dikonfirmasi saat pemesanan.
-              </p>
+            <div className="mt-4 flex items-center justify-between border-t-2 border-tk-charcoal pt-4">
+              <span className="font-extrabold text-tk-charcoal">TOTAL</span>
+              <span className="text-2xl font-extrabold text-tk-orange">
+                {formatRupiah(total)}
+              </span>
             </div>
-          </FadeIn>
+
+            <Link
+              href="/pesan"
+              className={cn(tkButtonVariants({ variant: "primary", size: "md" }), "mt-6 justify-center")}
+            >
+              Pesan sekarang →
+            </Link>
+
+            <p className="mt-4 text-center text-xs text-tk-light">
+              Harga dapat berubah. Total final dikonfirmasi saat pemesanan.
+            </p>
+          </TkCard>
         </div>
       </div>
     </section>

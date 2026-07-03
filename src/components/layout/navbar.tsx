@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { tkButtonVariants } from "@/components/ui/tk-button";
 
 const MENU_LINKS = [
   { label: "Paket & Harga", href: "#paket" },
@@ -16,10 +17,15 @@ export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-card-border bg-bg-dark/80 backdrop-blur-md">
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
-        <Link href="/" className="gradient-text font-heading text-xl font-extrabold">
-          TitipKuy! 📦
+    <header className="sticky top-0 z-50 border-b-[2px] border-tk-charcoal bg-tk-cream">
+      <nav className="mx-auto flex max-w-6xl items-center justify-between px-8 py-[14px]">
+        <Link
+          href="/"
+          className="flex shrink-0 items-center gap-1 text-xl font-extrabold"
+        >
+          <span className="text-tk-charcoal">Titip</span>
+          <span className="text-tk-orange">Kuy!</span>
+          <span className="text-base">📦</span>
         </Link>
 
         <div className="hidden items-center gap-8 md:flex">
@@ -27,7 +33,7 @@ export function Navbar() {
             <a
               key={link.href}
               href={link.href}
-              className="text-sm font-medium text-foreground/80 transition-colors hover:text-foreground"
+              className="text-sm font-bold text-tk-charcoal underline decoration-tk-orange decoration-2 underline-offset-4 decoration-transparent transition-colors hover:decoration-tk-orange"
             >
               {link.label}
             </a>
@@ -36,37 +42,37 @@ export function Navbar() {
 
         <Link
           href="/pesan"
-          className="hidden rounded-full bg-gradient-to-r from-primary-from to-primary-to px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-transform hover:scale-105 sm:inline-block"
+          className={cn(tkButtonVariants({ variant: "nav", size: "sm" }), "hidden sm:inline-flex")}
         >
-          Pesan Sekarang
+          Pesan sekarang
         </Link>
 
         <button
           type="button"
           onClick={() => setIsOpen((prev) => !prev)}
-          className="text-foreground md:hidden"
+          className="text-tk-charcoal md:hidden"
           aria-label={isOpen ? "Tutup menu" : "Buka menu"}
         >
-          {isOpen ? <X size={24} /> : <Menu size={24} />}
+          {isOpen ? <X size={26} /> : <Menu size={26} />}
         </button>
       </nav>
 
       <div
         className={cn(
-          "grid overflow-hidden border-card-border bg-bg-dark transition-[grid-template-rows,opacity] duration-300 ease-in-out md:hidden",
+          "grid overflow-hidden bg-tk-cream transition-[grid-template-rows,opacity] duration-300 ease-in-out md:hidden",
           isOpen
-            ? "grid-rows-[1fr] border-t opacity-100"
+            ? "grid-rows-[1fr] border-t-[2px] border-tk-charcoal opacity-100"
             : "grid-rows-[0fr] border-t-0 opacity-0"
         )}
       >
-        <div className="min-h-0 px-4 pb-4">
-          <div className="flex flex-col gap-3 pt-3">
+        <div className="min-h-0 px-8 pb-6">
+          <div className="flex flex-col gap-4 pt-4">
             {MENU_LINKS.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
                 onClick={() => setIsOpen(false)}
-                className="text-sm font-medium text-foreground/80 hover:text-foreground"
+                className="text-sm font-bold text-tk-charcoal"
               >
                 {link.label}
               </a>
@@ -74,9 +80,9 @@ export function Navbar() {
             <Link
               href="/pesan"
               onClick={() => setIsOpen(false)}
-              className="rounded-full bg-gradient-to-r from-primary-from to-primary-to px-5 py-2 text-center text-sm font-semibold text-white"
+              className={cn(tkButtonVariants({ variant: "nav", size: "sm" }), "w-full")}
             >
-              Pesan Sekarang
+              Pesan sekarang
             </Link>
           </div>
         </div>

@@ -8,13 +8,11 @@ import {
 
 export function Footer() {
   return (
-    <footer id="kontak" className="border-t border-card-border px-4 py-12 sm:px-6">
+    <footer id="kontak" className="border-t-[2px] border-tk-muted bg-tk-charcoal px-4 py-12 sm:px-6">
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-6 text-center">
         <div>
-          <p className="gradient-text font-heading text-xl font-extrabold">
-            TitipKuy! 📦
-          </p>
-          <p className="mt-1 text-sm text-foreground/60">
+          <p className="text-xl font-extrabold text-tk-orange">TitipKuy! 📦</p>
+          <p className="mt-1 text-sm text-[#B8C4BE]">
             Titip barang aman di Malang — untuk mahasiswa, wisatawan, dan
             siapa pun yang butuh storage praktis.
           </p>
@@ -26,7 +24,7 @@ export function Footer() {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="WhatsApp Business TitipKuy!"
-            className="text-foreground/70 transition-colors hover:text-primary-from"
+            className="font-bold text-tk-sage transition-colors hover:text-tk-orange"
           >
             <MessageCircle size={22} />
           </a>
@@ -35,7 +33,7 @@ export function Footer() {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Instagram TitipKuy!"
-            className="text-sm font-semibold text-foreground/70 transition-colors hover:text-primary-from"
+            className="text-sm font-bold text-tk-sage transition-colors hover:text-tk-orange"
           >
             Instagram
           </a>
@@ -44,7 +42,7 @@ export function Footer() {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="TikTok TitipKuy!"
-            className="text-sm font-semibold text-foreground/70 transition-colors hover:text-primary-from"
+            className="text-sm font-bold text-tk-sage transition-colors hover:text-tk-orange"
           >
             TikTok
           </a>
@@ -54,12 +52,12 @@ export function Footer() {
           href={getWhatsAppUrl("Halo TitipKuy! Saya mau tanya-tanya.")}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-sm font-semibold text-primary-from underline underline-offset-4 transition-colors hover:text-primary-to"
+          className="text-sm font-bold text-tk-light underline underline-offset-4 transition-colors hover:text-tk-orange"
         >
           💬 Chat Admin WhatsApp: {formatWhatsAppDisplay()}
         </a>
 
-        <p className="text-xs text-foreground/50">
+        <p className="text-xs text-tk-light">
           © 2026 TitipKuy! Seluruh hak cipta dilindungi.
         </p>
       </div>
