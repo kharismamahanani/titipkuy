@@ -1,18 +1,15 @@
 import type { Metadata } from "next";
-import { Inter, Plus_Jakarta_Sans } from "next/font/google";
+import { Nunito } from "next/font/google";
 import { Toaster } from "sonner";
+import "../styles/tokens.css";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { SITE_URL } from "@/constants/site";
 
-const plusJakartaSans = Plus_Jakarta_Sans({
+const nunito = Nunito({
   subsets: ["latin"],
-  variable: "--font-heading",
-});
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-body",
+  weight: ["400", "600", "700", "800"],
+  variable: "--font-sans",
 });
 
 const FAVICON_EMOJI = "📦";
@@ -52,13 +49,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={cn("dark", plusJakartaSans.variable, inter.variable)}
-    >
-      <body className="antialiased">
+    <html lang="en" className={cn(nunito.variable)}>
+      <body className={cn(nunito.className, "antialiased")}>
         {children}
-        <Toaster theme="dark" position="top-center" richColors />
+        <Toaster theme="light" position="top-center" richColors />
       </body>
     </html>
   );

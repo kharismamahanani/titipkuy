@@ -1,0 +1,32 @@
+:root {
+  /* Brand colors */
+  --tk-cream:      #FAF6F0;
+  --tk-charcoal:   #3D4A41;
+  --tk-orange:     #E89C65;
+  --tk-orange-dark:#C97A45;
+  --tk-sage:       #7FA99B;
+  --tk-sage-dark:  #5D8A7B;
+
+  /* Surfaces */
+  --tk-bg:         #FAF6F0;
+  --tk-bg-alt:     #F0EAE0;
+  --tk-card:       #FFFFFF;
+
+  /* Text */
+  --tk-text:       #3D4A41;
+  --tk-text-muted: #5A6B62;
+  --tk-text-light: #8A9E94;
+
+  /* Border & shadow — neobrutalist */
+  --tk-border:     #3D4A41;
+  --tk-border-w:   2px;
+  --tk-shadow:     4px 4px 0 #3D4A41;
+  --tk-shadow-sm:  3px 3px 0 #3D4A41;
+  --tk-radius:     10px;
+  --tk-radius-sm:  8px;
+
+  /* Status */
+  --tk-success:    #7FA99B;
+  --tk-danger:     #C0392B;
+  --tk-warning:    #E89C65;
+}

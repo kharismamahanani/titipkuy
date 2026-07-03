@@ -1,7 +1,10 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
-  darkMode: "class",
+  // Dark mode dihapus sepenuhnya: strategi "class" dengan nama kelas yang
+  // sengaja tidak pernah dipasang di DOM, jadi utility "dark:" (media query
+  // maupun class) tidak akan pernah aktif.
+  darkMode: ["class", "tk-dark-disabled"],
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -10,9 +13,9 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-body)", "sans-serif"],
-        body: ["var(--font-body)", "sans-serif"],
-        heading: ["var(--font-heading)", "sans-serif"],
+        sans: ["var(--font-sans)", "sans-serif"],
+        body: ["var(--font-sans)", "sans-serif"],
+        heading: ["var(--font-sans)", "sans-serif"],
       },
       colors: {
         // shadcn/ui semantic tokens (dibaca dari CSS variables di globals.css)
@@ -73,6 +76,19 @@ const config: Config = {
         "bg-dark": "#0D0D1A",
         "card-dark": "#1A1A2E",
         "card-border": "var(--card-border)",
+        // Design system baru: warm, illustrated, neobrutalist (light mode only)
+        tk: {
+          cream: "#FAF6F0",
+          "cream-alt": "#F0EAE0",
+          charcoal: "#3D4A41",
+          orange: "#E89C65",
+          "orange-dark": "#C97A45",
+          sage: "#7FA99B",
+          "sage-dark": "#5D8A7B",
+          card: "#FFFFFF",
+          muted: "#5A6B62",
+          light: "#8A9E94",
+        },
       },
     },
   },
