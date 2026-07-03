@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { FadeIn } from "@/components/shared/fade-in";
 
-const TRUST_BADGES = ["🛡️ Segel Cable Tie", "📸 Foto Bukti", "🛵 Jemput ke Pintu"];
+const TRUST_BADGES = ["🏷️ Label Bernomor Seri", "📸 Foto Bukti", "🛵 Jemput ke Pintu"];
 
 export function Hero() {
   return (

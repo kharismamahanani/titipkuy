@@ -6,7 +6,7 @@ import { JAM_DROP_OFF_MANDIRI } from "@/lib/constants";
 const STEPS = [
   {
     icon: "1️⃣",
-    text: "Isi form pemesanan di website — kamu dapat Kode Unik via WhatsApp (contoh: LELY-089).",
+    text: "Isi form pemesanan di website — Kode Unik langsung muncul di halaman konfirmasi setelah submit. Catat atau screenshot kodenya (contoh: LELY-089).",
   },
   {
     icon: "2️⃣",
@@ -53,7 +53,15 @@ export function CaraTitipMandiri() {
         </div>
 
         <FadeIn delay={0.1}>
-          <div className="mt-8 rounded-2xl border border-yellow-500/30 bg-yellow-500/10 p-5 text-sm text-yellow-200">
+          <div className="mt-6 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-5 text-sm text-amber-200">
+            📦 Kirim dari luar kota via ekspedisi (JNE, J&amp;T, dll)? Tulis Kode Unik di luar
+            paket dan sertakan kertas kecil berisi nama + no. HP di dalam paket. Hubungi admin
+            via WhatsApp setelah paket dikirim agar bisa dipantau kedatangannya.
+          </div>
+        </FadeIn>
+
+        <FadeIn delay={0.15}>
+          <div className="mt-4 rounded-2xl border border-yellow-500/30 bg-yellow-500/10 p-5 text-sm text-yellow-200">
             💡 Drop-off mandiri tidak perlu booking slot armada. Cukup isi form web, dapat
             kode unik, dan datang/kirim pada jam drop-off di atas.
           </div>

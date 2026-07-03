@@ -1,13 +1,13 @@
 "use client";
 
-import { Shield, Camera, Bike, FileText } from "lucide-react";
+import { Tag, Camera, Bike, FileText } from "lucide-react";
 import { FadeIn } from "@/components/shared/fade-in";
 
 const ALASAN = [
   {
-    icon: Shield,
-    title: "🛡️ Segel Keamanan",
-    desc: "Setiap barang disegel dengan numbered cable tie. Jika segel rusak saat pengambilan, kami tanggung.",
+    icon: Tag,
+    title: "🏷️ Label Bernomor Seri",
+    desc: "Setiap barang dapat label unik bernomor seri. Scan QR di label untuk cek status barangmu kapan saja.",
   },
   {
     icon: Camera,
