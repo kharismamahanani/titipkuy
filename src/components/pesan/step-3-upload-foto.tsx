@@ -52,10 +52,25 @@ export function Step3UploadFoto({
 
     setProgress({ done: 0, total: fileArray.length });
 
+    if (!transactionId) {
+      toast.error("ID transaksi belum siap, muat ulang halaman dan coba lagi.");
+      setProgress(null);
+      return;
+    }
+
     const newFotos: UploadedFoto[] = [];
     for (const file of fileArray) {
       try {
-        const path = buildFotoPath(`fotos/masuk/${transactionId}`);
+        const folder = `fotos/masuk/${transactionId}`;
+        const path = buildFotoPath(folder);
+
+        console.log("=== DEBUG UPLOAD ===");
+        console.log("transactionId:", transactionId);
+        console.log("folder param:", folder);
+        console.log("path yang akan dikirim:", path);
+        console.log("Supabase URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
+        console.log("Anon key ada?:", !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+
         const url = await uploadToStorage(path, file);
         newFotos.push({ url, path });
       } catch (error) {

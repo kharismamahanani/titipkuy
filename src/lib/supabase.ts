@@ -42,6 +42,8 @@ function sanitizeFileName(fileName: string) {
 // kepemilikan) — ekstensi asli tetap dipakai (setelah disanitasi) supaya
 // file PDF tidak berakhir dengan nama ".jpg".
 export function buildStoragePath(folder: string, originalFileName: string) {
+  assertValidPathSegment(folder, "folder");
+
   const ext = originalFileName.includes(".")
     ? originalFileName.slice(originalFileName.lastIndexOf("."))
     : "";
@@ -55,16 +57,39 @@ export function buildStoragePath(folder: string, originalFileName: string) {
 // "<folder>/<timestamp>-<random>.jpg" supaya konsisten dan aman untuk
 // Supabase Storage.
 export function buildFotoPath(folder: string) {
+  assertValidPathSegment(folder, "folder");
+
   const random = Math.random().toString(36).slice(2, 8);
   const fileName = `${Date.now()}-${random}.jpg`;
   const cleanFolder = folder.replace(/^\/+|\/+$/g, "");
   return `${cleanFolder}/${fileName}`.replace(/\/{2,}/g, "/");
 }
 
+// Cegah path yang mengandung "undefined"/"null"/string kosong lolos ke
+// Supabase — ini bikin error samar "Invalid path specified in request
+// URL" yang susah dilacak kalau tidak divalidasi lebih awal di sini.
+function assertValidPathSegment(value: string, label: string) {
+  if (!value || value.trim() === "") {
+    throw new Error(`Path upload tidak valid: "${label}" kosong.`);
+  }
+  if (/undefined|null/i.test(value)) {
+    throw new Error(
+      `Path upload tidak valid: "${label}" mengandung nilai "${value}" (kemungkinan variabel belum siap).`
+    );
+  }
+}
+
 export async function uploadToStorage(path: string, file: File) {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error(
+      "Supabase belum dikonfigurasi: NEXT_PUBLIC_SUPABASE_URL atau NEXT_PUBLIC_SUPABASE_ANON_KEY tidak ditemukan di environment."
+    );
+  }
   if (!supabase) {
     throw new Error("Supabase belum dikonfigurasi. Cek NEXT_PUBLIC_SUPABASE_URL di .env.local.");
   }
+
+  assertValidPathSegment(path, "path");
 
   const { bucket, objectPath } = resolveBucketAndPath(path);
   console.log("Upload path:", `${bucket}/${objectPath}`);
