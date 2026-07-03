@@ -53,7 +53,7 @@ export function CaraTitipMandiri() {
         </div>
 
         <FadeIn delay={0.1}>
-          <div className="mt-6 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-5 text-sm text-amber-200">
+          <div className="mt-6 rounded-2xl border border-yellow-500/30 bg-yellow-500/10 p-5 text-sm text-yellow-200">
             📦 Kirim dari luar kota via ekspedisi (JNE, J&amp;T, dll)? Tulis Kode Unik di luar
             paket dan sertakan kertas kecil berisi nama + no. HP di dalam paket. Hubungi admin
             via WhatsApp setelah paket dikirim agar bisa dipantau kedatangannya.
