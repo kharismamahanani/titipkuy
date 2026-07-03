@@ -3,11 +3,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const MENU_LINKS = [
-  { label: "Paket", href: "#paket" },
+  { label: "Paket & Harga", href: "#paket" },
+  { label: "Hitung Biaya ⚡", href: "#kalkulator" },
+  { label: "Lokasi & Jam", href: "#lokasi" },
   { label: "Cara Kerja", href: "#cara-kerja" },
-  { label: "Kontak", href: "#kontak" },
 ];
 
 export function Navbar() {
@@ -49,8 +51,15 @@ export function Navbar() {
         </button>
       </nav>
 
-      {isOpen && (
-        <div className="border-t border-card-border bg-bg-dark px-4 pb-4 md:hidden">
+      <div
+        className={cn(
+          "grid overflow-hidden border-card-border bg-bg-dark transition-[grid-template-rows,opacity] duration-300 ease-in-out md:hidden",
+          isOpen
+            ? "grid-rows-[1fr] border-t opacity-100"
+            : "grid-rows-[0fr] border-t-0 opacity-0"
+        )}
+      >
+        <div className="min-h-0 px-4 pb-4">
           <div className="flex flex-col gap-3 pt-3">
             {MENU_LINKS.map((link) => (
               <a
@@ -71,7 +80,7 @@ export function Navbar() {
             </Link>
           </div>
         </div>
-      )}
+      </div>
     </header>
   );
 }

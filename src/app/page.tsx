@@ -7,6 +7,7 @@ import { Hero } from "@/components/sections/hero";
 import { HubLokasi } from "@/components/sections/hub-lokasi";
 import { Kalkulator } from "@/components/sections/kalkulator";
 import { KenapaTitipkuy } from "@/components/sections/kenapa-titipkuy";
+import { LokasiJam } from "@/components/sections/lokasi-jam";
 import { CaraTitipMandiri } from "@/components/sections/cara-titip-mandiri";
 import { PaketSection } from "@/components/sections/paket-section";
 import { CaraKerja } from "@/components/sections/cara-kerja";
@@ -24,6 +25,7 @@ export default function Home() {
         <Kalkulator mode={mode} onModeChange={setMode} />
         <HubLokasi />
         <KenapaTitipkuy />
+        <LokasiJam />
         <CaraTitipMandiri />
         <CaraKerja />
       </main>
