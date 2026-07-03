@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
+import Image from "next/image";
 import { CheckCircle2, Loader2 } from "lucide-react";
-import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
 import { pdf } from "@react-pdf/renderer";
 import { Button } from "@/components/ui/button";
@@ -148,12 +148,18 @@ export default function KonfirmasiPage({ params }: { params: { id: string } }) {
         </div>
 
         <div className="glass-card flex flex-col items-center gap-3 rounded-2xl p-6">
-          <p className="text-sm font-medium">Scan QRIS untuk Bayar</p>
+          <p className="text-sm font-medium">Scan QRIS atau transfer ke rekening di bawah</p>
           <div className="rounded-xl bg-white p-4">
-            <QRCodeSVG value={`TitipKuy-QRIS-${transaksi.nomorRef}`} size={180} />
+            <Image
+              src="/qris-titipkuy.png"
+              alt="QRIS TitipKuy!"
+              width={220}
+              height={310}
+              className="h-auto w-[220px]"
+            />
           </div>
           <p className="text-center text-xs text-foreground/50">
-            *QR code sementara — akan diganti QRIS asli
+            Berlaku untuk semua bank & e-wallet
           </p>
         </div>
 
