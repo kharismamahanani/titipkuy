@@ -48,7 +48,6 @@ export function VerifikasiClient({ id, isAdmin }: VerifikasiClientProps) {
   function handleSelesai() {
     setJustSelesai(true);
     setData((prev) => (prev ? { ...prev, statusTransaksi: "SELESAI" } : prev));
-    setTimeout(() => window.location.reload(), 3000);
   }
 
   return (
