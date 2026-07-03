@@ -9,7 +9,7 @@ import { Camera, CheckCircle2, Loader2, X, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { buildStoragePath, uploadToStorage } from "@/lib/supabase";
+import { buildFotoPath, uploadToStorage } from "@/lib/supabase";
 import type { VerifikasiPublik } from "@/types/transaksi";
 
 type FetchState = "loading" | "success" | "error";
@@ -167,7 +167,7 @@ function SerahkanBarangPanel({ transaksiId, onSelesai }: SerahkanBarangPanelProp
     setIsUploading(true);
     for (const file of fileArray) {
       try {
-        const path = buildStoragePath(`fotos/keluar/${transaksiId}`, file.name);
+        const path = buildFotoPath(`fotos/keluar/${transaksiId}`);
         const url = await uploadToStorage(path, file);
         setFotoUrls((prev) => [...prev, url]);
       } catch (error) {

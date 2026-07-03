@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Camera, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { buildStoragePath, uploadToStorage } from "@/lib/supabase";
+import { buildFotoPath, uploadToStorage } from "@/lib/supabase";
 import { FotoLightboxGrid } from "@/components/admin/foto-lightbox-grid";
 import type { Foto } from "@/types/transaksi";
 
@@ -37,7 +37,7 @@ export function FotoKeluarUploader({ transaksiId, fotoKeluar }: FotoKeluarUpload
     const urls: string[] = [];
     for (const file of fileArray) {
       try {
-        const path = buildStoragePath(`fotos/keluar/${transaksiId}`, file.name);
+        const path = buildFotoPath(`fotos/keluar/${transaksiId}`);
         const url = await uploadToStorage(path, file);
         urls.push(url);
       } catch (error) {

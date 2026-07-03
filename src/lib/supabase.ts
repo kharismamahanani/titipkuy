@@ -38,6 +38,9 @@ function sanitizeFileName(fileName: string) {
     .replace(/-+/g, "-");
 }
 
+// Dipakai untuk dokumen yang bisa berupa gambar ATAU PDF (mis. bukti
+// kepemilikan) — ekstensi asli tetap dipakai (setelah disanitasi) supaya
+// file PDF tidak berakhir dengan nama ".jpg".
 export function buildStoragePath(folder: string, originalFileName: string) {
   const ext = originalFileName.includes(".")
     ? originalFileName.slice(originalFileName.lastIndexOf("."))
@@ -46,19 +49,35 @@ export function buildStoragePath(folder: string, originalFileName: string) {
   return `${folder}/${sanitizeFileName(unique)}`;
 }
 
+// Dipakai khusus untuk upload FOTO (Step 3 form pemesanan, foto keluar,
+// dll). Nama file asli dari user (bisa berisi spasi/karakter aneh) TIDAK
+// pernah dipakai sama sekali — path selalu berbentuk
+// "<folder>/<timestamp>-<random>.jpg" supaya konsisten dan aman untuk
+// Supabase Storage.
+export function buildFotoPath(folder: string) {
+  const random = Math.random().toString(36).slice(2, 8);
+  const fileName = `${Date.now()}-${random}.jpg`;
+  const cleanFolder = folder.replace(/^\/+|\/+$/g, "");
+  return `${cleanFolder}/${fileName}`.replace(/\/{2,}/g, "/");
+}
+
 export async function uploadToStorage(path: string, file: File) {
   if (!supabase) {
     throw new Error("Supabase belum dikonfigurasi. Cek NEXT_PUBLIC_SUPABASE_URL di .env.local.");
   }
 
   const { bucket, objectPath } = resolveBucketAndPath(path);
+  console.log("Upload path:", `${bucket}/${objectPath}`);
 
   try {
     const { error } = await supabase.storage
       .from(bucket)
       .upload(objectPath, file, { upsert: true });
 
-    if (error) throw error;
+    if (error) {
+      console.log("Upload error detail:", JSON.stringify(error));
+      throw error;
+    }
 
     const { data } = supabase.storage.from(bucket).getPublicUrl(objectPath);
     return data.publicUrl;

@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Camera, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { buildStoragePath, deleteFromStorage, uploadToStorage } from "@/lib/supabase";
+import { buildFotoPath, deleteFromStorage, uploadToStorage } from "@/lib/supabase";
 
 const MIN_FOTO = 3;
 const MAX_FOTO = 10;
@@ -55,7 +55,7 @@ export function Step3UploadFoto({
     const newFotos: UploadedFoto[] = [];
     for (const file of fileArray) {
       try {
-        const path = buildStoragePath(`fotos/masuk/${transactionId}`, file.name);
+        const path = buildFotoPath(`fotos/masuk/${transactionId}`);
         const url = await uploadToStorage(path, file);
         newFotos.push({ url, path });
       } catch (error) {
