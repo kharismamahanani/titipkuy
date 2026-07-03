@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/select";
 import { cn, normalizeWhatsAppNumber } from "@/lib/utils";
 import { ADMIN_NAME } from "@/constants/site";
-import { uploadToStorage } from "@/lib/supabase";
+import { buildStoragePath, uploadToStorage } from "@/lib/supabase";
 import { AKTIF_HUB_KEYS, HUB_CONFIG } from "@/lib/constants";
 import { PenjemputanArmadaPicker } from "@/components/pesan/penjemputan-armada-picker";
 import type { Paket } from "@/types/paket";
@@ -106,12 +106,15 @@ export default function AdminBuatOrderManualPage() {
 
     setIsUploadingBukti(true);
     try {
-      const path = `deklarasi/${transactionId}/${file.name}`;
+      const path = buildStoragePath(`deklarasi/${transactionId}`, file.name);
       const url = await uploadToStorage(path, file);
       setDeklarasi((prev) => ({ ...prev, buktiKepemilikanUrl: url }));
       toast.success("Bukti kepemilikan terupload");
-    } catch {
-      toast.error("Gagal upload bukti kepemilikan, coba lagi");
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Gagal upload bukti kepemilikan, coba lagi"
+      );
     } finally {
       setIsUploadingBukti(false);
     }

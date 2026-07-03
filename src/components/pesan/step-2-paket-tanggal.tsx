@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn, formatRupiah } from "@/lib/utils";
-import { uploadToStorage } from "@/lib/supabase";
+import { buildStoragePath, uploadToStorage } from "@/lib/supabase";
 import { AntarJemputPicker } from "@/components/pesan/antar-jemput-picker";
 import { HUB_CONFIG, JAM_DROP_OFF_MANDIRI } from "@/lib/constants";
 import type { Paket } from "@/types/paket";
@@ -17,6 +17,14 @@ import type { DeklarasiData, MetodePengiriman } from "@/types/pesan";
 import type { AntarJemputOption } from "@/types/antar-jemput";
 
 const MAX_BUKTI_SIZE = 5 * 1024 * 1024; // 5MB
+
+// Armada TitipKuy! hanya bisa dipesan minimal H-1 (24 jam sebelumnya) dan
+// tidak beroperasi di hari Minggu.
+function isTanggalValidUntukArmada(tanggal: Date) {
+  const diffHours = (tanggal.getTime() - Date.now()) / (1000 * 60 * 60);
+  const isSunday = tanggal.getDay() === 0;
+  return diffHours >= 24 && !isSunday;
+}
 
 interface Step2Props {
   transactionId: string;
@@ -94,12 +102,15 @@ export function Step2PaketTanggal({
 
     setIsUploadingBukti(true);
     try {
-      const path = `deklarasi/${transactionId}/${file.name}`;
+      const path = buildStoragePath(`deklarasi/${transactionId}`, file.name);
       const url = await uploadToStorage(path, file);
       onDeklarasiChange({ ...deklarasi, buktiKepemilikanUrl: url });
       toast.success("Bukti kepemilikan terupload");
-    } catch {
-      toast.error("Gagal upload bukti kepemilikan, coba lagi");
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Gagal upload bukti kepemilikan, coba lagi"
+      );
     } finally {
       setIsUploadingBukti(false);
     }
@@ -113,6 +124,17 @@ export function Step2PaketTanggal({
   const filteredPaketList = paketList.filter((item) =>
     tab === "harian" ? item.kategori === "harian" : item.kategori !== "harian"
   );
+
+  const isSunday = tanggalMasuk ? tanggalMasuk.getDay() === 0 : false;
+  const armadaValid = tanggalMasuk ? isTanggalValidUntukArmada(tanggalMasuk) : true;
+
+  useEffect(() => {
+    if (tanggalMasuk && !armadaValid && metodePengiriman === "armada") {
+      onMetodePengirimanChange("mandiri");
+      onAntarJemputOptionChange(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tanggalMasuk, armadaValid]);
 
   return (
     <div className="space-y-8">
@@ -267,19 +289,29 @@ export function Step2PaketTanggal({
         <div className="glass-card space-y-4 rounded-2xl p-5">
           <Label>🚚 Bagaimana barang kamu sampai ke hub?</Label>
 
+          {!armadaValid && (
+            <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-200">
+              {isSunday
+                ? "🚫 Armada tidak beroperasi di hari Minggu. Pilih hari lain atau gunakan opsi kirim mandiri."
+                : "⚠️ Pemesanan armada minimal H-1 (24 jam sebelumnya). Untuk hari ini, pilih opsi kirim mandiri."}
+            </div>
+          )}
+
           <div className="space-y-2">
-            <button
-              type="button"
-              onClick={() => onMetodePengirimanChange("armada")}
-              className={cn(
-                "w-full rounded-xl border px-4 py-3 text-left text-sm transition-colors",
-                metodePengiriman === "armada"
-                  ? "border-transparent bg-gradient-to-r from-primary-from to-primary-to text-white"
-                  : "border-card-border text-foreground/80 hover:bg-primary/10"
-              )}
-            >
-              <span className="font-semibold">◉ Dijemput armada TitipKuy!</span>
-            </button>
+            {armadaValid && (
+              <button
+                type="button"
+                onClick={() => onMetodePengirimanChange("armada")}
+                className={cn(
+                  "w-full rounded-xl border px-4 py-3 text-left text-sm transition-colors",
+                  metodePengiriman === "armada"
+                    ? "border-transparent bg-gradient-to-r from-primary-from to-primary-to text-white"
+                    : "border-card-border text-foreground/80 hover:bg-primary/10"
+                )}
+              >
+                <span className="font-semibold">◉ Dijemput armada TitipKuy!</span>
+              </button>
+            )}
 
             <button
               type="button"

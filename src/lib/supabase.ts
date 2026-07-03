@@ -9,27 +9,71 @@ export const supabase = isConfigured
   ? createClient(supabaseUrl, supabaseAnonKey)
   : null;
 
-export const STORAGE_BUCKET = "titipkuy";
+// Ada 3 bucket terpisah di Supabase Storage (bukan 1 bucket dengan
+// subfolder). Path yang dipakai di seluruh app diawali salah satu dari
+// prefix ini, mis. "fotos/masuk/x.jpg" -> bucket "fotos", object
+// "masuk/x.jpg". "deklarasi/..." (bukti kepemilikan) ikut ditaruh di
+// bucket "fotos" karena isinya juga foto/dokumen, dan tidak ada bucket
+// terpisah untuk itu.
+const BUCKET_BY_PREFIX: Record<string, string> = {
+  fotos: "fotos",
+  deklarasi: "fotos",
+  ttd: "ttd",
+  perjanjian: "perjanjian",
+};
+
+function resolveBucketAndPath(path: string) {
+  const [prefix, ...rest] = path.split("/");
+  const bucket = BUCKET_BY_PREFIX[prefix] ?? "fotos";
+  const objectPath = rest.length > 0 ? rest.join("/") : prefix;
+  return { bucket, objectPath };
+}
+
+// Nama file harus aman untuk URL — buang spasi & karakter khusus supaya
+// tidak memicu error atau URL yang rusak di Supabase Storage.
+function sanitizeFileName(fileName: string) {
+  return fileName
+    .normalize("NFKD")
+    .replace(/[^a-zA-Z0-9.\-_]/g, "-")
+    .replace(/-+/g, "-");
+}
+
+export function buildStoragePath(folder: string, originalFileName: string) {
+  const ext = originalFileName.includes(".")
+    ? originalFileName.slice(originalFileName.lastIndexOf("."))
+    : "";
+  const unique = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`;
+  return `${folder}/${sanitizeFileName(unique)}`;
+}
 
 export async function uploadToStorage(path: string, file: File) {
   if (!supabase) {
     throw new Error("Supabase belum dikonfigurasi. Cek NEXT_PUBLIC_SUPABASE_URL di .env.local.");
   }
 
-  const { error } = await supabase.storage
-    .from(STORAGE_BUCKET)
-    .upload(path, file, { upsert: true });
+  const { bucket, objectPath } = resolveBucketAndPath(path);
 
-  if (error) throw error;
+  try {
+    const { error } = await supabase.storage
+      .from(bucket)
+      .upload(objectPath, file, { upsert: true });
 
-  const { data } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(path);
-  return data.publicUrl;
+    if (error) throw error;
+
+    const { data } = supabase.storage.from(bucket).getPublicUrl(objectPath);
+    return data.publicUrl;
+  } catch (err) {
+    console.error("[uploadToStorage] Upload error:", err);
+    const message = err instanceof Error ? err.message : "Gagal upload file";
+    throw new Error(`Gagal upload ke Supabase Storage (bucket "${bucket}"): ${message}`);
+  }
 }
 
-// Ambil path relatif di dalam bucket dari public URL Supabase Storage,
-// mis. ".../object/public/titipkuy/fotos/masuk/x.jpg" -> "fotos/masuk/x.jpg".
+// Ambil path relatif (dengan prefix bucket, mis. "fotos/masuk/x.jpg") dari
+// public URL Supabase Storage — dipakai lagi sebagai argumen
+// deleteFromStorage() supaya bucket-nya ikut terselesaikan dengan benar.
 export function getStoragePathFromUrl(url: string): string | null {
-  const marker = `/object/public/${STORAGE_BUCKET}/`;
+  const marker = "/object/public/";
   const index = url.indexOf(marker);
   if (index === -1) return null;
   return decodeURIComponent(url.slice(index + marker.length));
@@ -40,6 +84,7 @@ export async function deleteFromStorage(path: string) {
     throw new Error("Supabase belum dikonfigurasi. Cek NEXT_PUBLIC_SUPABASE_URL di .env.local.");
   }
 
-  const { error } = await supabase.storage.from(STORAGE_BUCKET).remove([path]);
+  const { bucket, objectPath } = resolveBucketAndPath(path);
+  const { error } = await supabase.storage.from(bucket).remove([objectPath]);
   if (error) throw error;
 }

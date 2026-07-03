@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Camera, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { supabase, STORAGE_BUCKET, uploadToStorage } from "@/lib/supabase";
+import { buildStoragePath, deleteFromStorage, uploadToStorage } from "@/lib/supabase";
 
 const MIN_FOTO = 3;
 const MAX_FOTO = 10;
@@ -55,11 +55,14 @@ export function Step3UploadFoto({
     const newFotos: UploadedFoto[] = [];
     for (const file of fileArray) {
       try {
-        const path = `fotos/masuk/${transactionId}/${Date.now()}-${file.name}`;
+        const path = buildStoragePath(`fotos/masuk/${transactionId}`, file.name);
         const url = await uploadToStorage(path, file);
         newFotos.push({ url, path });
-      } catch {
-        toast.error(`Gagal upload "${file.name}"`);
+      } catch (error) {
+        console.error("Upload error:", error);
+        toast.error(
+          error instanceof Error ? error.message : `Gagal upload "${file.name}"`
+        );
       } finally {
         setProgress((prev) =>
           prev ? { done: prev.done + 1, total: prev.total } : null
@@ -75,8 +78,12 @@ export function Step3UploadFoto({
 
   async function handleRemove(index: number) {
     const target = uploaded[index];
-    if (target.path && supabase) {
-      await supabase.storage.from(STORAGE_BUCKET).remove([target.path]);
+    if (target.path) {
+      try {
+        await deleteFromStorage(target.path);
+      } catch (error) {
+        console.error("Delete error:", error);
+      }
     }
     const combined = uploaded.filter((_, i) => i !== index);
     setUploaded(combined);
