@@ -20,11 +20,11 @@ export default function Home() {
       <Navbar />
       <main>
         <Hero />
-        <HubLokasi />
+        <PaketSection />
         <Kalkulator mode={mode} onModeChange={setMode} />
+        <HubLokasi />
         <KenapaTitipkuy />
         <CaraTitipMandiri />
-        <PaketSection />
         <CaraKerja />
       </main>
       <Footer />

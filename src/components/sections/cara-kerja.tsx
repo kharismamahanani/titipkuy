@@ -1,28 +1,28 @@
 "use client";
 
-import { MessageCircle, FileText, Truck, PackageCheck } from "lucide-react";
+import { FileText, QrCode, Truck, Camera } from "lucide-react";
 import { FadeIn } from "@/components/shared/fade-in";
 
 const STEPS = [
   {
-    icon: MessageCircle,
-    title: "Chat WhatsApp",
-    desc: "Hubungi kami, ceritakan barang yang mau dititip.",
-  },
-  {
     icon: FileText,
     title: "Isi Form Online",
-    desc: "Isi data diri & pilih paket, cuma butuh 2 menit.",
+    desc: "Pilih paket, isi data diri, tanda tangan digital. Cuma 3 menit.",
+  },
+  {
+    icon: QrCode,
+    title: "Bayar & Dapat Kode Unik",
+    desc: "Bayar via QRIS/transfer. Kamu dapat kode unik untuk label barangmu.",
   },
   {
     icon: Truck,
-    title: "Kita Jemput ke Kos",
-    desc: "Tim kami datang jemput langsung ke kos kamu.",
+    title: "Jemput atau Antar Sendiri",
+    desc: "Pilih armada kami jemput ke kos, atau antar sendiri ke Hub Suhat pada jam drop-off (08.00–10.00 / 15.00–17.00 WIB).",
   },
   {
-    icon: PackageCheck,
-    title: "Barang Aman Tersimpan",
-    desc: "Foto bukti dikirim, barang aman sampai waktunya diambil.",
+    icon: Camera,
+    title: "Barang Aman, Ada Fotonya",
+    desc: "Foto kondisi barang dikirim ke WA kamu saat masuk dan saat kamu ambil. Transparan dan terdokumentasi.",
   },
 ];
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { FadeIn } from "@/components/shared/fade-in";
 import { Input } from "@/components/ui/input";
@@ -13,60 +13,46 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn, formatRupiah } from "@/lib/utils";
-import { getWhatsAppUrl } from "@/constants/site";
-import type { Paket } from "@/types/paket";
 import type { KalkulatorMode } from "@/types/kalkulator";
 
-// Belum ada kolom biaya antar-jemput di skema Paket, jadi dipakai angka
-// tetap untuk estimasi. Total final tetap dikonfirmasi saat pemesanan.
-const ANTAR_JEMPUT_FEE = 15000;
-
+// Katalog harga di-hardcode (bukan fetch API) supaya kalkulator tetap bisa
+// dipakai meski API paket sedang lambat/error. Nilai diambil dari katalog
+// resmi TitipKuy! — update manual di sini kalau ada perubahan harga.
 const JENIS_HARIAN = [
-  { value: "koper-kecil", label: "Koper Kecil", keywords: ["kecil"] },
-  { value: "koper-besar", label: "Koper Besar", keywords: ["besar"] },
-  { value: "ransel", label: "Ransel/Tas", keywords: ["ransel", "tas"] },
+  { value: "koper-kabin", label: "Koper Kabin (Box M)", harga: 15000 },
+  { value: "koper-besar", label: "Koper Besar (Box L)", harga: 20000 },
+  { value: "ransel", label: "Ransel/Sling (Box S)", harga: 10000 },
 ];
 
 const JENIS_BULANAN = [
-  { value: "kardus", label: "Kardus (per box)", keywords: ["kardus"] },
-  { value: "elektronik", label: "Elektronik/Barang Berharga", keywords: ["elektronik", "berharga"] },
-  { value: "motor", label: "Sepeda Motor", keywords: ["motor"] },
+  { value: "box-s", label: "Box S", harga: 45000 },
+  { value: "box-l", label: "Box L", harga: 70000 },
+  { value: "koper-besar", label: "Koper Besar", harga: 80000 },
+  { value: "elektronik-s", label: "Elektronik S", harga: 40000 },
+  { value: "elektronik-l", label: "Elektronik L", harga: 95000 },
+  { value: "motor", label: "Motor", harga: 150000 },
 ];
 
 const DURASI_BULANAN = [
-  { value: "1bulan", label: "1 Bulan" },
-  { value: "3bulan", label: "3 Bulan (Magang)" },
-  { value: "6bulan", label: "6 Bulan (Magang)" },
+  { value: "1", label: "1 Bulan" },
+  { value: "3", label: "3 Bulan" },
+  { value: "6", label: "6 Bulan" },
 ];
 
-function findMatch(
-  paketList: Paket[],
-  mode: KalkulatorMode,
-  jenis: string,
-  durasi: string
-): Paket | null {
-  const kategori =
-    mode === "harian" ? "harian" : jenis === "motor" ? "motor" : durasi === "1bulan" ? "bulanan" : "magang";
+const ANTAR_JEMPUT_TIPE = [
+  { value: "motor", label: "Motor" },
+  { value: "mobil", label: "Mobil" },
+];
 
-  const candidates = paketList.filter((p) => p.kategori === kategori);
-  if (candidates.length === 0) return null;
+const ANTAR_JEMPUT_RADIUS = [
+  { value: "<3km", label: "<3 km" },
+  { value: "3-6km", label: "3–6 km" },
+];
 
-  const jenisOptions = mode === "harian" ? JENIS_HARIAN : JENIS_BULANAN;
-  const keywords = [...(jenisOptions.find((j) => j.value === jenis)?.keywords ?? [])];
-  if (kategori === "magang") keywords.push(durasi === "3bulan" ? "3" : "6");
-
-  let best = candidates[0];
-  let bestScore = -1;
-  for (const p of candidates) {
-    const haystack = `${p.nama} ${p.deskripsi ?? ""}`.toLowerCase();
-    const score = keywords.reduce((acc, kw) => acc + (haystack.includes(kw) ? 1 : 0), 0);
-    if (score > bestScore) {
-      bestScore = score;
-      best = p;
-    }
-  }
-  return best;
-}
+const ANTAR_JEMPUT_HARGA: Record<string, Record<string, number>> = {
+  motor: { "<3km": 15000, "3-6km": 25000 },
+  mobil: { "<3km": 45000, "3-6km": 60000 },
+};
 
 interface KalkulatorProps {
   mode: KalkulatorMode;
@@ -74,49 +60,41 @@ interface KalkulatorProps {
 }
 
 export function Kalkulator({ mode, onModeChange }: KalkulatorProps) {
-  const [paketList, setPaketList] = useState<Paket[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const [jenisHarian, setJenisHarian] = useState("koper-kecil");
+  const [jenisHarian, setJenisHarian] = useState(JENIS_HARIAN[0].value);
   const [durasiHari, setDurasiHari] = useState(1);
-  const [jenisBulanan, setJenisBulanan] = useState("kardus");
+  const [jenisBulanan, setJenisBulanan] = useState(JENIS_BULANAN[0].value);
   const [jumlah, setJumlah] = useState(1);
-  const [durasiBulanan, setDurasiBulanan] = useState("1bulan");
+  const [durasiBulanan, setDurasiBulanan] = useState(DURASI_BULANAN[0].value);
   const [antarJemput, setAntarJemput] = useState(false);
+  const [armadaTipe, setArmadaTipe] = useState(ANTAR_JEMPUT_TIPE[0].value);
+  const [radius, setRadius] = useState(ANTAR_JEMPUT_RADIUS[0].value);
 
-  useEffect(() => {
-    fetch("/api/paket")
-      .then((res) => (res.ok ? res.json() : []))
-      .then((data: Paket[]) => setPaketList(data))
-      .catch(() => setPaketList([]))
-      .finally(() => setIsLoading(false));
-  }, []);
+  const jenisHarianOpt = JENIS_HARIAN.find((j) => j.value === jenisHarian)!;
+  const jenisBulananOpt = JENIS_BULANAN.find((j) => j.value === jenisBulanan)!;
+  const durasiBulananNum = Number(durasiBulanan);
 
-  const jenis = mode === "harian" ? jenisHarian : jenisBulanan;
-  const jenisLabel =
-    (mode === "harian" ? JENIS_HARIAN : JENIS_BULANAN).find((j) => j.value === jenis)?.label ?? "";
-  const multiplier = mode === "harian" ? durasiHari : jumlah;
-  const unitLabel = mode === "harian" ? "hari" : "unit";
+  const subtotal = useMemo(() => {
+    if (mode === "harian") return jenisHarianOpt.harga * durasiHari;
+    return jenisBulananOpt.harga * jumlah * durasiBulananNum;
+  }, [mode, jenisHarianOpt, durasiHari, jenisBulananOpt, jumlah, durasiBulananNum]);
 
-  const matchedPaket = useMemo(
-    () => findMatch(paketList, mode, jenis, durasiBulanan),
-    [paketList, mode, jenis, durasiBulanan]
-  );
+  const antarJemputFee = antarJemput ? ANTAR_JEMPUT_HARGA[armadaTipe][radius] : 0;
+  const total = subtotal + antarJemputFee;
 
-  const unitPrice = matchedPaket?.harga ?? null;
-  const subtotal = unitPrice != null ? unitPrice * multiplier : null;
-  const antarJemputFee = antarJemput ? ANTAR_JEMPUT_FEE : 0;
-  const total = subtotal != null ? subtotal + antarJemputFee : null;
+  const rincianLabel =
+    mode === "harian"
+      ? `${jenisHarianOpt.label} × ${durasiHari} hari`
+      : `${jenisBulananOpt.label} × ${jumlah} unit × ${durasiBulananNum} bulan`;
 
   return (
     <section id="kalkulator" className="px-4 py-24 sm:px-6">
       <div className="mx-auto max-w-4xl">
         <FadeIn className="text-center">
           <h2 className="font-heading text-3xl font-bold sm:text-4xl">
-            Hitung <span className="gradient-text">Biayamu</span> Sekarang ⚡
+            Hitung <span className="gradient-text">Biayamu</span> Dulu ⚡
           </h2>
           <p className="mt-3 text-foreground/70">
-            Langsung tahu tagihanmu sebelum pesan.
+            Langsung tahu total sebelum pesan.
           </p>
         </FadeIn>
 
@@ -150,13 +128,15 @@ export function Kalkulator({ mode, onModeChange }: KalkulatorProps) {
                     <Select value={jenisHarian} onValueChange={(v) => v && setJenisHarian(v)}>
                       <SelectTrigger className="w-full">
                         <SelectValue>
-                          {(v: string) => JENIS_HARIAN.find((opt) => opt.value === v)?.label ?? v}
+                          {(v: string) =>
+                            JENIS_HARIAN.find((opt) => opt.value === v)?.label ?? v
+                          }
                         </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         {JENIS_HARIAN.map((opt) => (
                           <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
+                            {opt.label} — {formatRupiah(opt.harga)}/hari
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -183,13 +163,15 @@ export function Kalkulator({ mode, onModeChange }: KalkulatorProps) {
                     <Select value={jenisBulanan} onValueChange={(v) => v && setJenisBulanan(v)}>
                       <SelectTrigger className="w-full">
                         <SelectValue>
-                          {(v: string) => JENIS_BULANAN.find((opt) => opt.value === v)?.label ?? v}
+                          {(v: string) =>
+                            JENIS_BULANAN.find((opt) => opt.value === v)?.label ?? v
+                          }
                         </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         {JENIS_BULANAN.map((opt) => (
                           <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
+                            {opt.label} — {formatRupiah(opt.harga)}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -197,7 +179,7 @@ export function Kalkulator({ mode, onModeChange }: KalkulatorProps) {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground/80">Jumlah Box / Unit</label>
+                    <label className="text-sm font-medium text-foreground/80">Jumlah Unit</label>
                     <Input
                       type="number"
                       min={1}
@@ -214,7 +196,9 @@ export function Kalkulator({ mode, onModeChange }: KalkulatorProps) {
                     <Select value={durasiBulanan} onValueChange={(v) => v && setDurasiBulanan(v)}>
                       <SelectTrigger className="w-full">
                         <SelectValue>
-                          {(v: string) => DURASI_BULANAN.find((opt) => opt.value === v)?.label ?? v}
+                          {(v: string) =>
+                            DURASI_BULANAN.find((opt) => opt.value === v)?.label ?? v
+                          }
                         </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
@@ -235,6 +219,50 @@ export function Kalkulator({ mode, onModeChange }: KalkulatorProps) {
                 </label>
                 <Switch checked={antarJemput} onCheckedChange={(v) => setAntarJemput(!!v)} />
               </div>
+
+              {antarJemput && (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-foreground/60">Armada</label>
+                    <Select value={armadaTipe} onValueChange={(v) => v && setArmadaTipe(v)}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue>
+                          {(v: string) =>
+                            ANTAR_JEMPUT_TIPE.find((opt) => opt.value === v)?.label ?? v
+                          }
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ANTAR_JEMPUT_TIPE.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-foreground/60">Radius</label>
+                    <Select value={radius} onValueChange={(v) => v && setRadius(v)}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue>
+                          {(v: string) =>
+                            ANTAR_JEMPUT_RADIUS.find((opt) => opt.value === v)?.label ?? v
+                          }
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ANTAR_JEMPUT_RADIUS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
             </div>
           </FadeIn>
 
@@ -242,54 +270,35 @@ export function Kalkulator({ mode, onModeChange }: KalkulatorProps) {
             <div className="glass-card gradient-border flex h-full flex-col rounded-2xl p-6">
               <p className="text-sm font-semibold text-foreground/80">Rincian Biaya</p>
 
-              {isLoading ? (
-                <p className="mt-4 text-sm text-foreground/60">Memuat harga...</p>
-              ) : !matchedPaket ? (
-                <div className="mt-4 flex-1 space-y-3">
-                  <p className="text-sm text-foreground/60">
-                    Paket untuk pilihan ini belum tersedia. Hubungi kami langsung, ya.
-                  </p>
-                  <a
-                    href={getWhatsAppUrl("Halo TitipKuy! Boleh info harga untuk kebutuhan saya?")}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block rounded-full border border-primary-from/60 px-5 py-2 text-sm font-semibold hover:bg-primary/10"
-                  >
-                    Tanya via WhatsApp
-                  </a>
+              <div className="mt-4 flex-1 space-y-2 border-t border-card-border pt-4 text-sm">
+                <div className="flex justify-between text-foreground/70">
+                  <span>{rincianLabel}</span>
+                  <span>{formatRupiah(subtotal)}</span>
                 </div>
-              ) : (
-                <>
-                  <div className="mt-4 flex-1 space-y-2 border-t border-card-border pt-4 text-sm">
-                    <div className="flex justify-between text-foreground/70">
-                      <span>
-                        {jenisLabel} &times; {multiplier} {unitLabel}
-                      </span>
-                      <span>{formatRupiah(subtotal ?? 0)}</span>
-                    </div>
-                    {antarJemput && (
-                      <div className="flex justify-between text-foreground/70">
-                        <span>Antar-jemput</span>
-                        <span>{formatRupiah(antarJemputFee)}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="mt-4 flex items-center justify-between border-t border-card-border pt-4">
-                    <span className="font-heading font-bold">TOTAL</span>
-                    <span className="gradient-text font-heading text-2xl font-extrabold">
-                      {formatRupiah(total ?? 0)}
+                {antarJemput && (
+                  <div className="flex justify-between text-foreground/70">
+                    <span>
+                      Antar-jemput ({ANTAR_JEMPUT_TIPE.find((t) => t.value === armadaTipe)?.label}
+                      , {radius})
                     </span>
+                    <span>+{formatRupiah(antarJemputFee)}</span>
                   </div>
+                )}
+              </div>
 
-                  <Link
-                    href={`/pesan?paketId=${matchedPaket.id}&mode=${mode}`}
-                    className="mt-6 block rounded-full bg-gradient-to-r from-primary-from to-primary-to py-3 text-center text-sm font-semibold text-white shadow-lg shadow-primary/30 transition-transform hover:scale-[1.02]"
-                  >
-                    Lanjut Pesan Sekarang →
-                  </Link>
-                </>
-              )}
+              <div className="mt-4 flex items-center justify-between border-t border-card-border pt-4">
+                <span className="font-heading font-bold">TOTAL</span>
+                <span className="gradient-text font-heading text-2xl font-extrabold">
+                  {formatRupiah(total)}
+                </span>
+              </div>
+
+              <Link
+                href="/pesan"
+                className="mt-6 block rounded-full bg-gradient-to-r from-primary-from to-primary-to py-3 text-center text-sm font-semibold text-white shadow-lg shadow-primary/30 transition-transform hover:scale-[1.02]"
+              >
+                Pesan Sekarang →
+              </Link>
 
               <p className="mt-4 text-center text-xs text-foreground/50">
                 Harga dapat berubah. Total final dikonfirmasi saat pemesanan.

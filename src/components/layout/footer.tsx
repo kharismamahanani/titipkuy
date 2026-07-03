@@ -1,6 +1,5 @@
 import { MessageCircle } from "lucide-react";
 import {
-  ADMIN_NAME,
   formatWhatsAppDisplay,
   getWhatsAppUrl,
   INSTAGRAM_URL,
@@ -16,7 +15,8 @@ export function Footer() {
             TitipKuy! 📦
           </p>
           <p className="mt-1 text-sm text-foreground/60">
-            Titip barang, tenang magang. Khusus mahasiswa Malang.
+            Titip barang aman di Malang — untuk mahasiswa, wisatawan, dan
+            siapa pun yang butuh storage praktis.
           </p>
         </div>
 
@@ -50,9 +50,14 @@ export function Footer() {
           </a>
         </div>
 
-        <p className="text-sm text-foreground/60">
-          Admin: {ADMIN_NAME} &middot; {formatWhatsAppDisplay()}
-        </p>
+        <a
+          href={getWhatsAppUrl("Halo TitipKuy! Saya mau tanya-tanya.")}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm font-semibold text-primary-from underline underline-offset-4 transition-colors hover:text-primary-to"
+        >
+          💬 Chat Admin WhatsApp: {formatWhatsAppDisplay()}
+        </a>
 
         <p className="text-xs text-foreground/50">
           © 2026 TitipKuy! Seluruh hak cipta dilindungi.

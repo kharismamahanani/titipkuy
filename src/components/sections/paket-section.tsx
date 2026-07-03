@@ -11,8 +11,12 @@ import type { Paket } from "@/types/paket";
 type FetchState = "loading" | "success" | "error";
 type Tab = "harian" | "bulanan";
 
+function isPromo(paket: Paket) {
+  return paket.nama.toUpperCase().includes("PROMO");
+}
+
 function isTerlaris(paket: Paket) {
-  return paket.nama.toLowerCase().includes("magang 3 bulan");
+  return paket.nama.includes("Magang 3 Bulan (5x Box L)");
 }
 
 export function PaketSection() {
@@ -44,7 +48,9 @@ export function PaketSection() {
   }, []);
 
   const filteredPaket = paketList.filter((p) =>
-    tab === "harian" ? p.kategori === "harian" : p.kategori !== "harian"
+    tab === "harian"
+      ? p.kategori === "harian"
+      : p.kategori === "bulanan" || p.kategori === "magang" || p.kategori === "motor"
   );
 
   return (
@@ -52,10 +58,10 @@ export function PaketSection() {
       <div className="mx-auto max-w-6xl">
         <FadeIn className="text-center">
           <h2 className="font-heading text-3xl font-bold sm:text-4xl">
-            Pilih <span className="gradient-text">Paket</span> Kamu
+            Pilih <span className="gradient-text">Paketmu</span> 📦
           </h2>
           <p className="mt-3 text-foreground/70">
-            Harga jelas, langsung lunas, tanpa biaya tersembunyi.
+            Harga transparan, tidak ada biaya tersembunyi.
           </p>
         </FadeIn>
 
@@ -73,7 +79,7 @@ export function PaketSection() {
                     : "border-card-border text-foreground/70 hover:bg-primary/10"
                 )}
               >
-                {t === "harian" ? "🧳 Harian" : "🎓 Bulanan"}
+                {t === "harian" ? "🧳 Harian" : "🎓 Bulanan/Magang"}
               </button>
             ))}
           </div>
@@ -117,10 +123,19 @@ export function PaketSection() {
                 transition={{ duration: 0.5, delay: index * 0.05, ease: "easeOut" }}
                 className="glass-card gradient-border relative flex flex-col rounded-2xl p-6"
               >
-                {isTerlaris(paket) && (
-                  <span className="absolute -top-3 right-6 rounded-full bg-gradient-to-r from-primary-from to-primary-to px-3 py-1 text-xs font-semibold text-white">
-                    Terlaris 🔥
-                  </span>
+                {(isPromo(paket) || isTerlaris(paket)) && (
+                  <div className="absolute -top-3 right-6 flex gap-1.5">
+                    {isPromo(paket) && (
+                      <span className="rounded-full bg-yellow-500 px-3 py-1 text-xs font-semibold text-yellow-950">
+                        🎉 PROMO
+                      </span>
+                    )}
+                    {isTerlaris(paket) && (
+                      <span className="rounded-full bg-gradient-to-r from-primary-from to-primary-to px-3 py-1 text-xs font-semibold text-white">
+                        Terlaris 🔥
+                      </span>
+                    )}
+                  </div>
                 )}
 
                 <h3 className="font-heading text-lg font-bold">{paket.nama}</h3>

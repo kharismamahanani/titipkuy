@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
-import { getWhatsAppUrl } from "@/constants/site";
 
 const MENU_LINKS = [
   { label: "Paket", href: "#paket" },
@@ -33,14 +32,12 @@ export function Navbar() {
           ))}
         </div>
 
-        <a
-          href={getWhatsAppUrl("Halo TitipKuy! Saya mau pesan penitipan barang.")}
-          target="_blank"
-          rel="noopener noreferrer"
+        <Link
+          href="/pesan"
           className="hidden rounded-full bg-gradient-to-r from-primary-from to-primary-to px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-transform hover:scale-105 sm:inline-block"
         >
           Pesan Sekarang
-        </a>
+        </Link>
 
         <button
           type="button"
@@ -65,15 +62,13 @@ export function Navbar() {
                 {link.label}
               </a>
             ))}
-            <a
-              href={getWhatsAppUrl("Halo TitipKuy! Saya mau pesan penitipan barang.")}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/pesan"
               onClick={() => setIsOpen(false)}
               className="rounded-full bg-gradient-to-r from-primary-from to-primary-to px-5 py-2 text-center text-sm font-semibold text-white"
             >
               Pesan Sekarang
-            </a>
+            </Link>
           </div>
         </div>
       )}
