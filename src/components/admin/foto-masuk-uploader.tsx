@@ -57,12 +57,15 @@ export function FotoMasukUploader({ transaksiId, fotoMasuk }: FotoMasukUploaderP
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ urls }),
         });
-        if (!res.ok) throw new Error();
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.error || "Gagal menyimpan foto masuk ke database");
 
         toast.success(`${urls.length} foto masuk ditambahkan`);
         router.refresh();
-      } catch {
-        toast.error("Gagal menyimpan foto masuk ke database");
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? error.message : "Gagal menyimpan foto masuk ke database"
+        );
       }
     }
 
