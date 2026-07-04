@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ADMIN_NAV_ITEMS } from "@/components/admin/admin-nav-items";
 import { LogoutButton } from "@/components/admin/logout-button";
+import { LogoMark } from "@/components/shared/logo-mark";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -22,6 +23,7 @@ export function Sidebar() {
       <div className="flex items-center justify-between px-4 py-5">
         {!collapsed && (
           <Link href="/admin" className="flex items-center gap-2 text-lg font-extrabold">
+            <LogoMark size={32} />
             <span className="text-tk-orange">TitipKuy!</span>
             <span className="rounded-full border border-tk-sage bg-tk-sage/20 px-2 py-0.5 text-[10px] font-bold text-tk-sage">
               Admin
