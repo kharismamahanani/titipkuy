@@ -156,6 +156,7 @@ export function PenjemputanArmadaPicker({
               disabled={isDateDisabled}
             />
           </div>
+          <p className="text-xs text-tk-light">🚫 Hari Minggu & tanggal merah: Hub tutup</p>
         </div>
       )}
 

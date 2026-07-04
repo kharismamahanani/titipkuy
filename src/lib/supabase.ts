@@ -66,6 +66,18 @@ export function buildFotoPath(folder: string) {
   return `${cleanFolder}/${fileName}`.replace(/\/{2,}/g, "/");
 }
 
+// Dipakai untuk dokumen motor (KTP/STNK/BPKB) — nama file asli tidak
+// pernah dipakai sama sekali, ekstensi ditentukan dari MIME type supaya
+// aman untuk gambar maupun PDF.
+export function buildDokumenPath(transactionId: string, jenis: string, mimeType: string) {
+  assertValidPathSegment(transactionId, "transactionId");
+  assertValidPathSegment(jenis, "jenis");
+
+  const ext = mimeType === "application/pdf" ? "pdf" : "jpg";
+  const random = Math.random().toString(36).slice(2, 8);
+  return `dokumen/motor/${transactionId}/${jenis}-${Date.now()}-${random}.${ext}`;
+}
+
 // Cegah path yang mengandung "undefined"/"null"/string kosong lolos ke
 // Supabase — ini bikin error samar "Invalid path specified in request
 // URL" yang susah dilacak kalau tidak divalidasi lebih awal di sini.

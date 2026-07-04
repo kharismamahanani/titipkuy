@@ -12,9 +12,10 @@ import { Label } from "@/components/ui/label";
 import { TkCard } from "@/components/ui/tk-card";
 import { cn, formatRupiah } from "@/lib/utils";
 import { tkInputClass, tkLabelClass } from "@/lib/form-style";
-import { buildStoragePath, uploadToStorage } from "@/lib/supabase";
+import { buildDokumenPath, uploadToStorage } from "@/lib/supabase";
 import { GANTI_RUGI, hitungPremi, tentukanTier } from "@/lib/ganti-rugi";
 import { AntarJemputPicker } from "@/components/pesan/antar-jemput-picker";
+import { armadaYangBisa } from "@/lib/armada-rules";
 import { HUB_CONFIG, JAM_DROP_OFF_MANDIRI } from "@/lib/constants";
 import type { Paket } from "@/types/paket";
 import type { DeklarasiData, DokumenMotorData, MetodePengiriman } from "@/types/pesan";
@@ -113,7 +114,7 @@ export function Step2PaketTanggal({
 
     setUploadingDokumen((prev) => ({ ...prev, [jenis]: true }));
     try {
-      const path = buildStoragePath(`dokumen/motor/${transactionId}`, `${jenis}-${file.name}`);
+      const path = buildDokumenPath(transactionId, jenis, file.type);
       const url = await uploadToStorage(path, file);
       onDokumenMotorChange({ ...dokumenMotor, [`${jenis}Url`]: url });
       toast.success(`${jenis.toUpperCase()} terupload`);
@@ -139,6 +140,7 @@ export function Step2PaketTanggal({
   const armadaValid = tanggalMasuk ? isTanggalValidUntukArmada(tanggalMasuk) : true;
   const saturdaySatuHariConflict = isSaturday && paket?.durasiHari === 1;
   const isMotor = paket?.kategori === "motor";
+  const armadaBisa = paket ? armadaYangBisa(paket) : "semua";
 
   const nilaiDeklarasiNum = Number(deklarasi.nilaiDeklarasi) || 0;
   const tierGantiRugi = tentukanTier(nilaiDeklarasiNum);
@@ -236,6 +238,7 @@ export function Step2PaketTanggal({
               disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0)) || date.getDay() === 0}
             />
           </div>
+          <p className="text-xs text-tk-light">🚫 Hari Minggu & tanggal merah: Hub tutup</p>
 
           {saturdaySatuHariConflict && (
             <div className="rounded-lg border-2 border-[#C0392B] bg-white p-3 text-xs font-semibold text-[#C0392B]">
@@ -382,9 +385,23 @@ export function Step2PaketTanggal({
         </TkCard>
       )}
 
-      {paket && tanggalMasuk && (
+      {paket && isMotor && (
+        <TkCard className="text-sm text-tk-charcoal">
+          🏍️ Paket Titip Motor tidak memerlukan layanan antar-jemput. Parkir langsung di
+          garasi Hub Bunga Lely.
+        </TkCard>
+      )}
+
+      {paket && !isMotor && tanggalMasuk && (
         <TkCard className="space-y-4">
           <Label className={tkLabelClass}>🚚 Bagaimana barang kamu sampai ke hub?</Label>
+
+          {armadaBisa === "mobil" && (
+            <div className="rounded-lg border-2 border-tk-orange bg-tk-orange/10 p-3 text-xs font-semibold text-tk-charcoal">
+              🚗 Paket ini hanya bisa dilayani armada Mobil karena melebihi kapasitas Motor
+              Honda Beat (maks. 2 Box S).
+            </div>
+          )}
 
           {!armadaValid && (
             <div className="rounded-lg border-2 border-[#C0392B] bg-white p-3 text-xs font-semibold text-[#C0392B]">
@@ -443,6 +460,7 @@ export function Step2PaketTanggal({
               value={antarJemputOption}
               onChange={onAntarJemputOptionChange}
               hideMandiriOption
+              allowedArmada={armadaBisa}
             />
           ) : (
             <div className="rounded-lg border-2 border-tk-orange bg-tk-orange/10 p-3 text-xs text-tk-charcoal">

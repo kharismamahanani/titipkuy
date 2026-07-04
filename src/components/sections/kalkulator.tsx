@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -16,6 +16,7 @@ import { tkButtonVariants } from "@/components/ui/tk-button";
 import { cn, formatRupiah } from "@/lib/utils";
 import { useDeteksiLokasi } from "@/hooks/use-deteksi-lokasi";
 import { DeteksiLokasiBlock } from "@/components/shared/deteksi-lokasi-block";
+import { armadaYangBisa } from "@/lib/armada-rules";
 import type { KalkulatorMode } from "@/types/kalkulator";
 
 // Katalog harga di-hardcode (bukan fetch API) supaya kalkulator tetap bisa
@@ -97,6 +98,20 @@ export function Kalkulator({ mode, onModeChange }: KalkulatorProps) {
   const jenisHarianOpt = JENIS_HARIAN.find((j) => j.value === jenisHarian)!;
   const jenisBulananOpt = JENIS_BULANAN.find((j) => j.value === jenisBulanan)!;
   const durasiBulananNum = Number(durasiBulanan);
+
+  const isMotorPaket = mode === "bulanan" && jenisBulanan === "motor";
+  const armadaBisa = armadaYangBisa({
+    nama: mode === "harian" ? jenisHarianOpt.label : jenisBulananOpt.label,
+    kategori: isMotorPaket ? "motor" : mode,
+  });
+  const armadaTipeOptions =
+    armadaBisa === "mobil" ? ANTAR_JEMPUT_TIPE.filter((t) => t.value !== "motor") : ANTAR_JEMPUT_TIPE;
+
+  useEffect(() => {
+    if (armadaBisa === "mobil" && armadaTipe !== "mobil") setArmadaTipe("mobil");
+    if (isMotorPaket) setAntarJemput(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [armadaBisa, isMotorPaket]);
 
   const subtotal = useMemo(() => {
     if (mode === "harian") return jenisHarianOpt.harga * durasiHari;
@@ -234,12 +249,26 @@ export function Kalkulator({ mode, onModeChange }: KalkulatorProps) {
               </>
             )}
 
-            <div className="flex items-center justify-between pt-2">
-              <label className="text-sm font-bold text-tk-charcoal">Layanan Antar-Jemput</label>
-              <Switch checked={antarJemput} onCheckedChange={(v) => setAntarJemput(!!v)} />
-            </div>
+            {isMotorPaket ? (
+              <div className="rounded-lg border-2 border-tk-charcoal bg-tk-cream-alt p-3 text-xs text-tk-charcoal">
+                🏍️ Paket Titip Motor tidak memerlukan layanan antar-jemput. Parkir langsung di
+                garasi Hub Bunga Lely.
+              </div>
+            ) : (
+              <div className="flex items-center justify-between pt-2">
+                <label className="text-sm font-bold text-tk-charcoal">Layanan Antar-Jemput</label>
+                <Switch checked={antarJemput} onCheckedChange={(v) => setAntarJemput(!!v)} />
+              </div>
+            )}
 
-            {antarJemput && (
+            {armadaBisa === "mobil" && antarJemput && !isMotorPaket && (
+              <div className="rounded-lg border-2 border-tk-orange bg-tk-orange/10 p-3 text-xs font-semibold text-tk-charcoal">
+                🚗 Paket ini hanya bisa dilayani armada Mobil karena melebihi kapasitas Motor
+                Honda Beat (maks. 2 Box S).
+              </div>
+            )}
+
+            {antarJemput && !isMotorPaket && (
               <div className="space-y-3">
                 <DeteksiLokasiBlock
                   isDetecting={isDetecting}
@@ -265,7 +294,7 @@ export function Kalkulator({ mode, onModeChange }: KalkulatorProps) {
                         </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
-                        {ANTAR_JEMPUT_TIPE.map((opt) => (
+                        {armadaTipeOptions.map((opt) => (
                           <SelectItem key={opt.value} value={opt.value}>
                             {opt.label}
                           </SelectItem>

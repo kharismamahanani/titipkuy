@@ -9,14 +9,21 @@ import { JAM_DROP_OFF_MANDIRI, JAM_OPERASIONAL_HUB_SUHAT } from "@/lib/constants
 import { useDeteksiLokasi } from "@/hooks/use-deteksi-lokasi";
 import { DeteksiLokasiBlock } from "@/components/shared/deteksi-lokasi-block";
 import type { AntarJemputOption } from "@/types/antar-jemput";
+import type { TipeArmada } from "@/lib/armada-rules";
 
 interface AntarJemputPickerProps {
   value: AntarJemputOption | null;
   onChange: (option: AntarJemputOption | null) => void;
   hideMandiriOption?: boolean;
+  allowedArmada?: TipeArmada;
 }
 
-export function AntarJemputPicker({ value, onChange, hideMandiriOption }: AntarJemputPickerProps) {
+export function AntarJemputPicker({
+  value,
+  onChange,
+  hideMandiriOption,
+  allowedArmada = "semua",
+}: AntarJemputPickerProps) {
   const [options, setOptions] = useState<AntarJemputOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { detect, isDetecting, result, error } = useDeteksiLokasi();
@@ -39,6 +46,8 @@ export function AntarJemputPicker({ value, onChange, hideMandiriOption }: AntarJ
   }
 
   const disabledByJarak = result?.kategori === "jauh";
+  const visibleOptions =
+    allowedArmada === "mobil" ? options.filter((o) => o.tipe !== "motor") : options;
 
   return (
     <div className="space-y-4 rounded-lg border-2 border-tk-charcoal bg-white p-5">
@@ -80,7 +89,7 @@ export function AntarJemputPicker({ value, onChange, hideMandiriOption }: AntarJ
             </button>
           )}
 
-          {options.map((option) => {
+          {visibleOptions.map((option) => {
             const isSelected = value?.id === option.id;
             return (
               <button
@@ -108,6 +117,16 @@ export function AntarJemputPicker({ value, onChange, hideMandiriOption }: AntarJ
                     )}
                   >
                     {option.kapasitasLabel}
+                  </span>
+                )}
+                {option.tipe === "motor" && allowedArmada === "semua" && (
+                  <span
+                    className={cn(
+                      "mt-1 block text-xs italic",
+                      isSelected ? "text-tk-cream/80" : "text-tk-muted"
+                    )}
+                  >
+                    Maks. 2 Box S atau 1 Koper Kabin
                   </span>
                 )}
               </button>

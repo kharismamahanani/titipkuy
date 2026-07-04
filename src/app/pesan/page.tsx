@@ -9,7 +9,6 @@ import { ProgressBar } from "@/components/pesan/progress-bar";
 import { Step1DataPelanggan } from "@/components/pesan/step-1-data-pelanggan";
 import { Step2PaketTanggal } from "@/components/pesan/step-2-paket-tanggal";
 import { Step3Perjanjian } from "@/components/pesan/step-3-perjanjian";
-import { dataUrlToFile } from "@/lib/utils";
 import { uploadToStorage } from "@/lib/supabase";
 import { validateStep1, validateStep2 } from "@/lib/pesan-validation";
 import { hitungPremi, tentukanTier } from "@/lib/ganti-rugi";
@@ -85,12 +84,12 @@ function PesanForm() {
 
     setIsSubmitting(true);
     try {
-      const signatureFile = dataUrlToFile(
-        tandaTanganDataUrl,
-        `${transactionId}.png`
-      );
+      const signatureBlobRes = await fetch(tandaTanganDataUrl);
+      const signatureBlob = await signatureBlobRes.blob();
+      const random = Math.random().toString(36).slice(2, 8);
+      const signatureFile = new File([signatureBlob], "ttd.png", { type: "image/png" });
       const tandaTanganUrl = await uploadToStorage(
-        `ttd/${transactionId}.png`,
+        `ttd/${transactionId}/${Date.now()}-${random}.png`,
         signatureFile
       );
 
