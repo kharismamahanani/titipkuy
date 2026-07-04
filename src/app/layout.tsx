@@ -12,8 +12,6 @@ const nunito = Nunito({
   variable: "--font-sans",
 });
 
-const FAVICON_EMOJI = "📦";
-
 const TITLE = "TitipKuy! | Titip Barang, Tenang Magang 🔥";
 const DESCRIPTION =
   "Jasa penitipan barang untuk mahasiswa di Malang. Aman, gampang, dan bikin tenang pas magang, KKN, atau mudik.";
@@ -39,7 +37,9 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
   },
   icons: {
-    icon: `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">${FAVICON_EMOJI}</text></svg>`,
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
   },
 };
 
