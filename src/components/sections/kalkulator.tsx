@@ -14,6 +14,8 @@ import {
 import { TkCard } from "@/components/ui/tk-card";
 import { tkButtonVariants } from "@/components/ui/tk-button";
 import { cn, formatRupiah } from "@/lib/utils";
+import { useDeteksiLokasi } from "@/hooks/use-deteksi-lokasi";
+import { DeteksiLokasiBlock } from "@/components/shared/deteksi-lokasi-block";
 import type { KalkulatorMode } from "@/types/kalkulator";
 
 // Katalog harga di-hardcode (bukan fetch API) supaya kalkulator tetap bisa
@@ -55,6 +57,11 @@ const ANTAR_JEMPUT_HARGA: Record<string, Record<string, number>> = {
   mobil: { "<3km": 45000, "3-6km": 60000 },
 };
 
+const ANTAR_JEMPUT_KAPASITAS: Record<string, string> = {
+  motor: "Maks. 2 Box S atau 1 Koper Kabin",
+  mobil: "Maks. 6 Box L atau Koper Besar",
+};
+
 const inputClass =
   "h-auto w-full rounded-lg border-2 border-tk-charcoal bg-tk-card px-[14px] py-[10px] font-sans text-sm text-tk-charcoal focus-visible:border-tk-charcoal focus-visible:ring-2 focus-visible:ring-tk-orange/40";
 
@@ -75,6 +82,17 @@ export function Kalkulator({ mode, onModeChange }: KalkulatorProps) {
   const [antarJemput, setAntarJemput] = useState(false);
   const [armadaTipe, setArmadaTipe] = useState(ANTAR_JEMPUT_TIPE[0].value);
   const [radius, setRadius] = useState(ANTAR_JEMPUT_RADIUS[0].value);
+  const { detect, isDetecting, result: lokasiResult, error: lokasiError } = useDeteksiLokasi();
+
+  function handleDetectLokasi() {
+    detect((detected) => {
+      if (detected.kategori === "jauh") return;
+      setArmadaTipe("motor");
+      setRadius(detected.kategori === "dekat" ? "<3km" : "3-6km");
+    });
+  }
+
+  const disabledByJarak = lokasiResult?.kategori === "jauh";
 
   const jenisHarianOpt = JENIS_HARIAN.find((j) => j.value === jenisHarian)!;
   const jenisBulananOpt = JENIS_BULANAN.find((j) => j.value === jenisBulanan)!;
@@ -85,7 +103,8 @@ export function Kalkulator({ mode, onModeChange }: KalkulatorProps) {
     return jenisBulananOpt.harga * jumlah * durasiBulananNum;
   }, [mode, jenisHarianOpt, durasiHari, jenisBulananOpt, jumlah, durasiBulananNum]);
 
-  const antarJemputFee = antarJemput ? ANTAR_JEMPUT_HARGA[armadaTipe][radius] : 0;
+  const antarJemputFee =
+    antarJemput && !disabledByJarak ? ANTAR_JEMPUT_HARGA[armadaTipe][radius] : 0;
   const total = subtotal + antarJemputFee;
 
   const rincianLabel =
@@ -221,46 +240,68 @@ export function Kalkulator({ mode, onModeChange }: KalkulatorProps) {
             </div>
 
             {antarJemput && (
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-tk-muted">Armada</label>
-                  <Select value={armadaTipe} onValueChange={(v) => v && setArmadaTipe(v)}>
-                    <SelectTrigger className={triggerClass}>
-                      <SelectValue>
-                        {(v: string) =>
-                          ANTAR_JEMPUT_TIPE.find((opt) => opt.value === v)?.label ?? v
-                        }
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ANTAR_JEMPUT_TIPE.map((opt) => (
-                        <SelectItem key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+              <div className="space-y-3">
+                <DeteksiLokasiBlock
+                  isDetecting={isDetecting}
+                  jarak={lokasiResult?.jarak ?? null}
+                  kategori={lokasiResult?.kategori ?? null}
+                  error={lokasiError}
+                  onDetect={handleDetectLokasi}
+                />
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-tk-muted">Armada</label>
+                    <Select
+                      value={armadaTipe}
+                      onValueChange={(v) => v && setArmadaTipe(v)}
+                      disabled={disabledByJarak}
+                    >
+                      <SelectTrigger className={triggerClass}>
+                        <SelectValue>
+                          {(v: string) =>
+                            ANTAR_JEMPUT_TIPE.find((opt) => opt.value === v)?.label ?? v
+                          }
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ANTAR_JEMPUT_TIPE.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-tk-muted">Radius</label>
+                    <Select
+                      value={radius}
+                      onValueChange={(v) => v && setRadius(v)}
+                      disabled={disabledByJarak}
+                    >
+                      <SelectTrigger className={triggerClass}>
+                        <SelectValue>
+                          {(v: string) =>
+                            ANTAR_JEMPUT_RADIUS.find((opt) => opt.value === v)?.label ?? v
+                          }
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ANTAR_JEMPUT_RADIUS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-tk-muted">Radius</label>
-                  <Select value={radius} onValueChange={(v) => v && setRadius(v)}>
-                    <SelectTrigger className={triggerClass}>
-                      <SelectValue>
-                        {(v: string) =>
-                          ANTAR_JEMPUT_RADIUS.find((opt) => opt.value === v)?.label ?? v
-                        }
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ANTAR_JEMPUT_RADIUS.map((opt) => (
-                        <SelectItem key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                {!disabledByJarak && (
+                  <p className="text-xs text-tk-muted">{ANTAR_JEMPUT_KAPASITAS[armadaTipe]}</p>
+                )}
               </div>
             )}
           </TkCard>
@@ -273,7 +314,7 @@ export function Kalkulator({ mode, onModeChange }: KalkulatorProps) {
                 <span>{rincianLabel}</span>
                 <span>{formatRupiah(subtotal)}</span>
               </div>
-              {antarJemput && (
+              {antarJemput && !disabledByJarak && (
                 <div className="flex justify-between text-tk-muted">
                   <span>
                     Antar-jemput ({ANTAR_JEMPUT_TIPE.find((t) => t.value === armadaTipe)?.label}

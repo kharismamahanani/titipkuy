@@ -22,12 +22,13 @@ export function Navbar() {
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-8 py-[14px]">
         <Link
           href="/"
-          className="flex shrink-0 items-center gap-2 text-xl font-extrabold"
+          className="flex shrink-0 items-center gap-1.5 text-xl font-extrabold sm:text-2xl"
         >
           <LogoMark />
           <span>
             <span className="text-tk-charcoal">Titip</span>
             <span className="text-tk-orange">Kuy!</span>
+            <span className="text-[0.85em]"> 📦</span>
           </span>
         </Link>
 

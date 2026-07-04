@@ -80,16 +80,21 @@ export function Step1DataPelanggan({ data, errors, onChange }: Step1Props) {
 
       <div>
         <Label htmlFor="kampus" className={tkLabelClass}>
-          Kampus
+          Kampus (opsional)
         </Label>
         <Select
-          value={data.kampus || undefined}
-          onValueChange={(value) => update("kampus", value as PelangganData["kampus"])}
+          value={data.kampus || "none"}
+          onValueChange={(value) =>
+            update("kampus", value === "none" ? "" : (value as PelangganData["kampus"]))
+          }
         >
           <SelectTrigger id="kampus" className={tkSelectTriggerClass}>
-            <SelectValue placeholder="Pilih kampus" />
+            <SelectValue placeholder="-- Tidak ada / Wisatawan --">
+              {(v: string) => (v === "none" ? "-- Tidak ada / Wisatawan --" : v)}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="none">-- Tidak ada / Wisatawan --</SelectItem>
             {KAMPUS_OPTIONS.map((kampus) => (
               <SelectItem key={kampus} value={kampus}>
                 {kampus}

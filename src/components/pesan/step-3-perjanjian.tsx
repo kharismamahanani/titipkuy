@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef, useState } from "react";
 import { format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import { addDays } from "date-fns";
@@ -7,8 +8,12 @@ import { Loader2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TkButton } from "@/components/ui/tk-button";
 import { TkCard } from "@/components/ui/tk-card";
-import { SignatureCanvas } from "@/components/pesan/signature-canvas";
+import {
+  SignatureCanvas,
+  type SignatureCanvasHandle,
+} from "@/components/pesan/signature-canvas";
 import { PerjanjianDialog } from "@/components/pesan/perjanjian-dialog";
+import { tkErrorClass } from "@/lib/form-style";
 import { formatRupiah } from "@/lib/utils";
 import { CHECKLIST_ITEMS, DEKLARASI_ITEM } from "@/lib/checklist-items";
 import type { ChecklistData, PesanFormData } from "@/types/pesan";
@@ -17,7 +22,7 @@ interface Step3Props {
   formData: PesanFormData;
   onChecklistChange: (checklist: ChecklistData) => void;
   onTandaTanganChange: (dataUrl: string | null) => void;
-  onSubmit: () => void;
+  onSubmit: (tandaTanganDataUrl: string) => void;
   isSubmitting: boolean;
   canSubmit: boolean;
 }
@@ -34,6 +39,31 @@ export function Step3Perjanjian({
   const items = paket?.perluDeklarasi
     ? [...CHECKLIST_ITEMS, DEKLARASI_ITEM]
     : CHECKLIST_ITEMS;
+
+  const signatureRef = useRef<SignatureCanvasHandle>(null);
+  const [signatureError, setSignatureError] = useState<string | null>(null);
+
+  function handleSubmitClick() {
+    const isCanvasEmpty = signatureRef.current?.isEmpty() ?? true;
+    if (isCanvasEmpty) {
+      setSignatureError("Tanda tangan wajib diisi");
+      return;
+    }
+
+    const dataUrl = signatureRef.current?.getDataUrl();
+    if (!dataUrl) {
+      setSignatureError("Tanda tangan wajib diisi");
+      return;
+    }
+
+    onTandaTanganChange(dataUrl);
+    setSignatureError(null);
+    // Kirim dataUrl langsung (bukan mengandalkan formData.tandaTanganDataUrl)
+    // karena setFormData di atas belum tentu ter-flush saat onSubmit ini
+    // dijalankan sinkron sesudahnya — kalau mengandalkan state, submit bisa
+    // memakai nilai lama (null) walau kanvas sudah ditandatangani.
+    onSubmit(dataUrl);
+  }
 
   const tanggalJatuhTempo =
     tanggalMasuk && paket ? addDays(tanggalMasuk, paket.durasiHari ?? 1) : null;
@@ -114,7 +144,8 @@ export function Step3Perjanjian({
 
       <div>
         <p className="mb-1 text-sm font-bold text-tk-charcoal">Tanda Tangan Digital</p>
-        <SignatureCanvas onChange={onTandaTanganChange} />
+        <SignatureCanvas ref={signatureRef} onChange={onTandaTanganChange} />
+        {signatureError && <p className={tkErrorClass}>{signatureError}</p>}
       </div>
 
       <TkButton
@@ -122,7 +153,7 @@ export function Step3Perjanjian({
         variant="primary"
         size="lg"
         disabled={!canSubmit || isSubmitting}
-        onClick={onSubmit}
+        onClick={handleSubmitClick}
         className="w-full justify-center"
       >
         {isSubmitting && <Loader2 className="mr-2 animate-spin" size={16} />}

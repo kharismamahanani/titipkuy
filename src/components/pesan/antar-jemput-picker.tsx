@@ -6,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import { tkLabelClass } from "@/lib/form-style";
 import { cn, formatRupiah } from "@/lib/utils";
 import { JAM_DROP_OFF_MANDIRI, JAM_OPERASIONAL_HUB_SUHAT } from "@/lib/constants";
+import { useDeteksiLokasi } from "@/hooks/use-deteksi-lokasi";
+import { DeteksiLokasiBlock } from "@/components/shared/deteksi-lokasi-block";
 import type { AntarJemputOption } from "@/types/antar-jemput";
 
 interface AntarJemputPickerProps {
@@ -17,6 +19,7 @@ interface AntarJemputPickerProps {
 export function AntarJemputPicker({ value, onChange, hideMandiriOption }: AntarJemputPickerProps) {
   const [options, setOptions] = useState<AntarJemputOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { detect, isDetecting, result, error } = useDeteksiLokasi();
 
   useEffect(() => {
     fetch("/api/antar-jemput")
@@ -25,6 +28,17 @@ export function AntarJemputPicker({ value, onChange, hideMandiriOption }: AntarJ
       .catch(() => setOptions([]))
       .finally(() => setIsLoading(false));
   }, []);
+
+  function handleDetect() {
+    detect((detected) => {
+      if (detected.kategori === "jauh") return;
+      const radiusLabel = detected.kategori === "dekat" ? "<3km" : "3-6km";
+      const match = options.find((o) => o.tipe === "motor" && o.radiusLabel === radiusLabel);
+      if (match) onChange(match);
+    });
+  }
+
+  const disabledByJarak = result?.kategori === "jauh";
 
   return (
     <div className="space-y-4 rounded-lg border-2 border-tk-charcoal bg-white p-5">
@@ -35,6 +49,14 @@ export function AntarJemputPicker({ value, onChange, hideMandiriOption }: AntarJ
         <p className="mt-1">{JAM_OPERASIONAL_HUB_SUHAT.hari}</p>
         <p>{JAM_OPERASIONAL_HUB_SUHAT.libur}</p>
       </div>
+
+      <DeteksiLokasiBlock
+        isDetecting={isDetecting}
+        jarak={result?.jarak ?? null}
+        kategori={result?.kategori ?? null}
+        error={error}
+        onDetect={handleDetect}
+      />
 
       {isLoading ? (
         <p className="flex items-center gap-2 text-sm text-tk-muted">
@@ -64,12 +86,14 @@ export function AntarJemputPicker({ value, onChange, hideMandiriOption }: AntarJ
               <button
                 key={option.id}
                 type="button"
+                disabled={disabledByJarak}
                 onClick={() => onChange(option)}
                 className={cn(
                   "w-full rounded-lg border-2 border-tk-charcoal px-4 py-2.5 text-left text-sm transition-colors",
                   isSelected
                     ? "bg-tk-charcoal text-tk-cream"
-                    : "bg-white text-tk-charcoal hover:bg-tk-cream-alt"
+                    : "bg-white text-tk-charcoal hover:bg-tk-cream-alt",
+                  disabledByJarak && "cursor-not-allowed opacity-40 hover:bg-white"
                 )}
               >
                 <span className="flex items-center justify-between">

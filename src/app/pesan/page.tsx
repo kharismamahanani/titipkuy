@@ -62,17 +62,18 @@ function PesanForm() {
   const requiredChecks = formData.paket?.perluDeklarasi
     ? [...REQUIRED_CHECKS, "deklarasiBenar" as const]
     : REQUIRED_CHECKS;
-  const canSubmit =
-    requiredChecks.every((key) => formData.checklist[key]) &&
-    !!formData.tandaTanganDataUrl;
+  // Tanda tangan divalidasi langsung di Step3Perjanjian saat tombol submit
+  // diklik (baca fresh dari kanvas, bukan dari state ini yang bisa lag satu
+  // render di belakang) — di sini cukup syarat checklist saja.
+  const canSubmit = requiredChecks.every((key) => formData.checklist[key]);
 
-  async function handleSubmit() {
-    if (!canSubmit || !formData.paket || !formData.tandaTanganDataUrl) return;
+  async function handleSubmit(tandaTanganDataUrl: string) {
+    if (!canSubmit || !formData.paket) return;
 
     setIsSubmitting(true);
     try {
       const signatureFile = dataUrlToFile(
-        formData.tandaTanganDataUrl,
+        tandaTanganDataUrl,
         `${transactionId}.png`
       );
       const tandaTanganUrl = await uploadToStorage(

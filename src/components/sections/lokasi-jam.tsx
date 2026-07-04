@@ -1,6 +1,7 @@
 "use client";
 
-import { MessageCircle } from "lucide-react";
+import { FaWhatsapp, FaInstagram } from "react-icons/fa";
+import { FaTiktok } from "react-icons/fa6";
 import { TkCard } from "@/components/ui/tk-card";
 import { tkButtonVariants } from "@/components/ui/tk-button";
 import { HUB_CONFIG, JAM_DROP_OFF_MANDIRI, JAM_OPERASIONAL_HUB_SUHAT } from "@/lib/constants";
@@ -11,7 +12,7 @@ import {
   getWhatsAppUrl,
 } from "@/constants/site";
 
-const MAPS_URL = "https://maps.google.com/?q=Jl+Bunga+Lely+Lowokwaru+Malang";
+const MAPS_URL = "https://maps.app.goo.gl/qtmjRK84Hh1FfQsE6";
 
 export function LokasiJam() {
   return (
@@ -39,24 +40,26 @@ export function LokasiJam() {
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 font-bold text-tk-charcoal transition-colors hover:text-tk-orange"
             >
-              <MessageCircle size={16} />
+              <FaWhatsapp size={20} color="#3D4A41" />
               {formatWhatsAppDisplay()}
             </a>
             <a
               href={INSTAGRAM_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="block font-bold text-tk-charcoal transition-colors hover:text-tk-orange"
+              className="flex items-center justify-center gap-2 font-bold text-tk-charcoal transition-colors hover:text-tk-orange"
             >
-              📸 @titipkuy.malang
+              <FaInstagram size={20} color="#3D4A41" />
+              @titipkuy.malang
             </a>
             <a
               href={TIKTOK_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="block font-bold text-tk-charcoal transition-colors hover:text-tk-orange"
+              className="flex items-center justify-center gap-2 font-bold text-tk-charcoal transition-colors hover:text-tk-orange"
             >
-              🎵 @titipkuy.malang
+              <FaTiktok size={20} color="#3D4A41" />
+              @titipkuy.malang
             </a>
           </div>
 
