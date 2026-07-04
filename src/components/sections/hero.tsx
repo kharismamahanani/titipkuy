@@ -13,60 +13,88 @@ const TRUST_ITEMS = [
 function BoxIllustration() {
   return (
     <svg
-      viewBox="0 0 280 280"
-      className="h-[200px] w-[200px] sm:h-[280px] sm:w-[280px]"
+      viewBox="0 0 300 300"
+      className="h-[220px] w-[220px] sm:h-[300px] sm:w-[300px]"
       aria-hidden="true"
     >
+      {/* dekorasi mengambang */}
+      <circle cx="256" cy="52" r="4" fill="#E89C65" />
+      <circle cx="44" cy="60" r="3" fill="#7FA99B" />
       <path
-        d="M40 90 L100 40 L180 40 L240 90 Z"
-        fill="#7FA99B"
-        stroke="#3D4A41"
-        strokeWidth="6"
-        strokeLinejoin="round"
-      />
-      <rect
-        x="40"
-        y="90"
-        width="200"
-        height="150"
-        rx="10"
+        d="M222 82 l3 7 7 3 -7 3 -3 7 -3 -7 -7 -3 7 -3 Z"
         fill="#E89C65"
-        stroke="#3D4A41"
-        strokeWidth="6"
       />
-      <line x1="140" y1="90" x2="140" y2="240" stroke="#3D4A41" strokeWidth="4" />
-      <rect
-        x="68"
-        y="148"
-        width="144"
-        height="62"
-        rx="8"
-        fill="#FFFFFF"
-        stroke="#3D4A41"
-        strokeWidth="5"
-      />
-      <line
-        x1="82"
-        y1="168"
-        x2="198"
-        y2="168"
-        stroke="#3D4A41"
-        strokeWidth="4"
-        strokeDasharray="6 6"
-      />
+
+      {/* garis tanah */}
+      <line x1="16" y1="253" x2="284" y2="253" stroke="#3D4A41" strokeWidth="4" strokeLinecap="round" />
+
+      {/* Tugu Malang */}
+      <path d="M35 253 L75 253 L66 236 L44 236 Z" fill="#7FA99B" stroke="#3D4A41" strokeWidth="4" strokeLinejoin="round" />
+      <rect x="44" y="207" width="22" height="29" rx="2" fill="#7FA99B" stroke="#3D4A41" strokeWidth="4" />
+      <rect x="51" y="126" width="8" height="81" fill="#FAF6F0" stroke="#3D4A41" strokeWidth="4" />
+      <rect x="45" y="109" width="20" height="18" rx="3" fill="#E89C65" stroke="#3D4A41" strokeWidth="4" />
+      <circle cx="55" cy="97" r="7" fill="#E89C65" stroke="#3D4A41" strokeWidth="4" />
+
+      {/* gedung kota */}
+      <rect x="207" y="149" width="42" height="104" rx="4" fill="#FFFFFF" stroke="#3D4A41" strokeWidth="5" />
+      <rect x="216" y="160" width="9" height="9" fill="#7FA99B" />
+      <rect x="231" y="160" width="9" height="9" fill="#7FA99B" />
+      <rect x="216" y="176" width="9" height="9" fill="#7FA99B" />
+      <rect x="231" y="176" width="9" height="9" fill="#7FA99B" />
+      <rect x="216" y="192" width="9" height="9" fill="#7FA99B" />
+      <rect x="231" y="192" width="9" height="9" fill="#7FA99B" />
+      <rect x="211" y="235" width="34" height="15" rx="2" fill="#E89C65" stroke="#3D4A41" strokeWidth="3" />
       <text
-        x="140"
-        y="196"
+        x="228"
+        y="246"
         textAnchor="middle"
         fontFamily="Nunito, sans-serif"
         fontWeight="800"
-        fontSize="20"
+        fontSize="8"
         fill="#3D4A41"
       >
-        No. 0089
+        KOST
       </text>
-      <circle cx="212" cy="68" r="15" fill="#3D4A41" />
-      <circle cx="212" cy="68" r="5" fill="#FAF6F0" />
+
+      <rect x="251" y="105" width="34" height="148" rx="4" fill="#7FA99B" stroke="#3D4A41" strokeWidth="5" />
+      <rect x="259" y="118" width="8" height="8" fill="#FAF6F0" />
+      <rect x="273" y="118" width="8" height="8" fill="#FAF6F0" />
+      <rect x="259" y="134" width="8" height="8" fill="#FAF6F0" />
+      <rect x="273" y="134" width="8" height="8" fill="#FAF6F0" />
+      <rect x="259" y="150" width="8" height="8" fill="#FAF6F0" />
+      <rect x="273" y="150" width="8" height="8" fill="#FAF6F0" />
+
+      {/* karakter berjalan */}
+      <rect x="120" y="205" width="16" height="48" rx="8" fill="#3D4A41" transform="rotate(-14 128 205)" />
+      <rect x="164" y="205" width="16" height="48" rx="8" fill="#3D4A41" transform="rotate(16 172 205)" />
+      <ellipse cx="120" cy="254" rx="14" ry="7" fill="#E89C65" stroke="#3D4A41" strokeWidth="3" />
+      <ellipse cx="184" cy="254" rx="14" ry="7" fill="#E89C65" stroke="#3D4A41" strokeWidth="3" />
+
+      {/* ransel mengintip */}
+      <rect x="110" y="154" width="25" height="58" rx="10" fill="#E89C65" stroke="#3D4A41" strokeWidth="5" />
+
+      {/* badan */}
+      <rect x="124" y="149" width="56" height="62" rx="22" fill="#7FA99B" stroke="#3D4A41" strokeWidth="5" />
+      <path d="M137 152 Q133 172 139 191" fill="none" stroke="#3D4A41" strokeWidth="3" strokeLinecap="round" />
+
+      {/* lengan memeluk kardus */}
+      <path d="M134 169 Q108 184 117 206 L131 206 Q127 185 147 177 Z" fill="#7FA99B" stroke="#3D4A41" strokeWidth="4" strokeLinejoin="round" />
+      <path d="M170 169 Q196 184 187 206 L173 206 Q177 185 157 177 Z" fill="#7FA99B" stroke="#3D4A41" strokeWidth="4" strokeLinejoin="round" />
+
+      {/* kardus */}
+      <rect x="119" y="190" width="62" height="38" rx="6" fill="#FAF6F0" stroke="#3D4A41" strokeWidth="5" />
+      <line x1="150" y1="190" x2="150" y2="228" stroke="#3D4A41" strokeWidth="3" />
+      <line x1="119" y1="207" x2="181" y2="207" stroke="#3D4A41" strokeWidth="3" strokeDasharray="5 4" />
+
+      {/* kepala */}
+      <circle cx="152" cy="132" r="24" fill="#FAF6F0" stroke="#3D4A41" strokeWidth="5" />
+      <path
+        d="M127 129 Q128 100 152 103 Q177 100 178 127 Q167 111 152 114 Q137 111 127 129 Z"
+        fill="#3D4A41"
+      />
+      <circle cx="144" cy="134" r="2.5" fill="#3D4A41" />
+      <circle cx="161" cy="134" r="2.5" fill="#3D4A41" />
+      <path d="M144 142 Q152 149 160 142" fill="none" stroke="#3D4A41" strokeWidth="3" strokeLinecap="round" />
     </svg>
   );
 }
