@@ -103,12 +103,7 @@ function KonfirmasiManualContent() {
     setIsSubmitting(true);
     try {
       const signatureFile = dataUrlToFile(tandaTanganDataUrl, `${data.id}.png`);
-      const random = Math.random().toString(36).slice(2, 8);
-      const tandaTanganUrl = await uploadViaApi(
-        signatureFile,
-        "ttd",
-        `${data.id}/${Date.now()}-${random}.png`
-      );
+      const tandaTanganUrl = await uploadViaApi(signatureFile, "ttd", "ttd", data.id);
 
       const patchRes = await fetch(`/api/konfirmasi-manual/${data.id}?token=${token}`, {
         method: "PATCH",

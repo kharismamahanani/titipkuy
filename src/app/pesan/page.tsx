@@ -86,13 +86,7 @@ function PesanForm() {
     try {
       const signatureBlobRes = await fetch(tandaTanganDataUrl);
       const signatureBlob = await signatureBlobRes.blob();
-      const random = Math.random().toString(36).slice(2, 8);
-      const signatureFile = new File([signatureBlob], "ttd.png", { type: "image/png" });
-      const tandaTanganUrl = await uploadViaApi(
-        signatureFile,
-        "ttd",
-        `${transactionId}/${Date.now()}-${random}.png`
-      );
+      const tandaTanganUrl = await uploadViaApi(signatureBlob, "ttd", "ttd", transactionId);
 
       const durasiHari = formData.paket.durasiHari ?? 1;
       const premiGantiRugi =

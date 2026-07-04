@@ -12,7 +12,6 @@ import { Label } from "@/components/ui/label";
 import { TkCard } from "@/components/ui/tk-card";
 import { cn, formatRupiah } from "@/lib/utils";
 import { tkInputClass, tkLabelClass } from "@/lib/form-style";
-import { buildDokumenPath } from "@/lib/supabase";
 import { uploadViaApi } from "@/lib/upload-via-api";
 import { GANTI_RUGI, hitungPremi, tentukanTier } from "@/lib/ganti-rugi";
 import { AntarJemputPicker } from "@/components/pesan/antar-jemput-picker";
@@ -115,8 +114,7 @@ export function Step2PaketTanggal({
 
     setUploadingDokumen((prev) => ({ ...prev, [jenis]: true }));
     try {
-      const path = buildDokumenPath(transactionId, jenis, file.type);
-      const url = await uploadViaApi(file, "dokumen", path);
+      const url = await uploadViaApi(file, "dokumen", `motor/${jenis}`, transactionId);
       onDokumenMotorChange({ ...dokumenMotor, [`${jenis}Url`]: url });
       toast.success(`${jenis.toUpperCase()} terupload`);
     } catch (error) {

@@ -1,13 +1,14 @@
 export async function uploadViaApi(
   file: File | Blob,
   bucket: string,
-  path: string,
-  filename?: string
+  folder: string, // contoh: "motor/ktp", "ttd", "motor/stnk"
+  transactionId: string
 ): Promise<string> {
   const formData = new FormData();
-  formData.append("file", file, filename || "file");
+  formData.append("file", file); // JANGAN append nama file di sini
   formData.append("bucket", bucket);
-  formData.append("path", path);
+  formData.append("folder", folder);
+  formData.append("transactionId", transactionId);
 
   const res = await fetch("/api/upload", {
     method: "POST",

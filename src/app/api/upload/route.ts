@@ -12,48 +12,48 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const file = formData.get("file") as File;
     const bucket = formData.get("bucket") as string;
-    const path = formData.get("path") as string;
+    const folder = formData.get("folder") as string; // contoh: "motor/ktp"
+    const transactionId = formData.get("transactionId") as string;
 
-    if (!file || !bucket || !path) {
+    if (!file || !bucket || !folder || !transactionId) {
       return NextResponse.json(
-        { error: "file, bucket, dan path wajib diisi" },
+        { error: "file, bucket, folder, transactionId wajib diisi" },
         { status: 400 }
       );
     }
 
-    // Validasi bucket yang diizinkan
     const allowedBuckets = ["ttd", "dokumen", "fotos", "perjanjian"];
     if (!allowedBuckets.includes(bucket)) {
       return NextResponse.json({ error: "Bucket tidak diizinkan" }, { status: 403 });
     }
 
-    // Validasi path tidak mengandung karakter berbahaya
-    if (path.includes("..") || path.startsWith("/")) {
-      return NextResponse.json({ error: "Path tidak valid" }, { status: 400 });
-    }
+    // Server yang generate path — tidak pakai nama file asli SAMA SEKALI
+    const ext = file.type.includes("pdf") ? "pdf" : file.type.includes("png") ? "png" : "jpg";
+    const cleanPath = `${folder}/${transactionId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    const { data, error } = await supabaseAdmin.storage
+    const { error } = await supabaseAdmin.storage
       .from(bucket)
-      .upload(path, buffer, {
+      .upload(cleanPath, buffer, {
         contentType: file.type || "application/octet-stream",
         upsert: false,
       });
 
     if (error) {
+      console.error("[API Upload] error:", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // Return public URL (untuk bucket public) atau path saja
-    const { data: urlData } = supabaseAdmin.storage.from(bucket).getPublicUrl(path);
+    const { data: urlData } = supabaseAdmin.storage.from(bucket).getPublicUrl(cleanPath);
 
     return NextResponse.json({
-      path: data.path,
+      path: cleanPath,
       publicUrl: urlData.publicUrl,
     });
   } catch (err) {
-    return NextResponse.json({ error: "Upload gagal: " + String(err) }, { status: 500 });
+    console.error("[API Upload] exception:", err);
+    return NextResponse.json({ error: String(err) }, { status: 500 });
   }
 }
