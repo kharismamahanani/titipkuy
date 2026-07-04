@@ -17,6 +17,7 @@ import { PerjanjianPdfDocument } from "@/components/konfirmasi/perjanjian-pdf";
 import { CHECKLIST_ITEMS, DEKLARASI_ITEM, MOTOR_ITEM } from "@/lib/checklist-items";
 import { dataUrlToFile, formatRupiah } from "@/lib/utils";
 import { uploadToStorage } from "@/lib/supabase";
+import { uploadViaApi } from "@/lib/upload-via-api";
 import { ADMIN_NAME, formatWhatsAppDisplay, getWhatsAppUrl } from "@/constants/site";
 import type { ChecklistData } from "@/types/pesan";
 import type { TransaksiDetail, Foto } from "@/types/transaksi";
@@ -102,7 +103,12 @@ function KonfirmasiManualContent() {
     setIsSubmitting(true);
     try {
       const signatureFile = dataUrlToFile(tandaTanganDataUrl, `${data.id}.png`);
-      const tandaTanganUrl = await uploadToStorage(`ttd/${data.id}.png`, signatureFile);
+      const random = Math.random().toString(36).slice(2, 8);
+      const tandaTanganUrl = await uploadViaApi(
+        signatureFile,
+        "ttd",
+        `${data.id}/${Date.now()}-${random}.png`
+      );
 
       const patchRes = await fetch(`/api/konfirmasi-manual/${data.id}?token=${token}`, {
         method: "PATCH",

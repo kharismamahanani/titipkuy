@@ -68,14 +68,16 @@ export function buildFotoPath(folder: string) {
 
 // Dipakai untuk dokumen motor (KTP/STNK/BPKB) — nama file asli tidak
 // pernah dipakai sama sekali, ekstensi ditentukan dari MIME type supaya
-// aman untuk gambar maupun PDF.
+// aman untuk gambar maupun PDF. Path TIDAK menyertakan prefix bucket
+// karena dipakai lewat uploadViaApi() (bucket dikirim terpisah ke
+// /api/upload), bukan lewat uploadToStorage().
 export function buildDokumenPath(transactionId: string, jenis: string, mimeType: string) {
   assertValidPathSegment(transactionId, "transactionId");
   assertValidPathSegment(jenis, "jenis");
 
   const ext = mimeType === "application/pdf" ? "pdf" : "jpg";
   const random = Math.random().toString(36).slice(2, 8);
-  return `dokumen/motor/${transactionId}/${jenis}-${Date.now()}-${random}.${ext}`;
+  return `motor/${transactionId}/${jenis}-${Date.now()}-${random}.${ext}`;
 }
 
 // Cegah path yang mengandung "undefined"/"null"/string kosong lolos ke
