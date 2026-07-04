@@ -20,7 +20,7 @@ function HeroIllustration() {
       width={512}
       height={512}
       priority
-      className="h-[240px] w-[240px] sm:h-[300px] sm:w-[300px]"
+      className="h-[300px] w-[300px] sm:h-[420px] sm:w-[420px]"
     />
   );
 }
