@@ -11,15 +11,17 @@ import {
 export function PerjanjianDialog() {
   return (
     <Dialog>
-      <DialogTrigger className="text-sm font-medium text-primary-from underline underline-offset-4">
+      <DialogTrigger className="text-sm font-bold text-tk-orange-dark underline underline-offset-4">
         Baca Perjanjian Lengkap
       </DialogTrigger>
       <DialogContent className="max-h-[80vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Perjanjian Penitipan Barang TitipKuy!</DialogTitle>
+          <DialogTitle className="text-tk-charcoal">
+            Perjanjian Penitipan Barang TitipKuy!
+          </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-3 text-sm text-foreground/80">
+        <div className="space-y-3 text-sm text-tk-muted">
           <p>
             Perjanjian ini dibuat antara <strong>TitipKuy!</strong>
             (&quot;Penyedia Jasa&quot;) dan Pelanggan yang mengisi form

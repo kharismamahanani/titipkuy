@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { TkButton } from "@/components/ui/tk-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { tkInputClass, tkLabelClass, tkSelectTriggerClass } from "@/lib/form-style";
 import type { Armada } from "@/types/armada";
 
 const TIPE_OPTIONS = [
@@ -105,25 +106,32 @@ export function ArmadaFormDialog({ open, onOpenChange, armada }: ArmadaFormDialo
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{armada ? "Edit Armada" : "Tambah Armada"}</DialogTitle>
+          <DialogTitle className="text-tk-charcoal">
+            {armada ? "Edit Armada" : "Tambah Armada"}
+          </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="nama">Nama Armada</Label>
+          <div>
+            <Label htmlFor="nama" className={tkLabelClass}>
+              Nama Armada
+            </Label>
             <Input
               id="nama"
               placeholder="Motor Honda Beat"
               value={form.nama}
               onChange={(e) => setForm({ ...form, nama: e.target.value })}
               required
+              className={tkInputClass}
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="tipe">Tipe</Label>
+          <div>
+            <Label htmlFor="tipe" className={tkLabelClass}>
+              Tipe
+            </Label>
             <Select value={form.tipe} onValueChange={(v) => v && setForm({ ...form, tipe: v })}>
-              <SelectTrigger id="tipe" className="w-full">
+              <SelectTrigger id="tipe" className={tkSelectTriggerClass}>
                 <SelectValue>
                   {(v: string) => TIPE_OPTIONS.find((opt) => opt.value === v)?.label ?? v}
                 </SelectValue>
@@ -138,29 +146,35 @@ export function ArmadaFormDialog({ open, onOpenChange, armada }: ArmadaFormDialo
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="platNomor">Plat Nomor</Label>
+          <div>
+            <Label htmlFor="platNomor" className={tkLabelClass}>
+              Plat Nomor
+            </Label>
             <Input
               id="platNomor"
               placeholder="N 1234 ABC"
               value={form.platNomor}
               onChange={(e) => setForm({ ...form, platNomor: e.target.value })}
+              className={tkInputClass}
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="slotPerHari">Slot Per Hari</Label>
+          <div>
+            <Label htmlFor="slotPerHari" className={tkLabelClass}>
+              Slot Per Hari
+            </Label>
             <Input
               id="slotPerHari"
               type="number"
               min={1}
               value={form.slotPerHari}
               onChange={(e) => setForm({ ...form, slotPerHari: e.target.value })}
+              className={tkInputClass}
             />
           </div>
 
-          <div className="flex items-center justify-between rounded-lg border border-card-border px-3 py-2">
-            <Label htmlFor="aktif" className="cursor-pointer">
+          <div className="flex items-center justify-between rounded-lg border-2 border-tk-charcoal bg-white px-3 py-2">
+            <Label htmlFor="aktif" className="cursor-pointer text-sm font-bold text-tk-charcoal">
               Status Aktif
             </Label>
             <Switch
@@ -170,14 +184,10 @@ export function ArmadaFormDialog({ open, onOpenChange, armada }: ArmadaFormDialo
             />
           </div>
 
-          <Button
-            type="submit"
-            disabled={isSaving}
-            className="w-full bg-gradient-to-r from-primary-from to-primary-to text-white"
-          >
-            {isSaving && <Loader2 className="animate-spin" size={16} />}
+          <TkButton type="submit" variant="primary" disabled={isSaving} className="w-full justify-center">
+            {isSaving && <Loader2 className="mr-2 animate-spin" size={16} />}
             Simpan
-          </Button>
+          </TkButton>
         </form>
       </DialogContent>
     </Dialog>

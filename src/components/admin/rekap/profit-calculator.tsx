@@ -3,10 +3,12 @@
 import { useState } from "react";
 import { AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { TkButton } from "@/components/ui/tk-button";
+import { TkCard } from "@/components/ui/tk-card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { tkInputClass, tkLabelClass } from "@/lib/form-style";
 import { formatRupiah } from "@/lib/utils";
 
 const DEFAULT_BIAYA_OPERASIONAL = 650000;
@@ -37,23 +39,26 @@ export function ProfitCalculator({
   }
 
   return (
-    <div className="glass-card space-y-5 rounded-2xl p-5">
-      <h2 className="font-heading font-bold">Kalkulator Pembagian Laba</h2>
+    <TkCard className="space-y-5">
+      <h2 className="font-extrabold text-tk-charcoal">Kalkulator Pembagian Laba</h2>
 
-      <div className="space-y-2">
-        <Label htmlFor="biayaOperasional">Estimasi Biaya Operasional Bulan Ini</Label>
+      <div>
+        <Label htmlFor="biayaOperasional" className={tkLabelClass}>
+          Estimasi Biaya Operasional Bulan Ini
+        </Label>
         <Input
           id="biayaOperasional"
           type="number"
           value={biayaOperasional}
           onChange={(e) => setBiayaOperasional(e.target.value)}
+          className={tkInputClass}
         />
       </div>
 
       <div className="space-y-3">
         <div className="flex justify-between text-sm">
-          <Label>Persentase Laba Ditahan untuk Modal Kerja</Label>
-          <span className="font-semibold text-primary-from">{persentaseDitahan}%</span>
+          <Label className="font-bold text-tk-charcoal">Persentase Laba Ditahan untuk Modal Kerja</Label>
+          <span className="font-bold text-tk-orange-dark">{persentaseDitahan}%</span>
         </div>
         <Slider
           value={persentaseDitahan}
@@ -65,26 +70,22 @@ export function ProfitCalculator({
       </div>
 
       {isRugi && (
-        <div className="flex items-start gap-2 rounded-xl border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
+        <div className="flex items-start gap-2 rounded-lg border-2 border-[#C0392B] bg-white p-3 text-sm text-[#C0392B]">
           <AlertTriangle size={18} className="mt-0.5 shrink-0" />
           <p>Biaya operasional lebih besar dari omzet bulan ini — bulan ini rugi.</p>
         </div>
       )}
 
-      <div className="space-y-2 rounded-xl border border-card-border p-4 text-sm">
+      <div className="space-y-2 rounded-lg border-2 border-tk-charcoal bg-white p-4 text-sm">
         <Row label="Laba Bersih" value={labaBersih} highlight={isRugi} />
         <Row label={`Dana Ditahan (${persentaseDitahan}%)`} value={danaDitahan} />
         <Row label="Boleh Diambil Pemilik" value={bolehDiambil} emphasize />
       </div>
 
-      <Button
-        type="button"
-        onClick={handleSave}
-        className="w-full bg-gradient-to-r from-primary-from to-primary-to text-white"
-      >
+      <TkButton type="button" variant="primary" onClick={handleSave} className="w-full justify-center">
         Simpan sebagai Pengambilan Bulan Ini
-      </Button>
-    </div>
+      </TkButton>
+    </TkCard>
   );
 }
 
@@ -101,14 +102,14 @@ function Row({
 }) {
   return (
     <div className="flex justify-between">
-      <span className="text-foreground/60">{label}</span>
+      <span className="text-tk-muted">{label}</span>
       <span
         className={
           highlight
-            ? "font-semibold text-destructive"
+            ? "font-bold text-[#C0392B]"
             : emphasize
-              ? "gradient-text font-bold"
-              : "font-medium"
+              ? "font-extrabold text-tk-orange"
+              : "font-bold text-tk-charcoal"
         }
       >
         {formatRupiah(value)}

@@ -6,7 +6,8 @@ import { format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import { Loader2, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { TkButton } from "@/components/ui/tk-button";
+import { TkCard, tkCardVariants } from "@/components/ui/tk-card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -16,7 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { formatRupiah } from "@/lib/utils";
+import { tkInputClass, tkLabelClass, tkSelectTriggerClass } from "@/lib/form-style";
+import { cn, formatRupiah } from "@/lib/utils";
 import type { TransaksiSearchResult } from "@/types/transaksi";
 
 const KATEGORI_BARANG_OPTIONS = [
@@ -127,13 +129,13 @@ function AdminLabelPageContent() {
 
   return (
     <div className="px-4 py-6 sm:px-6 lg:px-8">
-      <h1 className="font-heading text-2xl font-bold">Print Label</h1>
-      <p className="mt-1 text-sm text-foreground/60">
+      <h1 className="text-2xl font-extrabold text-tk-charcoal">Print Label</h1>
+      <p className="mt-1 text-sm text-tk-muted">
         Cari transaksi, tambahkan barang, lalu cetak label.
       </p>
 
       {isLoadingDeepLink && (
-        <p className="mt-6 flex items-center gap-2 text-sm text-foreground/60">
+        <p className="mt-6 flex items-center gap-2 text-sm text-tk-muted">
           <Loader2 className="animate-spin" size={16} />
           Memuat transaksi...
         </p>
@@ -145,11 +147,16 @@ function AdminLabelPageContent() {
             placeholder="Cari nama pelanggan atau nomor ref..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            className={tkInputClass}
           />
-          <Button type="submit" disabled={isSearching}>
-            {isSearching ? <Loader2 className="animate-spin" size={16} /> : <Search size={16} />}
+          <TkButton type="submit" variant="primary" disabled={isSearching}>
+            {isSearching ? (
+              <Loader2 className="mr-1.5 animate-spin" size={16} />
+            ) : (
+              <Search className="mr-1.5" size={16} />
+            )}
             Cari
-          </Button>
+          </TkButton>
         </form>
       )}
 
@@ -160,10 +167,10 @@ function AdminLabelPageContent() {
               key={t.id}
               type="button"
               onClick={() => setSelected(t)}
-              className="glass-card block w-full rounded-xl p-4 text-left hover:scale-[1.01]"
+              className="block w-full rounded-lg border-2 border-tk-charcoal bg-white p-4 text-left transition-colors hover:bg-tk-cream-alt"
             >
-              <p className="font-medium">{t.pelanggan.nama}</p>
-              <p className="text-xs text-foreground/60">
+              <p className="font-bold text-tk-charcoal">{t.pelanggan.nama}</p>
+              <p className="text-xs text-tk-muted">
                 {t.nomorRef} &middot; {t.paket.nama}
               </p>
             </button>
@@ -173,62 +180,67 @@ function AdminLabelPageContent() {
 
       {selected && (
         <div className="mt-6 space-y-6">
-          <div className="glass-card space-y-2 rounded-2xl p-5 text-sm">
-            <Button
+          <TkCard className="space-y-2 text-sm">
+            <TkButton
               type="button"
               size="sm"
-              variant="outline"
+              variant="secondary"
               onClick={() => {
                 setSelected(null);
                 if (transaksiIdParam) router.replace("/admin/label");
               }}
             >
               &larr; Cari transaksi lain
-            </Button>
+            </TkButton>
             <div className="flex justify-between pt-2">
-              <span className="text-foreground/60">Nama</span>
-              <span className="font-medium">{selected.pelanggan.nama}</span>
+              <span className="text-tk-muted">Nama</span>
+              <span className="font-bold text-tk-charcoal">{selected.pelanggan.nama}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-foreground/60">Paket</span>
-              <span className="font-medium">
+              <span className="text-tk-muted">Paket</span>
+              <span className="font-bold text-tk-charcoal">
                 {selected.paket.nama} &middot; {formatRupiah(selected.paket.harga)}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-foreground/60">Masuk</span>
-              <span className="font-medium">
+              <span className="text-tk-muted">Masuk</span>
+              <span className="font-bold text-tk-charcoal">
                 {format(new Date(selected.tanggalMasuk), "d MMM yyyy", { locale: localeId })}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-foreground/60">Jatuh Tempo</span>
-              <span className="font-medium">
+              <span className="text-tk-muted">Jatuh Tempo</span>
+              <span className="font-bold text-tk-charcoal">
                 {format(new Date(selected.tanggalJatuhTempo), "d MMM yyyy", { locale: localeId })}
               </span>
             </div>
-          </div>
+          </TkCard>
 
-          <form onSubmit={handleAddBarang} className="glass-card space-y-3 rounded-2xl p-5">
-            <p className="text-sm font-semibold">Tambah Barang</p>
+          <form onSubmit={handleAddBarang} className={cn(tkCardVariants(), "space-y-3")}>
+            <p className="text-sm font-bold text-tk-charcoal">Tambah Barang</p>
             <div className="grid gap-3 sm:grid-cols-[1fr_180px_auto]">
-              <div className="space-y-2">
-                <Label htmlFor="deskripsiBarang">Deskripsi Barang</Label>
+              <div>
+                <Label htmlFor="deskripsiBarang" className={tkLabelClass}>
+                  Deskripsi Barang
+                </Label>
                 <Input
                   id="deskripsiBarang"
                   placeholder="Kardus 1 - Pakaian"
                   value={deskripsiBarang}
                   onChange={(e) => setDeskripsiBarang(e.target.value)}
                   required
+                  className={tkInputClass}
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="kategoriBarang">Kategori</Label>
+              <div>
+                <Label htmlFor="kategoriBarang" className={tkLabelClass}>
+                  Kategori
+                </Label>
                 <Select
                   value={kategoriBarang}
                   onValueChange={(value) => value && setKategoriBarang(value)}
                 >
-                  <SelectTrigger id="kategoriBarang" className="w-full">
+                  <SelectTrigger id="kategoriBarang" className={tkSelectTriggerClass}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -240,50 +252,46 @@ function AdminLabelPageContent() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button
-                type="submit"
-                disabled={isAdding}
-                className="self-end bg-gradient-to-r from-primary-from to-primary-to text-white"
-              >
-                {isAdding && <Loader2 className="animate-spin" size={14} />}
+              <TkButton type="submit" variant="primary" disabled={isAdding} className="self-end">
+                {isAdding && <Loader2 className="mr-1.5 animate-spin" size={14} />}
                 Tambah
-              </Button>
+              </TkButton>
             </div>
           </form>
 
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <p className="font-heading font-bold">
+              <p className="font-extrabold text-tk-charcoal">
                 Daftar Barang ({selected.barangLabel.length})
               </p>
-              <Button
+              <TkButton
                 type="button"
+                variant="primary"
                 disabled={selected.barangLabel.length === 0}
                 onClick={handlePrint}
-                className="bg-gradient-to-r from-primary-from to-primary-to text-white"
               >
                 Print Semua Label
-              </Button>
+              </TkButton>
             </div>
 
             {selected.barangLabel.length === 0 ? (
-              <p className="text-sm text-foreground/50">Belum ada barang ditambahkan.</p>
+              <p className="text-sm text-tk-light">Belum ada barang ditambahkan.</p>
             ) : (
-              <div className="glass-card divide-y divide-card-border rounded-2xl">
+              <div className="divide-y divide-[#D6CEC4] rounded-lg border-2 border-tk-charcoal bg-white">
                 {selected.barangLabel.map((b) => (
                   <div key={b.id} className="flex items-center justify-between px-4 py-3 text-sm">
                     <div>
-                      <p className="font-medium">{b.deskripsi}</p>
-                      <p className="text-xs text-foreground/60 capitalize">{b.kategori}</p>
+                      <p className="font-bold text-tk-charcoal">{b.deskripsi}</p>
+                      <p className="text-xs capitalize text-tk-muted">{b.kategori}</p>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="gradient-text font-heading font-bold">{b.kodeLabel}</span>
+                      <span className="font-extrabold text-tk-orange">{b.kodeLabel}</span>
                       {selected.statusTransaksi === "AKTIF" && (
                         <button
                           type="button"
                           onClick={() => handleDeleteBarang(b.id)}
                           aria-label="Hapus barang"
-                          className="text-foreground/40 hover:text-destructive"
+                          className="text-tk-light hover:text-[#C0392B]"
                         >
                           <Trash2 size={16} />
                         </button>

@@ -3,7 +3,8 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { TkButton } from "@/components/ui/tk-button";
+import { TkCard } from "@/components/ui/tk-card";
 import { ProgressBar } from "@/components/pesan/progress-bar";
 import { Step1DataPelanggan } from "@/components/pesan/step-1-data-pelanggan";
 import { Step2PaketTanggal } from "@/components/pesan/step-2-paket-tanggal";
@@ -112,13 +113,13 @@ function PesanForm() {
   }
 
   return (
-    <div className="min-h-screen bg-bg-dark px-4 py-10 sm:px-6">
+    <div className="min-h-screen bg-tk-cream px-4 py-10 sm:px-6">
       <div className="mx-auto max-w-2xl">
         <div className="mb-8">
           <ProgressBar currentStep={step} />
         </div>
 
-        <div className="glass-card rounded-2xl p-6 sm:p-8">
+        <TkCard className="p-6 sm:p-8">
           {step === 1 && (
             <Step1DataPelanggan
               data={formData.pelanggan}
@@ -170,32 +171,28 @@ function PesanForm() {
 
           {step < 3 && (
             <div className="mt-8 flex justify-between">
-              <Button
+              <TkButton
                 type="button"
-                variant="outline"
+                variant="secondary"
                 onClick={handleBack}
                 disabled={step === 1}
               >
                 Kembali
-              </Button>
-              <Button
-                type="button"
-                onClick={handleNext}
-                className="bg-gradient-to-r from-primary-from to-primary-to text-white"
-              >
-                Lanjut
-              </Button>
+              </TkButton>
+              <TkButton type="button" variant="primary" onClick={handleNext}>
+                Lanjut →
+              </TkButton>
             </div>
           )}
 
           {step === 3 && (
             <div className="mt-4">
-              <Button type="button" variant="outline" onClick={handleBack}>
+              <TkButton type="button" variant="secondary" onClick={handleBack}>
                 Kembali
-              </Button>
+              </TkButton>
             </div>
           )}
-        </div>
+        </TkCard>
       </div>
     </div>
   );

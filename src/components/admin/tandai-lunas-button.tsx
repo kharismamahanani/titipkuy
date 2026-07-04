@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { TkButton } from "@/components/ui/tk-button";
 
 interface TandaiLunasButtonProps {
   id: string;
@@ -39,9 +39,9 @@ export function TandaiLunasButton({ id, onSuccess }: TandaiLunasButtonProps) {
   }
 
   return (
-    <Button type="button" size="sm" variant="outline" disabled={isLoading} onClick={handleClick}>
-      {isLoading && <Loader2 className="animate-spin" size={14} />}
+    <TkButton type="button" size="sm" variant="primary" disabled={isLoading} onClick={handleClick}>
+      {isLoading && <Loader2 className="mr-1.5 animate-spin" size={14} />}
       Tandai Lunas
-    </Button>
+    </TkButton>
   );
 }

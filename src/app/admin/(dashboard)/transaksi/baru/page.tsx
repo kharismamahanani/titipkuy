@@ -5,7 +5,8 @@ import { addDays, format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import { Loader2, Copy } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { TkButton, tkButtonVariants } from "@/components/ui/tk-button";
+import { TkCard } from "@/components/ui/tk-card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -24,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { tkInputClass, tkLabelClass, tkSelectTriggerClass } from "@/lib/form-style";
 import { cn, normalizeWhatsAppNumber } from "@/lib/utils";
 import { ADMIN_NAME } from "@/constants/site";
 import { buildStoragePath, uploadToStorage } from "@/lib/supabase";
@@ -206,50 +208,61 @@ export default function AdminBuatOrderManualPage() {
 
   return (
     <div className="px-4 py-6 sm:px-6 lg:px-8">
-      <h1 className="font-heading text-2xl font-bold">Buat Order Manual</h1>
-      <p className="mt-1 text-sm text-foreground/60">
+      <h1 className="text-2xl font-extrabold text-tk-charcoal">Buat Order Manual</h1>
+      <p className="mt-1 text-sm text-tk-muted">
         Untuk customer yang memesan lewat WhatsApp. Isi berdasarkan info dari chat.
       </p>
 
       <div className="mt-6 max-w-2xl space-y-8">
         <section className="space-y-4">
-          <h2 className="font-heading text-lg font-bold">Data Pelanggan</h2>
+          <h2 className="text-lg font-extrabold text-tk-charcoal">Data Pelanggan</h2>
 
-          <div className="space-y-2">
-            <Label htmlFor="nama">Nama Lengkap *</Label>
+          <div>
+            <Label htmlFor="nama" className={tkLabelClass}>
+              Nama Lengkap *
+            </Label>
             <Input
               id="nama"
               value={pelanggan.nama}
               onChange={(e) => setPelanggan({ ...pelanggan, nama: e.target.value })}
+              className={tkInputClass}
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="whatsapp">No WhatsApp *</Label>
+          <div>
+            <Label htmlFor="whatsapp" className={tkLabelClass}>
+              No WhatsApp *
+            </Label>
             <Input
               id="whatsapp"
               placeholder="08xx atau +628xx"
               value={pelanggan.whatsapp}
               onChange={(e) => setPelanggan({ ...pelanggan, whatsapp: e.target.value })}
+              className={tkInputClass}
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="alamatKos">Alamat Kos / Hotel</Label>
+          <div>
+            <Label htmlFor="alamatKos" className={tkLabelClass}>
+              Alamat Kos / Hotel
+            </Label>
             <Input
               id="alamatKos"
               value={pelanggan.alamatKos}
               onChange={(e) => setPelanggan({ ...pelanggan, alamatKos: e.target.value })}
+              className={tkInputClass}
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="kampus">Kampus</Label>
+          <div>
+            <Label htmlFor="kampus" className={tkLabelClass}>
+              Kampus
+            </Label>
             <Select
               value={pelanggan.kampus}
               onValueChange={(v) => v && setPelanggan({ ...pelanggan, kampus: v })}
             >
-              <SelectTrigger id="kampus" className="w-full">
+              <SelectTrigger id="kampus" className={tkSelectTriggerClass}>
                 <SelectValue placeholder="Pilih kampus">
                   {(v: string) => v || "Pilih kampus"}
                 </SelectValue>
@@ -264,23 +277,28 @@ export default function AdminBuatOrderManualPage() {
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="noKtpKtm">No KTP/KTM (opsional)</Label>
+          <div>
+            <Label htmlFor="noKtpKtm" className={tkLabelClass}>
+              No KTP/KTM (opsional)
+            </Label>
             <Input
               id="noKtpKtm"
               value={pelanggan.noKtpKtm}
               onChange={(e) => setPelanggan({ ...pelanggan, noKtpKtm: e.target.value })}
+              className={tkInputClass}
             />
           </div>
         </section>
 
         <section className="space-y-4">
-          <h2 className="font-heading text-lg font-bold">Detail Pesanan</h2>
+          <h2 className="text-lg font-extrabold text-tk-charcoal">Detail Pesanan</h2>
 
-          <div className="space-y-2">
-            <Label htmlFor="paket">Pilih Paket *</Label>
+          <div>
+            <Label htmlFor="paket" className={tkLabelClass}>
+              Pilih Paket *
+            </Label>
             <Select value={paketId} onValueChange={(v) => v && setPaketId(v)}>
-              <SelectTrigger id="paket" className="w-full">
+              <SelectTrigger id="paket" className={tkSelectTriggerClass}>
                 <SelectValue placeholder="Pilih paket">
                   {(v: string) => paketList.find((p) => p.id === v)?.nama ?? "Pilih paket"}
                 </SelectValue>
@@ -297,8 +315,8 @@ export default function AdminBuatOrderManualPage() {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label>Tanggal Masuk *</Label>
-              <div className="glass-card inline-block rounded-2xl p-2">
+              <Label className={tkLabelClass}>Tanggal Masuk *</Label>
+              <div className="inline-block rounded-lg border-2 border-tk-charcoal bg-white p-2">
                 <Calendar
                   mode="single"
                   selected={tanggalMasuk ?? undefined}
@@ -308,8 +326,8 @@ export default function AdminBuatOrderManualPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Tanggal Jatuh Tempo *</Label>
-              <div className="glass-card inline-block rounded-2xl p-2">
+              <Label className={tkLabelClass}>Tanggal Jatuh Tempo *</Label>
+              <div className="inline-block rounded-lg border-2 border-tk-charcoal bg-white p-2">
                 <Calendar
                   mode="single"
                   selected={tanggalJatuhTempo ?? undefined}
@@ -317,7 +335,7 @@ export default function AdminBuatOrderManualPage() {
                 />
               </div>
               {tanggalJatuhTempo && (
-                <p className="text-xs text-foreground/60">
+                <p className="text-xs text-tk-muted">
                   {format(tanggalJatuhTempo, "d MMMM yyyy", { locale: localeId })}
                 </p>
               )}
@@ -325,7 +343,7 @@ export default function AdminBuatOrderManualPage() {
           </div>
 
           <div className="space-y-2">
-            <Label>Hub Penyimpanan *</Label>
+            <Label className={tkLabelClass}>Hub Penyimpanan *</Label>
             {HUB_OPTIONS.length > 1 ? (
               <div className="flex flex-col gap-2 sm:flex-row">
                 {HUB_OPTIONS.map((opt) => (
@@ -334,44 +352,49 @@ export default function AdminBuatOrderManualPage() {
                     type="button"
                     onClick={() => setHub(opt.value)}
                     className={cn(
-                      "flex-1 rounded-xl border px-4 py-2.5 text-left text-sm transition-colors",
+                      "flex-1 rounded-lg border-2 border-tk-charcoal px-4 py-2.5 text-left text-sm transition-colors",
                       hub === opt.value
-                        ? "border-transparent bg-gradient-to-r from-primary-from to-primary-to text-white"
-                        : "border-card-border text-foreground/80 hover:bg-primary/10"
+                        ? "bg-tk-charcoal text-tk-cream"
+                        : "bg-white text-tk-charcoal hover:bg-tk-cream-alt"
                     )}
                   >
-                    <span className="font-semibold">{opt.label}</span>{" "}
+                    <span className="font-bold">{opt.label}</span>{" "}
                     <span className="opacity-80">({opt.alamat})</span>
                   </button>
                 ))}
               </div>
             ) : (
-              <p className="rounded-xl border border-card-border px-4 py-2.5 text-sm text-foreground/80">
-                <span className="font-semibold">{HUB_OPTIONS[0]?.label}</span>{" "}
+              <p className="rounded-lg border-2 border-tk-charcoal bg-white px-4 py-2.5 text-sm text-tk-charcoal">
+                <span className="font-bold">{HUB_OPTIONS[0]?.label}</span>{" "}
                 <span className="opacity-80">({HUB_OPTIONS[0]?.alamat})</span>
               </p>
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="zonaRak">Zona Rak (opsional)</Label>
+          <div>
+            <Label htmlFor="zonaRak" className={tkLabelClass}>
+              Zona Rak (opsional)
+            </Label>
             <Input
               id="zonaRak"
               placeholder="Diisi setelah barang masuk"
               value={zonaRak}
               onChange={(e) => setZonaRak(e.target.value)}
+              className={tkInputClass}
             />
           </div>
         </section>
 
         {paket?.perluDeklarasi && (
-          <section className="glass-card space-y-4 rounded-2xl p-5">
-            <h2 className="font-heading text-lg font-bold text-accent">
+          <TkCard className="space-y-4">
+            <h2 className="text-lg font-extrabold text-tk-orange-dark">
               Barang Bernilai Tinggi
             </h2>
 
-            <div className="space-y-2">
-              <Label htmlFor="nilaiDeklarasi">Nilai Deklarasi (Rp) *</Label>
+            <div>
+              <Label htmlFor="nilaiDeklarasi" className={tkLabelClass}>
+                Nilai Deklarasi (Rp) *
+              </Label>
               <Input
                 id="nilaiDeklarasi"
                 type="number"
@@ -379,11 +402,14 @@ export default function AdminBuatOrderManualPage() {
                 onChange={(e) =>
                   setDeklarasi({ ...deklarasi, nilaiDeklarasi: e.target.value })
                 }
+                className={tkInputClass}
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="deskripsiDeklarasi">Deskripsi Barang *</Label>
+            <div>
+              <Label htmlFor="deskripsiDeklarasi" className={tkLabelClass}>
+                Deskripsi Barang *
+              </Label>
               <Textarea
                 id="deskripsiDeklarasi"
                 placeholder="Merek, model, no seri"
@@ -391,11 +417,14 @@ export default function AdminBuatOrderManualPage() {
                 onChange={(e) =>
                   setDeklarasi({ ...deklarasi, deskripsiDeklarasi: e.target.value })
                 }
+                className={cn(tkInputClass, "min-h-24")}
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="buktiKepemilikan">Upload Bukti Kepemilikan (STNK/nota) *</Label>
+            <div>
+              <Label htmlFor="buktiKepemilikan" className={tkLabelClass}>
+                Upload Bukti Kepemilikan (STNK/nota) *
+              </Label>
               <Input
                 id="buktiKepemilikan"
                 type="file"
@@ -405,21 +434,20 @@ export default function AdminBuatOrderManualPage() {
                   const file = e.target.files?.[0];
                   if (file) handleBuktiUpload(file);
                 }}
+                className={tkInputClass}
               />
-              {isUploadingBukti && (
-                <p className="text-xs text-foreground/60">Mengupload...</p>
-              )}
+              {isUploadingBukti && <p className="mt-1 text-xs text-tk-muted">Mengupload...</p>}
               {deklarasi.buktiKepemilikanUrl && !isUploadingBukti && (
-                <p className="text-xs text-primary-from">✓ Bukti sudah terupload</p>
+                <p className="mt-1 text-xs font-bold text-tk-sage-dark">✓ Bukti sudah terupload</p>
               )}
             </div>
-          </section>
+          </TkCard>
         )}
 
         <section className="space-y-4">
-          <h2 className="font-heading text-lg font-bold">Layanan Antar-Jemput</h2>
-          <div className="flex items-center justify-between rounded-lg border border-card-border px-3 py-2">
-            <Label htmlFor="antarJemput" className="cursor-pointer">
+          <h2 className="text-lg font-extrabold text-tk-charcoal">Layanan Antar-Jemput</h2>
+          <div className="flex items-center justify-between rounded-lg border-2 border-tk-charcoal bg-white px-3 py-2">
+            <Label htmlFor="antarJemput" className="cursor-pointer text-sm font-bold text-tk-charcoal">
               Ada antar-jemput?
             </Label>
             <Switch
@@ -439,75 +467,77 @@ export default function AdminBuatOrderManualPage() {
         </section>
 
         <section className="space-y-2">
-          <h2 className="font-heading text-lg font-bold">Catatan Admin</h2>
+          <h2 className="text-lg font-extrabold text-tk-charcoal">Catatan Admin</h2>
           <Textarea
             placeholder="Catatan internal, tidak terlihat pelanggan"
             value={catatanAdmin}
             onChange={(e) => setCatatanAdmin(e.target.value)}
+            className={cn(tkInputClass, "min-h-24")}
           />
         </section>
 
-        <Button
+        <TkButton
           type="button"
+          variant="primary"
           size="lg"
           disabled={isSubmitting}
           onClick={handleSubmit}
-          className="w-full bg-gradient-to-r from-primary-from to-primary-to text-white"
+          className="w-full justify-center"
         >
-          {isSubmitting && <Loader2 className="animate-spin" size={16} />}
+          {isSubmitting && <Loader2 className="mr-2 animate-spin" size={16} />}
           Simpan & Generate Link Konfirmasi
-        </Button>
+        </TkButton>
       </div>
 
       <Dialog open={!!successData} onOpenChange={(open) => !open && setSuccessData(null)}>
         <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Order Berhasil Dibuat 🎉</DialogTitle>
+            <DialogTitle className="text-tk-charcoal">Order Berhasil Dibuat 🎉</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4">
-            <p className="text-sm text-foreground/70">
-              Nomor referensi: <span className="font-semibold">{successData?.nomorRef}</span>
+            <p className="text-sm text-tk-muted">
+              Nomor referensi: <span className="font-bold text-tk-charcoal">{successData?.nomorRef}</span>
             </p>
 
-            <div className="space-y-2">
-              <Label>Link Konfirmasi</Label>
+            <div>
+              <Label className={tkLabelClass}>Link Konfirmasi</Label>
               <div className="flex gap-2">
-                <Input readOnly value={confirmUrl} />
-                <Button
+                <Input readOnly value={confirmUrl} className={tkInputClass} />
+                <TkButton
                   type="button"
-                  variant="outline"
+                  variant="secondary"
                   onClick={() => {
                     navigator.clipboard.writeText(confirmUrl);
                     toast.success("Link disalin");
                   }}
                 >
-                  <Copy size={14} />
+                  <Copy size={14} className="mr-1.5" />
                   Salin
-                </Button>
+                </TkButton>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label>Template Pesan WhatsApp</Label>
-              <Textarea readOnly rows={6} value={waMessage} />
-              <div className="flex flex-col gap-2 sm:flex-row">
-                <Button
+            <div>
+              <Label className={tkLabelClass}>Template Pesan WhatsApp</Label>
+              <Textarea readOnly rows={6} value={waMessage} className={tkInputClass} />
+              <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+                <TkButton
                   type="button"
-                  variant="outline"
-                  className="flex-1"
+                  variant="secondary"
+                  className="flex-1 justify-center"
                   onClick={() => {
                     navigator.clipboard.writeText(waMessage);
                     toast.success("Pesan disalin");
                   }}
                 >
                   Salin Pesan
-                </Button>
+                </TkButton>
                 <a
                   href={`https://wa.me/${normalizeWhatsAppNumber(pelanggan.whatsapp)}?text=${encodeURIComponent(waMessage)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 rounded-lg bg-gradient-to-r from-primary-from to-primary-to px-4 py-2 text-center text-sm font-semibold text-white"
+                  className={cn(tkButtonVariants({ variant: "primary", size: "md" }), "flex-1 justify-center")}
                 >
                   Kirim via WhatsApp
                 </a>

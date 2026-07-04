@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { TkButton } from "@/components/ui/tk-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,6 +22,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { tkInputClass, tkLabelClass, tkSelectTriggerClass } from "@/lib/form-style";
+import { cn } from "@/lib/utils";
 import type { Paket } from "@/types/paket";
 
 const KATEGORI_OPTIONS = ["harian", "bulanan", "magang", "pindahan", "motor"];
@@ -112,59 +114,75 @@ export function PaketFormDialog({ open, onOpenChange, paket }: PaketFormDialogPr
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{paket ? "Edit Paket" : "Tambah Paket Baru"}</DialogTitle>
+          <DialogTitle className="text-tk-charcoal">
+            {paket ? "Edit Paket" : "Tambah Paket Baru"}
+          </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="nama">Nama Paket</Label>
+          <div>
+            <Label htmlFor="nama" className={tkLabelClass}>
+              Nama Paket
+            </Label>
             <Input
               id="nama"
               value={form.nama}
               onChange={(e) => setForm({ ...form, nama: e.target.value })}
               required
+              className={tkInputClass}
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="deskripsi">Deskripsi Singkat</Label>
+          <div>
+            <Label htmlFor="deskripsi" className={tkLabelClass}>
+              Deskripsi Singkat
+            </Label>
             <Textarea
               id="deskripsi"
               value={form.deskripsi}
               onChange={(e) => setForm({ ...form, deskripsi: e.target.value })}
+              className={cn(tkInputClass, "min-h-20")}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label htmlFor="harga">Harga (Rp)</Label>
+            <div>
+              <Label htmlFor="harga" className={tkLabelClass}>
+                Harga (Rp)
+              </Label>
               <Input
                 id="harga"
                 type="number"
                 value={form.harga}
                 onChange={(e) => setForm({ ...form, harga: e.target.value })}
                 required
+                className={tkInputClass}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="durasiHari">Durasi (hari)</Label>
+            <div>
+              <Label htmlFor="durasiHari" className={tkLabelClass}>
+                Durasi (hari)
+              </Label>
               <Input
                 id="durasiHari"
                 type="number"
                 placeholder="Kosongkan jika harian"
                 value={form.durasiHari}
                 onChange={(e) => setForm({ ...form, durasiHari: e.target.value })}
+                className={tkInputClass}
               />
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="kategori">Kategori</Label>
+          <div>
+            <Label htmlFor="kategori" className={tkLabelClass}>
+              Kategori
+            </Label>
             <Select
               value={form.kategori}
               onValueChange={(value) => value && setForm({ ...form, kategori: value })}
             >
-              <SelectTrigger id="kategori" className="w-full">
+              <SelectTrigger id="kategori" className={tkSelectTriggerClass}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -177,18 +195,21 @@ export function PaketFormDialog({ open, onOpenChange, paket }: PaketFormDialogPr
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="urutan">Urutan Tampil di Landing Page</Label>
+          <div>
+            <Label htmlFor="urutan" className={tkLabelClass}>
+              Urutan Tampil di Landing Page
+            </Label>
             <Input
               id="urutan"
               type="number"
               value={form.urutan}
               onChange={(e) => setForm({ ...form, urutan: e.target.value })}
+              className={tkInputClass}
             />
           </div>
 
-          <div className="flex items-center justify-between rounded-lg border border-card-border px-3 py-2">
-            <Label htmlFor="perluDeklarasi" className="cursor-pointer">
+          <div className="flex items-center justify-between rounded-lg border-2 border-tk-charcoal bg-white px-3 py-2">
+            <Label htmlFor="perluDeklarasi" className="cursor-pointer text-sm font-bold text-tk-charcoal">
               Perlu Deklarasi Barang Bernilai Tinggi?
             </Label>
             <Switch
@@ -200,8 +221,8 @@ export function PaketFormDialog({ open, onOpenChange, paket }: PaketFormDialogPr
             />
           </div>
 
-          <div className="flex items-center justify-between rounded-lg border border-card-border px-3 py-2">
-            <Label htmlFor="aktif" className="cursor-pointer">
+          <div className="flex items-center justify-between rounded-lg border-2 border-tk-charcoal bg-white px-3 py-2">
+            <Label htmlFor="aktif" className="cursor-pointer text-sm font-bold text-tk-charcoal">
               Status Aktif
             </Label>
             <Switch
@@ -211,14 +232,10 @@ export function PaketFormDialog({ open, onOpenChange, paket }: PaketFormDialogPr
             />
           </div>
 
-          <Button
-            type="submit"
-            disabled={isSaving}
-            className="w-full bg-gradient-to-r from-primary-from to-primary-to text-white"
-          >
-            {isSaving && <Loader2 className="animate-spin" size={16} />}
+          <TkButton type="submit" variant="primary" disabled={isSaving} className="w-full justify-center">
+            {isSaving && <Loader2 className="mr-2 animate-spin" size={16} />}
             Simpan
-          </Button>
+          </TkButton>
         </form>
       </DialogContent>
     </Dialog>

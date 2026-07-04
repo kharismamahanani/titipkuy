@@ -15,14 +15,17 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "hidden h-screen flex-col border-r border-card-border bg-card-dark transition-all md:flex",
+        "hidden h-screen flex-col bg-tk-charcoal transition-all md:flex",
         collapsed ? "w-16" : "w-60"
       )}
     >
       <div className="flex items-center justify-between px-4 py-5">
         {!collapsed && (
-          <Link href="/admin" className="gradient-text font-heading text-lg font-extrabold">
-            TitipKuy! 📦
+          <Link href="/admin" className="flex items-center gap-2 text-lg font-extrabold">
+            <span className="text-tk-orange">TitipKuy!</span>
+            <span className="rounded-full border border-tk-sage bg-tk-sage/20 px-2 py-0.5 text-[10px] font-bold text-tk-sage">
+              Admin
+            </span>
           </Link>
         )}
         <button
@@ -30,7 +33,7 @@ export function Sidebar() {
           onClick={() => setCollapsed((prev) => !prev)}
           aria-label={collapsed ? "Perbesar sidebar" : "Kecilkan sidebar"}
           className={cn(
-            "rounded-full p-1.5 text-foreground/60 hover:bg-primary/10 hover:text-foreground",
+            "rounded-full p-1.5 text-tk-cream/70 hover:bg-white/[0.08] hover:text-tk-cream",
             collapsed && "mx-auto"
           )}
         >
@@ -50,11 +53,11 @@ export function Sidebar() {
               href={item.href}
               title={collapsed ? item.label : undefined}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+                "flex items-center gap-3 rounded-lg border-l-[3px] px-3 py-2 text-sm font-semibold transition-colors",
                 collapsed && "justify-center",
                 isActive
-                  ? "bg-gradient-to-r from-primary-from to-primary-to text-white"
-                  : "text-foreground/70 hover:bg-primary/10 hover:text-foreground"
+                  ? "border-l-tk-orange bg-tk-muted text-tk-cream"
+                  : "border-l-transparent text-tk-cream/80 hover:bg-white/[0.08] hover:text-tk-cream"
               )}
             >
               <Icon size={18} className="shrink-0" />
@@ -64,7 +67,7 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="border-t border-card-border px-3 py-4">
+      <div className="border-t border-tk-muted px-3 py-4">
         <LogoutButton collapsed={collapsed} />
       </div>
     </aside>

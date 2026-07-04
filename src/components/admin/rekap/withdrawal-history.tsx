@@ -3,8 +3,8 @@
 import { format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import { Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { formatRupiah } from "@/lib/utils";
+import { formatRupiah, cn } from "@/lib/utils";
+import { tkDangerButtonClass } from "@/lib/form-style";
 import type { PengambilanLaba } from "@/types/rekap";
 
 interface WithdrawalHistoryProps {
@@ -15,7 +15,7 @@ interface WithdrawalHistoryProps {
 export function WithdrawalHistory({ data, onDelete }: WithdrawalHistoryProps) {
   if (data.length === 0) {
     return (
-      <p className="text-sm text-foreground/50">
+      <p className="text-sm text-tk-light">
         Belum ada pengambilan yang dicatat. Simpan lewat kalkulator di atas.
       </p>
     );
@@ -24,36 +24,40 @@ export function WithdrawalHistory({ data, onDelete }: WithdrawalHistoryProps) {
   const sorted = [...data].sort((a, b) => b.bulan.localeCompare(a.bulan));
 
   return (
-    <div className="glass-card overflow-x-auto rounded-2xl">
-      <table className="w-full min-w-[500px] text-left text-sm">
-        <thead className="border-b border-card-border text-foreground/60">
+    <div className="overflow-x-auto rounded-lg border-2 border-tk-charcoal">
+      <table className="w-full min-w-[500px] border-collapse text-left text-sm">
+        <thead className="bg-tk-charcoal text-tk-cream">
           <tr>
-            <th className="px-4 py-3 font-medium">Bulan</th>
-            <th className="px-4 py-3 font-medium">Jumlah Diambil</th>
-            <th className="px-4 py-3 font-medium">Dicatat Pada</th>
-            <th className="px-4 py-3 font-medium"></th>
+            <th className="px-4 py-3 font-bold">Bulan</th>
+            <th className="px-4 py-3 font-bold">Jumlah Diambil</th>
+            <th className="px-4 py-3 font-bold">Dicatat Pada</th>
+            <th className="px-4 py-3 font-bold"></th>
           </tr>
         </thead>
         <tbody>
-          {sorted.map((item) => (
-            <tr key={item.id} className="border-b border-card-border last:border-0">
-              <td className="px-4 py-3">
+          {sorted.map((item, index) => (
+            <tr
+              key={item.id}
+              className={cn(
+                "border-b border-[#D6CEC4] transition-colors last:border-0 hover:bg-tk-cream-alt",
+                index % 2 === 0 ? "bg-white" : "bg-tk-cream"
+              )}
+            >
+              <td className="px-4 py-3 text-tk-charcoal">
                 {format(new Date(`${item.bulan}-01`), "MMMM yyyy", { locale: localeId })}
               </td>
-              <td className="px-4 py-3 font-medium">{formatRupiah(item.jumlah)}</td>
-              <td className="px-4 py-3 text-foreground/60">
+              <td className="px-4 py-3 font-bold text-tk-charcoal">{formatRupiah(item.jumlah)}</td>
+              <td className="px-4 py-3 text-tk-muted">
                 {format(new Date(item.dicatatPada), "d MMM yyyy, HH:mm", { locale: localeId })}
               </td>
               <td className="px-4 py-3">
-                <Button
+                <button
                   type="button"
-                  size="sm"
-                  variant="outline"
-                  className="text-destructive hover:bg-destructive/10"
+                  className={cn(tkDangerButtonClass, "px-3 py-1.5")}
                   onClick={() => onDelete(item.id)}
                 >
                   <Trash2 size={14} />
-                </Button>
+                </button>
               </td>
             </tr>
           ))}

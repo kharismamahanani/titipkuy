@@ -5,7 +5,8 @@ import { id as localeId } from "date-fns/locale";
 import { addDays } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
+import { TkButton } from "@/components/ui/tk-button";
+import { TkCard } from "@/components/ui/tk-card";
 import { SignatureCanvas } from "@/components/pesan/signature-canvas";
 import { PerjanjianDialog } from "@/components/pesan/perjanjian-dialog";
 import { formatRupiah } from "@/lib/utils";
@@ -40,52 +41,52 @@ export function Step3Perjanjian({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-heading text-xl font-bold">Perjanjian & Konfirmasi</h2>
-        <p className="mt-1 text-sm text-foreground/60">
+        <h2 className="text-xl font-extrabold text-tk-charcoal">Perjanjian & Konfirmasi</h2>
+        <p className="mt-1 text-sm text-tk-muted">
           Cek ringkasan pesanan, setujui perjanjian, lalu tanda tangan.
         </p>
       </div>
 
-      <div className="glass-card space-y-2 rounded-2xl p-5 text-sm">
+      <TkCard className="space-y-2 text-sm">
         <div className="flex justify-between">
-          <span className="text-foreground/60">Nama</span>
-          <span className="font-medium">{pelanggan.nama}</span>
+          <span className="text-tk-muted">Nama</span>
+          <span className="font-bold text-tk-charcoal">{pelanggan.nama}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-foreground/60">Paket</span>
-          <span className="font-medium">
+          <span className="text-tk-muted">Paket</span>
+          <span className="font-bold text-tk-charcoal">
             {paket?.nama} {paket ? `— ${formatRupiah(paket.harga)}` : ""}
           </span>
         </div>
         {formData.antarJemputOption && (
           <div className="flex justify-between">
-            <span className="text-foreground/60">Antar-jemput</span>
-            <span className="font-medium">
+            <span className="text-tk-muted">Antar-jemput</span>
+            <span className="font-bold text-tk-charcoal">
               {formData.antarJemputOption.label} — +{formatRupiah(formData.antarJemputOption.harga)}
             </span>
           </div>
         )}
-        <div className="flex justify-between border-t border-card-border pt-2">
-          <span className="font-heading font-bold">TOTAL</span>
-          <span className="gradient-text font-heading text-lg font-extrabold">
+        <div className="flex justify-between border-t-2 border-tk-charcoal pt-2">
+          <span className="font-extrabold text-tk-charcoal">TOTAL</span>
+          <span className="text-lg font-extrabold text-tk-orange">
             {formatRupiah((paket?.harga ?? 0) + (formData.antarJemputOption?.harga ?? 0))}
           </span>
         </div>
         <div className="flex justify-between">
-          <span className="text-foreground/60">Masuk</span>
-          <span className="font-medium">
+          <span className="text-tk-muted">Masuk</span>
+          <span className="font-bold text-tk-charcoal">
             {tanggalMasuk ? format(tanggalMasuk, "d MMM yyyy", { locale: localeId }) : "-"}
           </span>
         </div>
         <div className="flex justify-between">
-          <span className="text-foreground/60">Jatuh tempo</span>
-          <span className="font-medium">
+          <span className="text-tk-muted">Jatuh tempo</span>
+          <span className="font-bold text-tk-charcoal">
             {tanggalJatuhTempo
               ? format(tanggalJatuhTempo, "d MMM yyyy", { locale: localeId })
               : "-"}
           </span>
         </div>
-      </div>
+      </TkCard>
 
       <div className="space-y-3">
         {items.map((item) => {
@@ -93,17 +94,17 @@ export function Step3Perjanjian({
           return (
             <label
               key={item.key}
-              className="glass-card flex cursor-pointer items-start gap-3 rounded-xl p-4"
+              className="flex cursor-pointer items-start gap-3 rounded-lg border-2 border-tk-charcoal bg-white p-4"
             >
               <Checkbox
                 checked={checklist[item.key]}
                 onCheckedChange={(checked) =>
                   onChecklistChange({ ...checklist, [item.key]: checked === true })
                 }
-                className="mt-0.5"
+                className="mt-0.5 rounded-[4px] border-2 border-tk-charcoal data-checked:border-tk-orange data-checked:bg-tk-orange data-checked:text-tk-charcoal"
               />
-              <Icon className="mt-0.5 shrink-0 text-primary-from" size={18} />
-              <span className="text-sm text-foreground/80">{item.label}</span>
+              <Icon className="mt-0.5 shrink-0 text-tk-orange" size={18} />
+              <span className="text-sm text-tk-charcoal">{item.label}</span>
             </label>
           );
         })}
@@ -111,21 +112,22 @@ export function Step3Perjanjian({
 
       <PerjanjianDialog />
 
-      <div className="space-y-2">
-        <p className="text-sm font-medium">Tanda Tangan Digital</p>
+      <div>
+        <p className="mb-1 text-sm font-bold text-tk-charcoal">Tanda Tangan Digital</p>
         <SignatureCanvas onChange={onTandaTanganChange} />
       </div>
 
-      <Button
+      <TkButton
         type="button"
+        variant="primary"
+        size="lg"
         disabled={!canSubmit || isSubmitting}
         onClick={onSubmit}
-        className="w-full bg-gradient-to-r from-primary-from to-primary-to text-white"
-        size="lg"
+        className="w-full justify-center"
       >
-        {isSubmitting && <Loader2 className="animate-spin" size={16} />}
+        {isSubmitting && <Loader2 className="mr-2 animate-spin" size={16} />}
         Konfirmasi & Bayar
-      </Button>
+      </TkButton>
     </div>
   );
 }

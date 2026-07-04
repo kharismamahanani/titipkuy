@@ -15,8 +15,8 @@ export default async function AdminAntarJemputPage() {
   if (!options) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
-        <h1 className="font-heading text-xl font-bold">Data belum bisa dimuat</h1>
-        <p className="mt-2 text-sm text-foreground/60">
+        <h1 className="text-xl font-extrabold text-tk-charcoal">Data belum bisa dimuat</h1>
+        <p className="mt-2 text-sm text-tk-muted">
           Database belum terhubung. Coba muat ulang halaman ini.
         </p>
       </div>
@@ -25,8 +25,8 @@ export default async function AdminAntarJemputPage() {
 
   return (
     <div className="px-4 py-6 sm:px-6 lg:px-8">
-      <h1 className="font-heading text-2xl font-bold">Antar-Jemput</h1>
-      <p className="mt-1 text-sm text-foreground/60">
+      <h1 className="text-2xl font-extrabold text-tk-charcoal">Antar-Jemput</h1>
+      <p className="mt-1 text-sm text-tk-muted">
         Kelola opsi add-on antar-jemput yang tampil di form pemesanan.
       </p>
 

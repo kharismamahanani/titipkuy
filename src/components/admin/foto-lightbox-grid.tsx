@@ -16,7 +16,7 @@ export function FotoLightboxGrid({ fotos, emptyText, onDelete }: FotoLightboxGri
   const [selected, setSelected] = useState<Foto | null>(null);
 
   if (fotos.length === 0) {
-    return <p className="text-sm text-foreground/50">{emptyText}</p>;
+    return <p className="text-sm text-tk-light">{emptyText}</p>;
   }
 
   function handleDelete(e: React.MouseEvent, foto: Foto) {
@@ -30,7 +30,7 @@ export function FotoLightboxGrid({ fotos, emptyText, onDelete }: FotoLightboxGri
     <>
       <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
         {fotos.map((foto) => (
-          <div key={foto.id} className="group relative aspect-square overflow-hidden rounded-xl">
+          <div key={foto.id} className="group relative aspect-square overflow-hidden rounded-lg border-2 border-tk-charcoal">
             <button
               type="button"
               onClick={() => setSelected(foto)}
@@ -43,7 +43,7 @@ export function FotoLightboxGrid({ fotos, emptyText, onDelete }: FotoLightboxGri
                 type="button"
                 onClick={(e) => handleDelete(e, foto)}
                 aria-label="Hapus foto"
-                className="absolute right-1 top-1 rounded-full bg-black/60 p-1.5 text-white opacity-0 transition-opacity hover:bg-destructive group-hover:opacity-100"
+                className="absolute right-1 top-1 rounded-full bg-tk-charcoal/80 p-1.5 text-tk-cream opacity-0 transition-opacity hover:bg-[#C0392B] group-hover:opacity-100"
               >
                 <Trash2 size={14} />
               </button>

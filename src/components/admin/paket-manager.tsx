@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { TkButton } from "@/components/ui/tk-button";
 import { Switch } from "@/components/ui/switch";
-import { formatRupiah } from "@/lib/utils";
+import { formatRupiah, cn } from "@/lib/utils";
+import { tkDangerButtonClass } from "@/lib/form-style";
 import { PaketFormDialog } from "@/components/admin/paket-form-dialog";
 import type { Paket } from "@/types/paket";
 
@@ -65,45 +66,47 @@ export function PaketManager({ initialPaket }: PaketManagerProps) {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Button
-          type="button"
-          onClick={handleAdd}
-          className="bg-gradient-to-r from-primary-from to-primary-to text-white"
-        >
+        <TkButton type="button" variant="primary" onClick={handleAdd}>
           Tambah Paket Baru
-        </Button>
+        </TkButton>
       </div>
 
-      <div className="glass-card overflow-x-auto rounded-2xl">
-        <table className="w-full min-w-[900px] text-left text-sm">
-          <thead className="border-b border-card-border text-foreground/60">
+      <div className="overflow-x-auto rounded-lg border-2 border-tk-charcoal">
+        <table className="w-full min-w-[900px] border-collapse text-left text-sm">
+          <thead className="bg-tk-charcoal text-tk-cream">
             <tr>
-              <th className="px-4 py-3 font-medium">Nama</th>
-              <th className="px-4 py-3 font-medium">Harga</th>
-              <th className="px-4 py-3 font-medium">Durasi</th>
-              <th className="px-4 py-3 font-medium">Kategori</th>
-              <th className="px-4 py-3 font-medium">Perlu Deklarasi</th>
-              <th className="px-4 py-3 font-medium">Status Aktif</th>
-              <th className="px-4 py-3 font-medium">Urutan</th>
-              <th className="px-4 py-3 font-medium">Aksi</th>
+              <th className="px-4 py-3 font-bold">Nama</th>
+              <th className="px-4 py-3 font-bold">Harga</th>
+              <th className="px-4 py-3 font-bold">Durasi</th>
+              <th className="px-4 py-3 font-bold">Kategori</th>
+              <th className="px-4 py-3 font-bold">Perlu Deklarasi</th>
+              <th className="px-4 py-3 font-bold">Status Aktif</th>
+              <th className="px-4 py-3 font-bold">Urutan</th>
+              <th className="px-4 py-3 font-bold">Aksi</th>
             </tr>
           </thead>
           <tbody>
             {initialPaket.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-4 py-6 text-center text-foreground/50">
+                <td colSpan={8} className="px-4 py-6 text-center text-tk-muted">
                   Belum ada paket. Klik &quot;Tambah Paket Baru&quot; untuk mulai.
                 </td>
               </tr>
             )}
-            {initialPaket.map((paket) => (
-              <tr key={paket.id} className="border-b border-card-border last:border-0">
-                <td className="px-4 py-3 font-medium">{paket.nama}</td>
-                <td className="px-4 py-3">{formatRupiah(paket.harga)}</td>
-                <td className="px-4 py-3">
+            {initialPaket.map((paket, index) => (
+              <tr
+                key={paket.id}
+                className={cn(
+                  "border-b border-[#D6CEC4] transition-colors last:border-0 hover:bg-tk-cream-alt",
+                  index % 2 === 0 ? "bg-white" : "bg-tk-cream"
+                )}
+              >
+                <td className="px-4 py-3 font-bold text-tk-charcoal">{paket.nama}</td>
+                <td className="px-4 py-3 text-tk-charcoal">{formatRupiah(paket.harga)}</td>
+                <td className="px-4 py-3 text-tk-charcoal">
                   {paket.durasiHari ? `${paket.durasiHari} hari` : "Harian"}
                 </td>
-                <td className="px-4 py-3 capitalize">{paket.kategori}</td>
+                <td className="px-4 py-3 capitalize text-tk-charcoal">{paket.kategori}</td>
                 <td className="px-4 py-3">
                   <Switch
                     checked={paket.perluDeklarasi}
@@ -118,21 +121,15 @@ export function PaketManager({ initialPaket }: PaketManagerProps) {
                     onCheckedChange={(checked) => handleToggle(paket, "aktif", checked === true)}
                   />
                 </td>
-                <td className="px-4 py-3">{paket.urutan}</td>
+                <td className="px-4 py-3 text-tk-charcoal">{paket.urutan}</td>
                 <td className="px-4 py-3">
                   <div className="flex gap-2">
-                    <Button type="button" size="sm" variant="outline" onClick={() => handleEdit(paket)}>
+                    <TkButton type="button" size="sm" variant="secondary" onClick={() => handleEdit(paket)}>
                       Edit
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      className="text-destructive hover:bg-destructive/10"
-                      onClick={() => handleDelete(paket)}
-                    >
+                    </TkButton>
+                    <button type="button" className={tkDangerButtonClass} onClick={() => handleDelete(paket)}>
                       Hapus
-                    </Button>
+                    </button>
                   </div>
                 </td>
               </tr>

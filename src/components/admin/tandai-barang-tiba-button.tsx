@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { TkButton } from "@/components/ui/tk-button";
 
 interface TandaiBarangTibaButtonProps {
   transaksiId: string;
@@ -20,7 +20,7 @@ export function TandaiBarangTibaButton({
 
   if (barangTibaMandiri) {
     return (
-      <span className="flex items-center gap-2 text-sm font-medium text-primary-from">
+      <span className="flex items-center gap-2 text-sm font-bold text-tk-sage-dark">
         <CheckCircle2 size={18} />
         Barang sudah tiba di hub
       </span>
@@ -48,14 +48,9 @@ export function TandaiBarangTibaButton({
   }
 
   return (
-    <Button
-      type="button"
-      disabled={isLoading}
-      onClick={handleClick}
-      className="bg-gradient-to-r from-primary-from to-primary-to text-white"
-    >
-      {isLoading && <Loader2 className="animate-spin" size={16} />}
+    <TkButton type="button" variant="primary" disabled={isLoading} onClick={handleClick}>
+      {isLoading && <Loader2 className="mr-1.5 animate-spin" size={16} />}
       Tandai Barang Sudah Tiba
-    </Button>
+    </TkButton>
   );
 }

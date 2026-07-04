@@ -7,6 +7,9 @@ import { formatRupiah } from "@/lib/utils";
 import { StatCard } from "@/components/admin/stat-card";
 import { CopyWaButton } from "@/components/admin/copy-wa-button";
 import { TandaiLunasButton } from "@/components/admin/tandai-lunas-button";
+import { tkButtonVariants } from "@/components/ui/tk-button";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { cn } from "@/lib/utils";
 
 // Data berubah tiap ada transaksi baru/dibayar — jangan biarkan Next.js
 // menyimpannya sebagai halaman statis, selalu render ulang dari database.
@@ -63,8 +66,8 @@ export default async function AdminDashboardPage() {
   if (!data) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
-        <h1 className="font-heading text-xl font-bold">Dashboard belum bisa dimuat</h1>
-        <p className="mt-2 text-sm text-foreground/60">
+        <h1 className="text-xl font-extrabold text-tk-charcoal">Dashboard belum bisa dimuat</h1>
+        <p className="mt-2 text-sm text-tk-muted">
           Database belum terhubung. Coba muat ulang halaman ini.
         </p>
       </div>
@@ -74,26 +77,28 @@ export default async function AdminDashboardPage() {
   const { transaksiAktif, jatuhTempoSoon, belumLunas, omzetBulanIni, recentTransaksi } =
     data;
 
+  const linkButtonClass = cn(tkButtonVariants({ variant: "secondary", size: "sm" }));
+
   return (
     <div className="space-y-8 px-4 py-6 sm:px-6 lg:px-8">
-      <h1 className="font-heading text-2xl font-bold">Dashboard</h1>
+      <h1 className="text-2xl font-extrabold text-tk-charcoal">Dashboard</h1>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Transaksi Aktif" value={String(transaksiAktif)} />
-        <StatCard label="Omzet Bulan Ini" value={formatRupiah(omzetBulanIni)} />
+        <StatCard label="Transaksi Aktif" value={String(transaksiAktif)} accent="sage" />
+        <StatCard label="Omzet Bulan Ini" value={formatRupiah(omzetBulanIni)} accent="orange" />
         <StatCard
           label="Jatuh Tempo ≤3 Hari"
           value={String(jatuhTempoSoon.length)}
           danger={jatuhTempoSoon.length > 0}
         />
-        <StatCard label="Belum Lunas" value={String(belumLunas)} />
+        <StatCard label="Belum Lunas" value={String(belumLunas)} accent="charcoal" />
       </div>
 
       {jatuhTempoSoon.length > 0 && (
-        <section className="glass-card space-y-4 rounded-2xl p-5">
+        <section className="space-y-4 rounded-lg border-2 border-tk-charcoal bg-white p-5 [box-shadow:3px_3px_0_var(--tk-charcoal)]">
           <div className="flex items-center gap-2">
-            <AlertTriangle className="text-destructive" size={18} />
-            <h2 className="font-heading font-bold">Perlu Tindakan</h2>
+            <AlertTriangle className="text-[#C0392B]" size={18} />
+            <h2 className="font-extrabold text-tk-charcoal">Perlu Tindakan</h2>
           </div>
 
           <div className="space-y-3">
@@ -106,11 +111,11 @@ export default async function AdminDashboardPage() {
               return (
                 <div
                   key={t.id}
-                  className="flex flex-col gap-2 rounded-xl border border-card-border p-3 sm:flex-row sm:items-center sm:justify-between"
+                  className="flex flex-col gap-2 rounded-lg border-2 border-tk-charcoal p-3 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div>
-                    <p className="text-sm font-medium">{t.pelanggan.nama}</p>
-                    <p className="text-xs text-foreground/60">
+                    <p className="text-sm font-bold text-tk-charcoal">{t.pelanggan.nama}</p>
+                    <p className="text-xs text-tk-muted">
                       {t.nomorRef} &middot; jatuh tempo {tanggal}
                     </p>
                   </div>
@@ -123,58 +128,56 @@ export default async function AdminDashboardPage() {
       )}
 
       <section className="space-y-4">
-        <h2 className="font-heading font-bold">Transaksi Terbaru</h2>
+        <h2 className="font-extrabold text-tk-charcoal">Transaksi Terbaru</h2>
 
-        <div className="glass-card overflow-x-auto rounded-2xl">
-          <table className="w-full min-w-[640px] text-left text-sm">
-            <thead className="border-b border-card-border text-foreground/60">
+        <div className="overflow-x-auto rounded-lg border-2 border-tk-charcoal">
+          <table className="w-full min-w-[640px] border-collapse text-left text-sm">
+            <thead className="bg-tk-charcoal text-tk-cream">
               <tr>
-                <th className="px-4 py-3 font-medium">Ref</th>
-                <th className="px-4 py-3 font-medium">Nama</th>
-                <th className="px-4 py-3 font-medium">Paket</th>
-                <th className="px-4 py-3 font-medium">Jatuh Tempo</th>
-                <th className="px-4 py-3 font-medium">Status Bayar</th>
-                <th className="px-4 py-3 font-medium">Aksi</th>
+                <th className="px-4 py-3 font-bold">Ref</th>
+                <th className="px-4 py-3 font-bold">Nama</th>
+                <th className="px-4 py-3 font-bold">Paket</th>
+                <th className="px-4 py-3 font-bold">Jatuh Tempo</th>
+                <th className="px-4 py-3 font-bold">Status Bayar</th>
+                <th className="px-4 py-3 font-bold">Aksi</th>
               </tr>
             </thead>
             <tbody>
               {recentTransaksi.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-6 text-center text-foreground/50">
+                  <td colSpan={6} className="px-4 py-6 text-center text-tk-muted">
                     Belum ada transaksi.
                   </td>
                 </tr>
               )}
-              {recentTransaksi.map((t) => (
-                <tr key={t.id} className="border-b border-card-border last:border-0">
-                  <td className="px-4 py-3 font-medium">{t.nomorRef}</td>
-                  <td className="px-4 py-3">{t.pelanggan.nama}</td>
-                  <td className="px-4 py-3">{t.paket.nama}</td>
-                  <td className="px-4 py-3">
+              {recentTransaksi.map((t, index) => (
+                <tr
+                  key={t.id}
+                  className={cn(
+                    "border-b border-[#D6CEC4] transition-colors last:border-0 hover:bg-tk-cream-alt",
+                    index % 2 === 0 ? "bg-white" : "bg-tk-cream"
+                  )}
+                >
+                  <td className="px-4 py-3 font-bold text-tk-charcoal">{t.nomorRef}</td>
+                  <td className="px-4 py-3 text-tk-charcoal">{t.pelanggan.nama}</td>
+                  <td className="px-4 py-3 text-tk-charcoal">{t.paket.nama}</td>
+                  <td className="px-4 py-3 text-tk-charcoal">
                     {format(t.tanggalJatuhTempo, "d MMM yyyy", { locale: localeId })}
                   </td>
                   <td className="px-4 py-3">
-                    {t.statusBayar === "LUNAS" ? (
-                      <span className="text-primary-from">Lunas</span>
-                    ) : (
-                      <span className="text-accent">Belum Lunas</span>
-                    )}
+                    <StatusBadge status={t.statusBayar}>
+                      {t.statusBayar === "LUNAS" ? "Lunas" : "Belum Lunas"}
+                    </StatusBadge>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-2">
                       {t.statusBayar === "BELUM_BAYAR" && (
                         <TandaiLunasButton id={t.id} />
                       )}
-                      <Link
-                        href={`/admin/transaksi/${t.id}`}
-                        className="rounded-lg border border-card-border px-3 py-1.5 text-xs hover:bg-primary/10"
-                      >
+                      <Link href={`/admin/transaksi/${t.id}`} className={linkButtonClass}>
                         Lihat Detail
                       </Link>
-                      <Link
-                        href={`/admin/label?transaksiId=${t.id}`}
-                        className="rounded-lg border border-card-border px-3 py-1.5 text-xs hover:bg-primary/10"
-                      >
+                      <Link href={`/admin/label?transaksiId=${t.id}`} className={linkButtonClass}>
                         Print Label
                       </Link>
                     </div>

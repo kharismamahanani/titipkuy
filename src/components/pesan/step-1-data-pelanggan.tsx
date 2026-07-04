@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { tkErrorClass, tkInputClass, tkLabelClass, tkSelectTriggerClass } from "@/lib/form-style";
 import { KAMPUS_OPTIONS, type PelangganData } from "@/types/pesan";
 
 interface Step1Props {
@@ -25,26 +26,31 @@ export function Step1DataPelanggan({ data, errors, onChange }: Step1Props) {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="font-heading text-xl font-bold">Data Pelanggan</h2>
-        <p className="mt-1 text-sm text-foreground/60">
+        <h2 className="text-xl font-extrabold text-tk-charcoal">Data Pelanggan</h2>
+        <p className="mt-1 text-sm text-tk-muted">
           Isi data diri kamu untuk proses penitipan barang.
         </p>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="nama">Nama Lengkap</Label>
+      <div>
+        <Label htmlFor="nama" className={tkLabelClass}>
+          Nama Lengkap
+        </Label>
         <Input
           id="nama"
           placeholder="Nama sesuai KTP/KTM"
           value={data.nama}
           onChange={(e) => update("nama", e.target.value)}
           aria-invalid={!!errors.nama}
+          className={tkInputClass}
         />
-        {errors.nama && <p className="text-xs text-destructive">{errors.nama}</p>}
+        {errors.nama && <p className={tkErrorClass}>{errors.nama}</p>}
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="whatsapp">No WhatsApp</Label>
+      <div>
+        <Label htmlFor="whatsapp" className={tkLabelClass}>
+          No WhatsApp
+        </Label>
         <Input
           id="whatsapp"
           placeholder="08xxxxxxxxxx"
@@ -52,33 +58,35 @@ export function Step1DataPelanggan({ data, errors, onChange }: Step1Props) {
           value={data.whatsapp}
           onChange={(e) => update("whatsapp", e.target.value)}
           aria-invalid={!!errors.whatsapp}
+          className={tkInputClass}
         />
-        {errors.whatsapp && (
-          <p className="text-xs text-destructive">{errors.whatsapp}</p>
-        )}
+        {errors.whatsapp && <p className={tkErrorClass}>{errors.whatsapp}</p>}
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="alamatKos">Alamat Kos</Label>
+      <div>
+        <Label htmlFor="alamatKos" className={tkLabelClass}>
+          Alamat Kos
+        </Label>
         <Input
           id="alamatKos"
           placeholder="Jl. ... No. ..., Malang"
           value={data.alamatKos}
           onChange={(e) => update("alamatKos", e.target.value)}
           aria-invalid={!!errors.alamatKos}
+          className={tkInputClass}
         />
-        {errors.alamatKos && (
-          <p className="text-xs text-destructive">{errors.alamatKos}</p>
-        )}
+        {errors.alamatKos && <p className={tkErrorClass}>{errors.alamatKos}</p>}
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="kampus">Kampus</Label>
+      <div>
+        <Label htmlFor="kampus" className={tkLabelClass}>
+          Kampus
+        </Label>
         <Select
           value={data.kampus || undefined}
           onValueChange={(value) => update("kampus", value as PelangganData["kampus"])}
         >
-          <SelectTrigger id="kampus" className="w-full">
+          <SelectTrigger id="kampus" className={tkSelectTriggerClass}>
             <SelectValue placeholder="Pilih kampus" />
           </SelectTrigger>
           <SelectContent>
@@ -91,13 +99,16 @@ export function Step1DataPelanggan({ data, errors, onChange }: Step1Props) {
         </Select>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="noKtpKtm">No KTP/KTM (opsional)</Label>
+      <div>
+        <Label htmlFor="noKtpKtm" className={tkLabelClass}>
+          No KTP/KTM (opsional)
+        </Label>
         <Input
           id="noKtpKtm"
           placeholder="Boleh dikosongkan"
           value={data.noKtpKtm}
           onChange={(e) => update("noKtpKtm", e.target.value)}
+          className={tkInputClass}
         />
       </div>
     </div>

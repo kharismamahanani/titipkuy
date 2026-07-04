@@ -7,7 +7,9 @@ import { format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import { Camera, CheckCircle2, Loader2, X, XCircle } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { TkButton } from "@/components/ui/tk-button";
+import { TkCard } from "@/components/ui/tk-card";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { cn } from "@/lib/utils";
 import { buildFotoPath, uploadToStorage } from "@/lib/supabase";
 import type { VerifikasiPublik } from "@/types/transaksi";
@@ -51,19 +53,17 @@ export function VerifikasiClient({ id, isAdmin }: VerifikasiClientProps) {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-bg-dark px-4 py-12">
-      <div className="glass-card w-full max-w-sm rounded-2xl p-6 text-center">
-        <p className="gradient-text font-heading text-lg font-extrabold">TitipKuy! 📦</p>
-        <p className="mt-1 text-xs text-foreground/60">Verifikasi Barang Titipan</p>
+    <div className="flex min-h-screen items-center justify-center bg-tk-cream px-4 py-12">
+      <TkCard className="w-full max-w-sm text-center">
+        <p className="text-lg font-extrabold text-tk-charcoal">TitipKuy! 📦</p>
+        <p className="mt-1 text-xs text-tk-muted">Verifikasi Barang Titipan</p>
 
-        {state === "loading" && (
-          <p className="mt-6 text-sm text-foreground/60">Memuat...</p>
-        )}
+        {state === "loading" && <p className="mt-6 text-sm text-tk-muted">Memuat...</p>}
 
         {state === "error" && (
           <div className="mt-6 flex flex-col items-center gap-2">
-            <XCircle className="text-destructive" size={40} />
-            <p className="text-sm text-foreground/70">
+            <XCircle className="text-[#C0392B]" size={40} />
+            <p className="text-sm text-tk-muted">
               Kode ini tidak valid atau transaksi tidak ditemukan.
             </p>
           </div>
@@ -73,8 +73,8 @@ export function VerifikasiClient({ id, isAdmin }: VerifikasiClientProps) {
           <>
             <div className="mt-6 space-y-3 text-left text-sm">
               <div className="flex flex-col items-center gap-2 pb-2">
-                <CheckCircle2 className="text-primary-from" size={40} />
-                <p className="font-semibold">Barang Terverifikasi</p>
+                <CheckCircle2 className="text-tk-sage-dark" size={40} />
+                <p className="font-bold text-tk-charcoal">Barang Terverifikasi</p>
               </div>
               <Row label="Nama" value={data.namaDepan} />
               <Row label="Paket" value={data.paketNama} />
@@ -90,15 +90,20 @@ export function VerifikasiClient({ id, isAdmin }: VerifikasiClientProps) {
                   locale: localeId,
                 })}
               />
-              <Row label="Status" value={STATUS_LABEL[data.statusTransaksi]} />
+              <div className="flex items-center justify-between border-b-[1.5px] border-[#D6CEC4] pb-1">
+                <span className="text-tk-muted">Status</span>
+                <StatusBadge status={data.statusTransaksi}>
+                  {STATUS_LABEL[data.statusTransaksi]}
+                </StatusBadge>
+              </div>
               {data.kodeLabel.length > 0 && (
-                <div className="border-b border-card-border pb-1">
-                  <span className="text-foreground/60">Kode Label</span>
+                <div className="border-b-[1.5px] border-[#D6CEC4] pb-1">
+                  <span className="text-tk-muted">Kode Label</span>
                   <div className="mt-1 flex flex-wrap justify-end gap-1.5">
                     {data.kodeLabel.map((kode) => (
                       <span
                         key={kode}
-                        className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary-from"
+                        className="rounded-[20px] border-2 border-tk-charcoal bg-tk-orange px-2.5 py-1 text-xs font-bold text-tk-charcoal"
                       >
                         {kode}
                       </span>
@@ -109,13 +114,13 @@ export function VerifikasiClient({ id, isAdmin }: VerifikasiClientProps) {
             </div>
 
             {justSelesai && (
-              <div className="mt-6 space-y-3 rounded-2xl border border-primary-from/30 bg-primary/10 p-4 text-left text-sm">
-                <p className="text-center font-medium text-primary-from">
+              <div className="mt-6 space-y-3 rounded-lg border-2 border-tk-charcoal bg-tk-sage/15 p-4 text-left text-sm">
+                <p className="text-center font-bold text-tk-sage-dark">
                   ✅ Barang berhasil diserahkan. Transaksi selesai.
                 </p>
                 <Link
                   href={`/admin/transaksi/${id}`}
-                  className="block rounded-full border border-primary-from/60 py-2 text-center text-sm font-semibold hover:bg-primary/10"
+                  className="block rounded-lg border-2 border-tk-charcoal py-2 text-center text-sm font-bold text-tk-charcoal hover:bg-tk-cream-alt"
                 >
                   Lihat Detail Transaksi
                 </Link>
@@ -127,16 +132,16 @@ export function VerifikasiClient({ id, isAdmin }: VerifikasiClientProps) {
             )}
           </>
         )}
-      </div>
+      </TkCard>
     </div>
   );
 }
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between border-b border-card-border pb-1">
-      <span className="text-foreground/60">{label}</span>
-      <span className="font-medium">{value}</span>
+    <div className="flex justify-between border-b-[1.5px] border-[#D6CEC4] pb-1">
+      <span className="text-tk-muted">{label}</span>
+      <span className="font-bold text-tk-charcoal">{value}</span>
     </div>
   );
 }
@@ -206,23 +211,26 @@ function SerahkanBarangPanel({ transaksiId, onSelesai }: SerahkanBarangPanelProp
   }
 
   return (
-    <div className="mt-6 space-y-3 rounded-2xl border border-card-border bg-card-dark/60 p-4 text-left">
-      <p className="text-center text-sm font-semibold text-foreground/90">
+    <TkCard
+      variant="outline"
+      className="mt-6 space-y-3 border-l-4 border-l-tk-orange p-4 text-left"
+    >
+      <p className="text-center text-sm font-bold text-tk-charcoal">
         🔑 Mode Admin — Konfirmasi Pengambilan
       </p>
-      <p className="text-xs text-foreground/60">
+      <p className="text-xs text-tk-muted">
         Upload foto kondisi barang saat diserahkan (wajib, min. 1 foto):
       </p>
 
       {fotoUrls.length > 0 && (
         <div className="grid grid-cols-3 gap-2">
           {fotoUrls.map((url) => (
-            <div key={url} className="group relative aspect-square overflow-hidden rounded-lg">
+            <div key={url} className="group relative aspect-square overflow-hidden rounded-lg border-2 border-tk-charcoal">
               <Image src={url} alt="Foto barang keluar" fill unoptimized className="object-cover" />
               <button
                 type="button"
                 onClick={() => handleRemove(url)}
-                className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                className="absolute right-1 top-1 rounded-full bg-tk-charcoal/80 p-1 text-tk-cream opacity-0 transition-opacity group-hover:opacity-100"
                 aria-label="Hapus foto"
               >
                 <X size={12} />
@@ -245,12 +253,12 @@ function SerahkanBarangPanel({ transaksiId, onSelesai }: SerahkanBarangPanelProp
         }}
         onClick={() => inputRef.current?.click()}
         className={cn(
-          "flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-card-border py-5 text-center transition-colors",
-          isDragging && "border-primary-from bg-primary/5"
+          "flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed border-tk-charcoal bg-white py-5 text-center transition-colors",
+          isDragging && "border-tk-orange bg-tk-orange/10"
         )}
       >
-        <Camera className="text-primary-from" size={22} />
-        <p className="text-xs font-medium">Klik atau seret foto ke sini</p>
+        <Camera className="text-tk-orange" size={22} />
+        <p className="text-xs font-bold text-tk-charcoal">Klik atau seret foto ke sini</p>
         <input
           ref={inputRef}
           type="file"
@@ -265,21 +273,22 @@ function SerahkanBarangPanel({ transaksiId, onSelesai }: SerahkanBarangPanelProp
       </div>
 
       {isUploading && (
-        <div className="flex items-center justify-center gap-2 text-xs text-foreground/70">
+        <div className="flex items-center justify-center gap-2 text-xs text-tk-muted">
           <Loader2 className="animate-spin" size={14} />
           Mengupload foto...
         </div>
       )}
 
-      <Button
+      <TkButton
         type="button"
+        variant="primary"
         disabled={fotoUrls.length === 0 || isUploading || isSubmitting}
         onClick={handleSubmit}
-        className="w-full bg-gradient-to-r from-primary-from to-primary-to text-white"
+        className="w-full justify-center"
       >
-        {isSubmitting && <Loader2 className="animate-spin" size={16} />}
+        {isSubmitting && <Loader2 className="mr-2 animate-spin" size={16} />}
         Tandai Selesai & Serahkan Barang
-      </Button>
-    </div>
+      </TkButton>
+    </TkCard>
   );
 }

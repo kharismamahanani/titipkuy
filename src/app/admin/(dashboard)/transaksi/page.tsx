@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import { Loader2, Search } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { TkButton, tkButtonVariants } from "@/components/ui/tk-button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -16,6 +16,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { tkInputClass, tkSelectTriggerClass } from "@/lib/form-style";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { TandaiLunasButton } from "@/components/admin/tandai-lunas-button";
 import { Pagination } from "@/components/admin/pagination";
 import type { TransaksiSearchResult } from "@/types/transaksi";
@@ -122,15 +124,12 @@ export default function AdminTransaksiPage() {
     <div className="px-4 py-6 sm:px-6 lg:px-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-heading text-2xl font-bold">Transaksi</h1>
-          <p className="mt-1 text-sm text-foreground/60">
+          <h1 className="text-2xl font-extrabold text-tk-charcoal">Transaksi</h1>
+          <p className="mt-1 text-sm text-tk-muted">
             Semua transaksi penitipan barang &middot; {total} total.
           </p>
         </div>
-        <Link
-          href="/admin/transaksi/baru"
-          className="rounded-full bg-gradient-to-r from-primary-from to-primary-to px-5 py-2.5 text-sm font-semibold text-white"
-        >
+        <Link href="/admin/transaksi/baru" className={tkButtonVariants({ variant: "primary", size: "md" })}>
           + Buat Order Manual
         </Link>
       </div>
@@ -140,11 +139,16 @@ export default function AdminTransaksiPage() {
           placeholder="Cari nama pelanggan atau nomor ref..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          className={tkInputClass}
         />
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? <Loader2 className="animate-spin" size={16} /> : <Search size={16} />}
+        <TkButton type="submit" variant="primary" disabled={isLoading}>
+          {isLoading ? (
+            <Loader2 className="mr-1.5 animate-spin" size={16} />
+          ) : (
+            <Search className="mr-1.5" size={16} />
+          )}
           Cari
-        </Button>
+        </TkButton>
       </form>
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -155,10 +159,8 @@ export default function AdminTransaksiPage() {
               type="button"
               onClick={() => handleStatusChange(f.value)}
               className={cn(
-                "rounded-full border px-4 py-1.5 text-sm transition-colors",
-                status === f.value
-                  ? "border-transparent bg-gradient-to-r from-primary-from to-primary-to text-white"
-                  : "border-card-border text-foreground/70 hover:bg-primary/10"
+                "rounded-lg border-2 border-tk-charcoal px-4 py-1.5 text-sm font-bold transition-colors",
+                status === f.value ? "bg-tk-charcoal text-tk-cream" : "bg-white text-tk-charcoal hover:bg-tk-cream-alt"
               )}
             >
               {f.label}
@@ -167,7 +169,7 @@ export default function AdminTransaksiPage() {
         </div>
 
         <Select value={paketId || "all"} onValueChange={(value) => value && handlePaketChange(value)}>
-          <SelectTrigger className="w-full sm:w-52">
+          <SelectTrigger className={cn(tkSelectTriggerClass, "w-full sm:w-52")}>
             <SelectValue placeholder="Semua Paket" />
           </SelectTrigger>
           <SelectContent>
@@ -181,54 +183,62 @@ export default function AdminTransaksiPage() {
         </Select>
       </div>
 
-      <div className="glass-card mt-6 overflow-x-auto rounded-2xl">
-        <table className="w-full min-w-[1000px] text-left text-sm">
-          <thead className="border-b border-card-border text-foreground/60">
+      <div className="mt-6 overflow-x-auto rounded-lg border-2 border-tk-charcoal">
+        <table className="w-full min-w-[1000px] border-collapse text-left text-sm">
+          <thead className="bg-tk-charcoal text-tk-cream">
             <tr>
-              <th className="px-4 py-3 font-medium">Nomor Ref</th>
-              <th className="px-4 py-3 font-medium">Nama</th>
-              <th className="px-4 py-3 font-medium">Paket</th>
-              <th className="px-4 py-3 font-medium">Hub</th>
-              <th className="px-4 py-3 font-medium">Tanggal Masuk</th>
-              <th className="px-4 py-3 font-medium">Jatuh Tempo</th>
-              <th className="px-4 py-3 font-medium">Status Bayar</th>
-              <th className="px-4 py-3 font-medium">Status Transaksi</th>
-              <th className="px-4 py-3 font-medium">Aksi</th>
+              <th className="px-4 py-3 font-bold">Nomor Ref</th>
+              <th className="px-4 py-3 font-bold">Nama</th>
+              <th className="px-4 py-3 font-bold">Paket</th>
+              <th className="px-4 py-3 font-bold">Hub</th>
+              <th className="px-4 py-3 font-bold">Tanggal Masuk</th>
+              <th className="px-4 py-3 font-bold">Jatuh Tempo</th>
+              <th className="px-4 py-3 font-bold">Status Bayar</th>
+              <th className="px-4 py-3 font-bold">Status Transaksi</th>
+              <th className="px-4 py-3 font-bold">Aksi</th>
             </tr>
           </thead>
           <tbody>
             {!isLoading && data.length === 0 && (
               <tr>
-                <td colSpan={9} className="px-4 py-6 text-center text-foreground/50">
+                <td colSpan={9} className="px-4 py-6 text-center text-tk-muted">
                   Tidak ada transaksi ditemukan.
                 </td>
               </tr>
             )}
-            {data.map((t) => (
-              <tr key={t.id} className="border-b border-card-border last:border-0">
-                <td className="px-4 py-3 font-medium">{t.nomorRef}</td>
-                <td className="px-4 py-3">{t.pelanggan.nama}</td>
-                <td className="px-4 py-3">{t.paket.nama}</td>
-                <td className="px-4 py-3 capitalize">{getHub(t)}</td>
-                <td className="px-4 py-3">
+            {data.map((t, index) => (
+              <tr
+                key={t.id}
+                className={cn(
+                  "border-b border-[#D6CEC4] transition-colors last:border-0 hover:bg-tk-cream-alt",
+                  index % 2 === 0 ? "bg-white" : "bg-tk-cream"
+                )}
+              >
+                <td className="px-4 py-3 font-bold text-tk-charcoal">{t.nomorRef}</td>
+                <td className="px-4 py-3 text-tk-charcoal">{t.pelanggan.nama}</td>
+                <td className="px-4 py-3 text-tk-charcoal">{t.paket.nama}</td>
+                <td className="px-4 py-3 capitalize text-tk-charcoal">{getHub(t)}</td>
+                <td className="px-4 py-3 text-tk-charcoal">
                   {format(new Date(t.tanggalMasuk), "d MMM yyyy", { locale: localeId })}
                 </td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-3 text-tk-charcoal">
                   {format(new Date(t.tanggalJatuhTempo), "d MMM yyyy", { locale: localeId })}
                 </td>
                 <td className="px-4 py-3">
-                  {t.statusBayar === "LUNAS" ? (
-                    <span className="text-primary-from">Lunas</span>
-                  ) : (
-                    <span className="text-accent">Belum Lunas</span>
-                  )}
+                  <StatusBadge status={t.statusBayar}>
+                    {t.statusBayar === "LUNAS" ? "Lunas" : "Belum Lunas"}
+                  </StatusBadge>
                 </td>
-                <td className="px-4 py-3 capitalize">{t.statusTransaksi.toLowerCase()}</td>
+                <td className="px-4 py-3">
+                  <StatusBadge status={t.statusTransaksi}>
+                    {t.statusTransaksi.charAt(0) + t.statusTransaksi.slice(1).toLowerCase()}
+                  </StatusBadge>
+                </td>
                 <td className="px-4 py-3">
                   <div className="flex flex-wrap gap-2">
                     <Link
                       href={`/admin/transaksi/${t.id}`}
-                      className="rounded-lg border border-card-border px-3 py-1.5 text-xs hover:bg-primary/10"
+                      className={tkButtonVariants({ variant: "secondary", size: "sm" })}
                     >
                       Detail
                     </Link>
@@ -237,7 +247,7 @@ export default function AdminTransaksiPage() {
                     )}
                     <Link
                       href={`/admin/label?transaksiId=${t.id}`}
-                      className="rounded-lg border border-card-border px-3 py-1.5 text-xs hover:bg-primary/10"
+                      className={tkButtonVariants({ variant: "secondary", size: "sm" })}
                     >
                       Print Label
                     </Link>

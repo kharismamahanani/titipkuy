@@ -8,9 +8,10 @@ import Image from "next/image";
 import { CheckCircle2, Copy, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { pdf } from "@react-pdf/renderer";
-import { Button } from "@/components/ui/button";
+import { TkButton, tkButtonVariants } from "@/components/ui/tk-button";
+import { TkCard } from "@/components/ui/tk-card";
 import { PerjanjianPdfDocument } from "@/components/konfirmasi/perjanjian-pdf";
-import { formatRupiah } from "@/lib/utils";
+import { cn, formatRupiah } from "@/lib/utils";
 import { ADMIN_NAME, formatWhatsAppDisplay, getWhatsAppUrl } from "@/constants/site";
 import { uploadToStorage } from "@/lib/supabase";
 import { HUB_CONFIG, JAM_DROP_OFF_MANDIRI, generateKodeUnik } from "@/lib/constants";
@@ -108,33 +109,30 @@ export default function KonfirmasiPage({ params }: { params: { id: string } }) {
   }
 
   return (
-    <div className="min-h-screen bg-bg-dark px-4 py-12 sm:px-6">
+    <div className="min-h-screen bg-tk-cream px-4 py-12 sm:px-6">
       <div className="mx-auto max-w-xl space-y-6">
-        <div className="glass-card gradient-border rounded-2xl p-6 text-center">
-          <p className="text-sm font-medium text-foreground/70">
-            🔑 Kode Unik Barangmu
+        <TkCard variant="orange" className="text-center">
+          <p className="text-[13px] font-bold text-tk-charcoal">Kode Unik Barangmu</p>
+          <p className="mt-2 text-[36px] font-extrabold leading-tight text-tk-charcoal">
+            {kodeUnik}
           </p>
-          <div className="mt-2 flex items-center justify-center gap-3">
-            <p className="gradient-text font-heading text-4xl font-extrabold sm:text-5xl">
-              {kodeUnik}
-            </p>
-            <button
-              type="button"
-              onClick={handleCopyKode}
-              aria-label="Salin Kode"
-              className="flex items-center gap-1 rounded-full border border-primary-from/60 px-3 py-1.5 text-xs font-semibold text-foreground/80 transition-colors hover:bg-primary/10"
-            >
-              <Copy size={14} />
-              Salin Kode
-            </button>
-          </div>
-          <p className="mt-2 text-xs text-foreground/60">
-            Tulis kode ini di luar kardus/koper kamu
+          <TkButton
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={handleCopyKode}
+            className="mt-3"
+          >
+            <Copy size={14} className="mr-1.5" />
+            Salin kode
+          </TkButton>
+          <p className="mt-3 text-xs text-tk-charcoal">
+            Tulis kode ini di luar kardus/koper
           </p>
-        </div>
+        </TkCard>
 
         {transaksi.metodePengiriman === "mandiri" && (
-          <div className="glass-card space-y-3 rounded-2xl border border-yellow-500/30 bg-yellow-500/10 p-5 text-sm text-yellow-200">
+          <TkCard className="space-y-3 text-sm text-tk-charcoal">
             <p>
               📦 Kamu memilih kirim sendiri / via Grab/Lalamove
               <br />
@@ -148,32 +146,28 @@ export default function KonfirmasiPage({ params }: { params: { id: string } }) {
               )}
               target="_blank"
               rel="noopener noreferrer"
-              className="block rounded-full border border-yellow-500/50 py-2 text-center text-sm font-semibold text-yellow-100 hover:bg-yellow-500/10"
+              className="block rounded-lg border-2 border-tk-charcoal py-2 text-center text-sm font-bold text-tk-charcoal hover:bg-tk-cream-alt"
             >
               Beritahu Admin via WA
             </a>
-          </div>
+          </TkCard>
         )}
 
         <div className="text-center">
-          <CheckCircle2
-            className="mx-auto text-primary-from"
-            size={72}
-            strokeWidth={1.5}
-          />
-          <h1 className="mt-4 font-heading text-2xl font-bold sm:text-3xl">
+          <CheckCircle2 className="mx-auto text-tk-sage-dark" size={72} strokeWidth={1.5} />
+          <h1 className="mt-4 text-2xl font-extrabold text-tk-charcoal sm:text-3xl">
             Pesanan Diterima! 🎉
           </h1>
         </div>
 
         <div className="text-center">
-          <p className="text-sm text-foreground/60">Nomor Referensi</p>
-          <p className="gradient-text font-heading text-3xl font-extrabold sm:text-4xl">
+          <p className="text-sm text-tk-muted">Nomor Referensi</p>
+          <p className="text-3xl font-extrabold text-tk-orange sm:text-4xl">
             {transaksi.nomorRef}
           </p>
         </div>
 
-        <div className="glass-card space-y-2 rounded-2xl p-6 text-sm">
+        <TkCard className="space-y-2 text-sm">
           <SummaryRow label="Nama" value={pelanggan.nama} />
           <SummaryRow label="Paket" value={paket.nama} />
           <SummaryRow label="Harga Paket" value={formatRupiah(paket.harga)} />
@@ -199,16 +193,18 @@ export default function KonfirmasiPage({ params }: { params: { id: string } }) {
               locale: localeId,
             })}
           />
-        </div>
+        </TkCard>
 
-        <div className="glass-card rounded-2xl p-5 text-center text-sm text-foreground/70">
+        <TkCard className="text-center text-sm text-tk-muted">
           📸 Foto kondisi barangmu akan dikirim ke WhatsApp setelah barang diterima dan
           dicek oleh tim kami di hub.
-        </div>
+        </TkCard>
 
-        <div className="glass-card flex flex-col items-center gap-3 rounded-2xl p-6">
-          <p className="text-sm font-medium">Scan QRIS atau transfer ke rekening di bawah</p>
-          <div className="rounded-xl bg-white p-4">
+        <TkCard className="flex flex-col items-center gap-3">
+          <p className="text-sm font-bold text-tk-charcoal">
+            Scan QRIS atau transfer ke rekening di bawah
+          </p>
+          <div className="rounded-lg border-2 border-tk-charcoal bg-white p-4">
             <Image
               src="/qris-titipkuy.png"
               alt="QRIS TitipKuy!"
@@ -217,38 +213,36 @@ export default function KonfirmasiPage({ params }: { params: { id: string } }) {
               className="h-auto w-[220px]"
             />
           </div>
-          <p className="text-center text-xs text-foreground/50">
+          <p className="text-center text-xs text-tk-light">
             Berlaku untuk semua bank & e-wallet
           </p>
-        </div>
+        </TkCard>
 
-        <div className="glass-card space-y-3 rounded-2xl p-6 text-center">
-          <p className="text-sm text-foreground/80">
-            Transfer/scan QRIS lalu konfirmasi ke WA
-          </p>
+        <TkCard variant="sage" className="space-y-3 text-center">
+          <p className="text-sm text-tk-cream">Transfer/scan QRIS lalu konfirmasi ke WA</p>
           <a
             href={getWhatsAppUrl(waMessage)}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block w-full rounded-full bg-gradient-to-r from-primary-from to-primary-to px-6 py-3 text-sm font-semibold text-white"
+            className={cn(tkButtonVariants({ variant: "primary", size: "md" }), "w-full justify-center")}
           >
             Konfirmasi Pembayaran via WhatsApp
           </a>
-          <p className="text-xs text-foreground/50">
+          <p className="text-xs text-tk-cream/80">
             Admin: {ADMIN_NAME} &middot; {formatWhatsAppDisplay()}
           </p>
-        </div>
+        </TkCard>
 
-        <Button
+        <TkButton
           type="button"
-          variant="outline"
-          className="w-full"
+          variant="secondary"
+          className="w-full justify-center"
           disabled={isGeneratingPdf}
           onClick={handleDownloadPdf}
         >
-          {isGeneratingPdf && <Loader2 className="animate-spin" size={16} />}
+          {isGeneratingPdf && <Loader2 className="mr-2 animate-spin" size={16} />}
           Download PDF Perjanjian
-        </Button>
+        </TkButton>
       </div>
     </div>
   );
@@ -257,15 +251,15 @@ export default function KonfirmasiPage({ params }: { params: { id: string } }) {
 function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between">
-      <span className="text-foreground/60">{label}</span>
-      <span className="font-medium">{value}</span>
+      <span className="text-tk-muted">{label}</span>
+      <span className="font-bold text-tk-charcoal">{value}</span>
     </div>
   );
 }
 
 function CenteredMessage({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-bg-dark px-4 text-center text-foreground/70">
+    <div className="flex min-h-screen items-center justify-center bg-tk-cream px-4 text-center text-tk-muted">
       {children}
     </div>
   );

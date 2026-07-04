@@ -1,5 +1,6 @@
 "use client";
 
+import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const STEP_LABELS = ["Data Diri", "Paket & Metode Pengiriman", "Perjanjian"];
@@ -22,18 +23,18 @@ export function ProgressBar({ currentStep }: ProgressBarProps) {
               <div className="flex flex-col items-center gap-1">
                 <div
                   className={cn(
-                    "flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold",
-                    isDone || isActive
-                      ? "bg-gradient-to-r from-primary-from to-primary-to text-white"
-                      : "bg-card-dark text-foreground/50"
+                    "flex h-8 w-8 items-center justify-center rounded-full border-2 border-tk-charcoal text-sm font-bold",
+                    isDone && "bg-tk-sage text-white",
+                    isActive && "bg-tk-orange text-tk-charcoal",
+                    !isDone && !isActive && "bg-tk-cream text-tk-charcoal"
                   )}
                 >
-                  {stepNumber}
+                  {isDone ? <Check size={16} /> : stepNumber}
                 </div>
                 <span
                   className={cn(
                     "hidden text-xs sm:block",
-                    isActive ? "font-semibold text-foreground" : "text-foreground/50"
+                    isActive ? "font-bold text-tk-charcoal" : "text-tk-muted"
                   )}
                 >
                   {label}
@@ -43,8 +44,8 @@ export function ProgressBar({ currentStep }: ProgressBarProps) {
               {stepNumber !== STEP_LABELS.length && (
                 <div
                   className={cn(
-                    "mx-2 h-0.5 flex-1",
-                    isDone ? "bg-primary-from" : "bg-card-dark"
+                    "mx-2 h-[2px] flex-1",
+                    isDone ? "bg-tk-sage" : "bg-[#D6CEC4]"
                   )}
                 />
               )}

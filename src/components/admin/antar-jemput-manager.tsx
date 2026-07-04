@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { TkButton } from "@/components/ui/tk-button";
 import { Switch } from "@/components/ui/switch";
-import { formatRupiah } from "@/lib/utils";
+import { formatRupiah, cn } from "@/lib/utils";
+import { tkDangerButtonClass } from "@/lib/form-style";
 import { AntarJemputFormDialog } from "@/components/admin/antar-jemput-form-dialog";
 import type { AntarJemputOption } from "@/types/antar-jemput";
 
@@ -65,43 +66,45 @@ export function AntarJemputManager({ initialOptions }: AntarJemputManagerProps) 
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Button
-          type="button"
-          onClick={handleAdd}
-          className="bg-gradient-to-r from-primary-from to-primary-to text-white"
-        >
+        <TkButton type="button" variant="primary" onClick={handleAdd}>
           Tambah Opsi
-        </Button>
+        </TkButton>
       </div>
 
-      <div className="glass-card overflow-x-auto rounded-2xl">
-        <table className="w-full min-w-[700px] text-left text-sm">
-          <thead className="border-b border-card-border text-foreground/60">
+      <div className="overflow-x-auto rounded-lg border-2 border-tk-charcoal">
+        <table className="w-full min-w-[700px] border-collapse text-left text-sm">
+          <thead className="bg-tk-charcoal text-tk-cream">
             <tr>
-              <th className="px-4 py-3 font-medium">Label</th>
-              <th className="px-4 py-3 font-medium">Tipe</th>
-              <th className="px-4 py-3 font-medium">Radius</th>
-              <th className="px-4 py-3 font-medium">Kapasitas</th>
-              <th className="px-4 py-3 font-medium">Harga</th>
-              <th className="px-4 py-3 font-medium">Status Aktif</th>
-              <th className="px-4 py-3 font-medium">Aksi</th>
+              <th className="px-4 py-3 font-bold">Label</th>
+              <th className="px-4 py-3 font-bold">Tipe</th>
+              <th className="px-4 py-3 font-bold">Radius</th>
+              <th className="px-4 py-3 font-bold">Kapasitas</th>
+              <th className="px-4 py-3 font-bold">Harga</th>
+              <th className="px-4 py-3 font-bold">Status Aktif</th>
+              <th className="px-4 py-3 font-bold">Aksi</th>
             </tr>
           </thead>
           <tbody>
             {initialOptions.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-6 text-center text-foreground/50">
+                <td colSpan={7} className="px-4 py-6 text-center text-tk-muted">
                   Belum ada opsi antar-jemput. Klik &quot;Tambah Opsi&quot; untuk mulai.
                 </td>
               </tr>
             )}
-            {initialOptions.map((option) => (
-              <tr key={option.id} className="border-b border-card-border last:border-0">
-                <td className="px-4 py-3 font-medium">{option.label}</td>
-                <td className="px-4 py-3 capitalize">{option.tipe}</td>
-                <td className="px-4 py-3">{option.radiusLabel}</td>
-                <td className="px-4 py-3 text-foreground/60">{option.kapasitasLabel ?? "-"}</td>
-                <td className="px-4 py-3">{formatRupiah(option.harga)}</td>
+            {initialOptions.map((option, index) => (
+              <tr
+                key={option.id}
+                className={cn(
+                  "border-b border-[#D6CEC4] transition-colors last:border-0 hover:bg-tk-cream-alt",
+                  index % 2 === 0 ? "bg-white" : "bg-tk-cream"
+                )}
+              >
+                <td className="px-4 py-3 font-bold text-tk-charcoal">{option.label}</td>
+                <td className="px-4 py-3 capitalize text-tk-charcoal">{option.tipe}</td>
+                <td className="px-4 py-3 text-tk-charcoal">{option.radiusLabel}</td>
+                <td className="px-4 py-3 text-tk-muted">{option.kapasitasLabel ?? "-"}</td>
+                <td className="px-4 py-3 text-tk-charcoal">{formatRupiah(option.harga)}</td>
                 <td className="px-4 py-3">
                   <Switch
                     checked={option.aktif}
@@ -110,19 +113,13 @@ export function AntarJemputManager({ initialOptions }: AntarJemputManagerProps) 
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex gap-2">
-                    <Button type="button" size="sm" variant="outline" onClick={() => handleEdit(option)}>
+                    <TkButton type="button" size="sm" variant="secondary" onClick={() => handleEdit(option)}>
                       Edit
-                    </Button>
+                    </TkButton>
                     {option.aktif && (
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        className="text-destructive hover:bg-destructive/10"
-                        onClick={() => handleNonaktifkan(option)}
-                      >
+                      <button type="button" className={tkDangerButtonClass} onClick={() => handleNonaktifkan(option)}>
                         Nonaktifkan
-                      </Button>
+                      </button>
                     )}
                   </div>
                 </td>

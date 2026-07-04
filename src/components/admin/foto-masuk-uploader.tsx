@@ -104,12 +104,12 @@ export function FotoMasukUploader({ transaksiId, fotoMasuk }: FotoMasukUploaderP
         }}
         onClick={() => inputRef.current?.click()}
         className={cn(
-          "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-card-border py-8 text-center transition-colors",
-          isDragging && "border-primary-from bg-primary/5"
+          "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-tk-charcoal bg-white py-8 text-center transition-colors",
+          isDragging && "border-tk-orange bg-tk-orange/10"
         )}
       >
-        <Camera className="text-primary-from" size={28} />
-        <p className="text-sm font-medium">Klik atau seret foto ke sini</p>
+        <Camera className="text-tk-orange" size={28} />
+        <p className="text-sm font-bold text-tk-charcoal">Klik atau seret foto ke sini</p>
         <input
           ref={inputRef}
           type="file"
@@ -124,7 +124,7 @@ export function FotoMasukUploader({ transaksiId, fotoMasuk }: FotoMasukUploaderP
       </div>
 
       {isUploading && (
-        <div className="flex items-center gap-2 text-sm text-foreground/70">
+        <div className="flex items-center gap-2 text-sm text-tk-muted">
           <Loader2 className="animate-spin" size={16} />
           Mengupload {progress.done}/{progress.total} foto...
         </div>

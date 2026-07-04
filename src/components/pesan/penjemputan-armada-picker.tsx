@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { TkButton } from "@/components/ui/tk-button";
 import { Calendar } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
+import { tkLabelClass } from "@/lib/form-style";
 import { cn } from "@/lib/utils";
 import { AKTIF_HUB_KEYS, HUB_CONFIG, SLOT_SESI } from "@/lib/constants";
 import type {
@@ -109,12 +110,12 @@ export function PenjemputanArmadaPicker({
   }
 
   return (
-    <div className="glass-card space-y-6 rounded-2xl p-5">
+    <div className="space-y-6 rounded-lg border-2 border-tk-charcoal bg-white p-5">
       <div>
-        <p className="font-heading font-bold">
+        <p className="font-extrabold text-tk-charcoal">
           📅 Pilih Jadwal Antar-Jemput Armada TitipKuy!
         </p>
-        <p className="mt-1 text-xs text-foreground/60">
+        <p className="mt-1 text-xs text-tk-muted">
           Maksimal pemesanan slot adalah H-1 (24 jam sebelum pengambilan). Penjemputan
           di hari Minggu/libur dialihkan ke hari kerja berikutnya.
         </p>
@@ -122,7 +123,7 @@ export function PenjemputanArmadaPicker({
 
       {HUB_OPTIONS.length > 1 && (
         <div className="space-y-2">
-          <Label>Pilih Hub</Label>
+          <Label className={tkLabelClass}>Pilih Hub</Label>
           <div className="flex flex-col gap-2 sm:flex-row">
             {HUB_OPTIONS.map((opt) => (
               <button
@@ -130,13 +131,13 @@ export function PenjemputanArmadaPicker({
                 type="button"
                 onClick={() => handleHubChange(opt.value)}
                 className={cn(
-                  "flex-1 rounded-xl border px-4 py-2.5 text-left text-sm transition-colors",
+                  "flex-1 rounded-lg border-2 border-tk-charcoal px-4 py-2.5 text-left text-sm transition-colors",
                   penjemputan.hub === opt.value
-                    ? "border-transparent bg-gradient-to-r from-primary-from to-primary-to text-white"
-                    : "border-card-border text-foreground/80 hover:bg-primary/10"
+                    ? "bg-tk-charcoal text-tk-cream"
+                    : "bg-white text-tk-charcoal hover:bg-tk-cream-alt"
                 )}
               >
-                <span className="font-semibold">{opt.label}</span>{" "}
+                <span className="font-bold">{opt.label}</span>{" "}
                 <span className="opacity-80">({opt.alamat})</span>
               </button>
             ))}
@@ -146,8 +147,8 @@ export function PenjemputanArmadaPicker({
 
       {penjemputan.hub && (
         <div className="space-y-2">
-          <Label>Pilih Tanggal Penjemputan</Label>
-          <div className="glass-card inline-block rounded-2xl p-2">
+          <Label className={tkLabelClass}>Pilih Tanggal Penjemputan</Label>
+          <div className="inline-block rounded-lg border-2 border-tk-charcoal bg-white p-2">
             <Calendar
               mode="single"
               selected={penjemputan.tanggal ?? undefined}
@@ -159,35 +160,29 @@ export function PenjemputanArmadaPicker({
       )}
 
       {isLoadingAvailability && (
-        <p className="flex items-center gap-2 text-sm text-foreground/60">
+        <p className="flex items-center gap-2 text-sm text-tk-muted">
           <Loader2 className="animate-spin" size={16} />
           Memuat ketersediaan slot...
         </p>
       )}
 
       {availability && availability.liburLocked && (
-        <div className="space-y-3 rounded-2xl border border-yellow-500/30 bg-yellow-500/10 p-4 text-sm text-yellow-200">
+        <div className="space-y-3 rounded-lg border-2 border-tk-orange bg-tk-orange/10 p-4 text-sm text-tk-charcoal">
           <p>💡 {availability.pesanHariLibur}</p>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={onKirimMandiri}
-            className="border-yellow-500/40 text-yellow-100 hover:bg-yellow-500/10"
-          >
+          <TkButton type="button" size="sm" variant="secondary" onClick={onKirimMandiri}>
             Saya mau kirim mandiri via Grab/Lalamove
-          </Button>
+          </TkButton>
         </div>
       )}
 
       {availability && !availability.liburLocked && (
         <div className="space-y-4">
-          <Label>Pilih Sesi & Armada</Label>
+          <Label className={tkLabelClass}>Pilih Sesi & Armada</Label>
           {(Object.keys(SLOT_SESI) as SesiWaktu[]).map((sesiWaktu) => {
             const sesiInfo = availability.sesi[sesiWaktu];
             return (
               <div key={sesiWaktu} className="space-y-2">
-                <p className="text-xs font-semibold uppercase tracking-wide text-foreground/60">
+                <p className="text-xs font-bold uppercase tracking-wide text-tk-muted">
                   Sesi {sesiWaktu} ({sesiInfo.label})
                 </p>
                 <div className="grid gap-2 sm:grid-cols-2">
@@ -207,12 +202,12 @@ export function PenjemputanArmadaPicker({
                           info.armadaId && handlePilihSesi(sesiWaktu, tipe, info.armadaId)
                         }
                         className={cn(
-                          "flex items-center justify-between rounded-xl border px-4 py-2.5 text-sm transition-colors",
+                          "flex items-center justify-between rounded-lg border-2 px-4 py-2.5 text-sm transition-colors",
                           disabled
-                            ? "cursor-not-allowed border-card-border text-foreground/30"
+                            ? "cursor-not-allowed border-[#D6CEC4] text-tk-light"
                             : isSelected
-                              ? "border-transparent bg-gradient-to-r from-primary-from to-primary-to text-white"
-                              : "border-card-border text-foreground/80 hover:bg-primary/10"
+                              ? "border-tk-charcoal bg-tk-charcoal text-tk-cream"
+                              : "border-tk-charcoal bg-white text-tk-charcoal hover:bg-tk-cream-alt"
                         )}
                       >
                         <span>{ARMADA_TIPE_LABEL[tipe]}</span>

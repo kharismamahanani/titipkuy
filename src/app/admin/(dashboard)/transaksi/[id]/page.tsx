@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import { prisma } from "@/lib/prisma";
 import { formatRupiah } from "@/lib/utils";
+import { TkCard } from "@/components/ui/tk-card";
 import { FotoMasukUploader } from "@/components/admin/foto-masuk-uploader";
 import { FotoKeluarUploader } from "@/components/admin/foto-keluar-uploader";
 import { TandaiSelesaiButton } from "@/components/admin/tandai-selesai-button";
@@ -40,11 +41,11 @@ export default async function AdminTransaksiDetailPage({
   if (!transaksi) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
-        <h1 className="font-heading text-xl font-bold">Transaksi tidak ditemukan</h1>
-        <p className="mt-2 text-sm text-foreground/60">
+        <h1 className="text-xl font-extrabold text-tk-charcoal">Transaksi tidak ditemukan</h1>
+        <p className="mt-2 text-sm text-tk-muted">
           Cek kembali link, atau database belum terhubung.
         </p>
-        <Link href="/admin/transaksi" className="mt-4 text-sm text-primary-from hover:underline">
+        <Link href="/admin/transaksi" className="mt-4 text-sm font-bold text-tk-orange-dark hover:underline">
           &larr; Kembali ke daftar transaksi
         </Link>
       </div>
@@ -64,13 +65,13 @@ export default async function AdminTransaksiDetailPage({
   return (
     <div className="space-y-8 px-4 py-6 sm:px-6 lg:px-8">
       <div>
-        <Link href="/admin/transaksi" className="text-sm text-foreground/60 hover:underline">
+        <Link href="/admin/transaksi" className="text-sm font-bold text-tk-orange-dark hover:underline">
           &larr; Kembali ke daftar transaksi
         </Link>
-        <h1 className="mt-2 font-heading text-2xl font-bold">{transaksi.nomorRef}</h1>
+        <h1 className="mt-2 text-2xl font-extrabold text-tk-charcoal">{transaksi.nomorRef}</h1>
       </div>
 
-      <div className="glass-card space-y-2 rounded-2xl p-5 text-sm">
+      <TkCard className="space-y-2 text-sm">
         <Row label="Nama" value={pelanggan.nama} />
         <Row label="No. WhatsApp" value={pelanggan.whatsapp} />
         <Row label="Alamat Kos" value={pelanggan.alamatKos} />
@@ -105,28 +106,26 @@ export default async function AdminTransaksiDetailPage({
         {transaksi.deskripsiDeklarasi && (
           <Row label="Deskripsi Barang" value={transaksi.deskripsiDeklarasi} />
         )}
-      </div>
+      </TkCard>
 
       <section className="space-y-3">
-        <h2 className="font-heading font-bold">Foto Saat Masuk</h2>
-        <p className="text-sm text-foreground/60">
-          Upload foto kondisi barang saat tiba di hub.
-        </p>
+        <h2 className="font-extrabold text-tk-charcoal">Foto Saat Masuk</h2>
+        <p className="text-sm text-tk-muted">Upload foto kondisi barang saat tiba di hub.</p>
         <FotoMasukUploader transaksiId={transaksi.id} fotoMasuk={fotoMasuk} />
       </section>
 
       <section className="space-y-3">
-        <h2 className="font-heading font-bold">Foto Saat Keluar</h2>
-        <p className="text-sm text-foreground/60">
+        <h2 className="font-extrabold text-tk-charcoal">Foto Saat Keluar</h2>
+        <p className="text-sm text-tk-muted">
           Upload foto kondisi barang saat pelanggan mengambilnya.
         </p>
         <FotoKeluarUploader transaksiId={transaksi.id} fotoKeluar={fotoKeluar} />
       </section>
 
       <section className="space-y-3">
-        <h2 className="font-heading font-bold">Tanda Tangan</h2>
+        <h2 className="font-extrabold text-tk-charcoal">Tanda Tangan</h2>
         {transaksi.tandaTanganUrl ? (
-          <div className="glass-card inline-block rounded-2xl p-4">
+          <div className="inline-block rounded-lg border-2 border-tk-charcoal bg-white p-4">
             <div className="relative h-32 w-64">
               <Image
                 src={transaksi.tandaTanganUrl}
@@ -138,13 +137,13 @@ export default async function AdminTransaksiDetailPage({
             </div>
           </div>
         ) : (
-          <p className="text-sm text-foreground/50">Belum ada tanda tangan.</p>
+          <p className="text-sm text-tk-light">Belum ada tanda tangan.</p>
         )}
       </section>
 
       {transaksi.metodePengiriman === "mandiri" && (
         <section className="space-y-2">
-          <h2 className="font-heading font-bold">Kiriman Mandiri</h2>
+          <h2 className="font-extrabold text-tk-charcoal">Kiriman Mandiri</h2>
           <TandaiBarangTibaButton
             transaksiId={transaksi.id}
             barangTibaMandiri={transaksi.barangTibaMandiri}
@@ -163,9 +162,9 @@ export default async function AdminTransaksiDetailPage({
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between border-b border-card-border/50 py-1 last:border-0">
-      <span className="text-foreground/60">{label}</span>
-      <span className="font-medium">{value}</span>
+    <div className="flex justify-between border-b border-[#D6CEC4] py-1 last:border-0">
+      <span className="text-tk-muted">{label}</span>
+      <span className="font-bold text-tk-charcoal">{value}</span>
     </div>
   );
 }

@@ -5,11 +5,14 @@ import { format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import { Loader2, X } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { TkButton } from "@/components/ui/tk-button";
+import { TkCard } from "@/components/ui/tk-card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
+import { tkInputClass, tkLabelClass } from "@/lib/form-style";
+import { cn } from "@/lib/utils";
 import type { KonfigurasiOperasional as KonfigurasiOperasionalType } from "@/types/armada";
 
 interface KonfigurasiOperasionalProps {
@@ -59,16 +62,16 @@ export function KonfigurasiOperasional({ initialKonfigurasi }: KonfigurasiOperas
   }
 
   return (
-    <div className="glass-card space-y-5 rounded-2xl p-6">
-      <div className="flex items-center justify-between rounded-lg border border-card-border px-3 py-2">
-        <Label htmlFor="lockH1" className="cursor-pointer">
+    <TkCard className="space-y-5">
+      <div className="flex items-center justify-between rounded-lg border-2 border-tk-charcoal bg-white px-3 py-2">
+        <Label htmlFor="lockH1" className="cursor-pointer text-sm font-bold text-tk-charcoal">
           Kunci pemesanan H-1 (24 jam sebelum)
         </Label>
         <Switch id="lockH1" checked={lockH1} onCheckedChange={(checked) => setLockH1(checked === true)} />
       </div>
 
-      <div className="flex items-center justify-between rounded-lg border border-card-border px-3 py-2">
-        <Label htmlFor="lockHariMinggu" className="cursor-pointer">
+      <div className="flex items-center justify-between rounded-lg border-2 border-tk-charcoal bg-white px-3 py-2">
+        <Label htmlFor="lockHariMinggu" className="cursor-pointer text-sm font-bold text-tk-charcoal">
           Tidak ada armada hari Minggu
         </Label>
         <Switch
@@ -79,20 +82,20 @@ export function KonfigurasiOperasional({ initialKonfigurasi }: KonfigurasiOperas
       </div>
 
       <div className="space-y-2">
-        <Label>Tanggal Merah</Label>
+        <Label className={tkLabelClass}>Tanggal Merah</Label>
         {tanggalMerah.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {tanggalMerah.map((iso) => (
               <span
                 key={iso}
-                className="flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary-from"
+                className="flex items-center gap-1.5 rounded-[20px] border-2 border-tk-charcoal bg-tk-orange px-3 py-1 text-xs font-bold text-tk-charcoal"
               >
                 {format(new Date(iso), "d MMM yyyy", { locale: localeId })}
                 <button
                   type="button"
                   onClick={() => handleHapusTanggal(iso)}
                   aria-label={`Hapus tanggal ${iso}`}
-                  className="hover:text-destructive"
+                  className="hover:text-[#C0392B]"
                 >
                   <X size={12} />
                 </button>
@@ -101,44 +104,48 @@ export function KonfigurasiOperasional({ initialKonfigurasi }: KonfigurasiOperas
           </div>
         )}
 
-        <div className="glass-card inline-flex flex-col items-start gap-2 rounded-2xl p-2">
+        <div className="inline-flex flex-col items-start gap-2 rounded-lg border-2 border-tk-charcoal bg-white p-2">
           <Calendar
             mode="single"
             selected={tanggalBaru}
             onSelect={setTanggalBaru}
           />
-          <Button
+          <TkButton
             type="button"
             size="sm"
-            variant="outline"
+            variant="secondary"
             disabled={!tanggalBaru}
             onClick={handleTambahTanggal}
-            className="w-full"
+            className="w-full justify-center"
           >
             Tambah Tanggal
-          </Button>
+          </TkButton>
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="pesanHariLibur">Pesan untuk Hari Libur</Label>
+      <div>
+        <Label htmlFor="pesanHariLibur" className={tkLabelClass}>
+          Pesan untuk Hari Libur
+        </Label>
         <Textarea
           id="pesanHariLibur"
           rows={3}
           value={pesanHariLibur}
           onChange={(e) => setPesanHariLibur(e.target.value)}
+          className={cn(tkInputClass, "min-h-20")}
         />
       </div>
 
-      <Button
+      <TkButton
         type="button"
+        variant="primary"
         disabled={isSaving}
         onClick={handleSave}
-        className="w-full bg-gradient-to-r from-primary-from to-primary-to text-white"
+        className="w-full justify-center"
       >
-        {isSaving && <Loader2 className="animate-spin" size={16} />}
+        {isSaving && <Loader2 className="mr-2 animate-spin" size={16} />}
         Simpan
-      </Button>
-    </div>
+      </TkButton>
+    </TkCard>
   );
 }

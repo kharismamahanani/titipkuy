@@ -1,7 +1,7 @@
 "use client";
 
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { TkButton } from "@/components/ui/tk-button";
 
 export function CopyWaButton({ message }: { message: string }) {
   async function handleCopy() {
@@ -14,8 +14,8 @@ export function CopyWaButton({ message }: { message: string }) {
   }
 
   return (
-    <Button type="button" size="sm" variant="outline" onClick={handleCopy}>
+    <TkButton type="button" size="sm" variant="secondary" onClick={handleCopy}>
       Salin Pesan WA
-    </Button>
+    </TkButton>
   );
 }

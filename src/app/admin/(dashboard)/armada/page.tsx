@@ -17,8 +17,8 @@ export default async function AdminArmadaPage() {
   if (!data) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
-        <h1 className="font-heading text-xl font-bold">Data armada belum bisa dimuat</h1>
-        <p className="mt-2 text-sm text-foreground/60">
+        <h1 className="text-xl font-extrabold text-tk-charcoal">Data armada belum bisa dimuat</h1>
+        <p className="mt-2 text-sm text-tk-muted">
           Database belum terhubung. Coba muat ulang halaman ini.
         </p>
       </div>
@@ -29,13 +29,13 @@ export default async function AdminArmadaPage() {
 
   return (
     <div className="px-4 py-6 sm:px-6 lg:px-8">
-      <h1 className="font-heading text-2xl font-bold">Armada & Slot</h1>
-      <p className="mt-1 text-sm text-foreground/60">
+      <h1 className="text-2xl font-extrabold text-tk-charcoal">Armada & Slot</h1>
+      <p className="mt-1 text-sm text-tk-muted">
         Kelola armada antar-jemput dan aturan operasional pemesanan.
       </p>
 
       <div className="mt-6">
-        <h2 className="font-heading text-lg font-bold">Daftar Armada</h2>
+        <h2 className="text-lg font-extrabold text-tk-charcoal">Daftar Armada</h2>
         <div className="mt-3">
           <ArmadaManager
             initialArmada={data.armadaList.map((a) => ({
@@ -48,7 +48,7 @@ export default async function AdminArmadaPage() {
       </div>
 
       <div className="mt-10">
-        <h2 className="font-heading text-lg font-bold">Konfigurasi Operasional</h2>
+        <h2 className="text-lg font-extrabold text-tk-charcoal">Konfigurasi Operasional</h2>
         <div className="mt-3">
           <KonfigurasiOperasional
             initialKonfigurasi={{

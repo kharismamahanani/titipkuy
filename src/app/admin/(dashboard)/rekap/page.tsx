@@ -6,12 +6,13 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { tkInputClass, tkLabelClass } from "@/lib/form-style";
 import { StatCard } from "@/components/admin/stat-card";
 import { OmzetBarChart } from "@/components/admin/rekap/omzet-bar-chart";
 import { TrenAreaChart } from "@/components/admin/rekap/tren-area-chart";
 import { ProfitCalculator } from "@/components/admin/rekap/profit-calculator";
 import { WithdrawalHistory } from "@/components/admin/rekap/withdrawal-history";
-import { formatRupiah } from "@/lib/utils";
+import { cn, formatRupiah } from "@/lib/utils";
 import type { PengambilanLaba, RekapData } from "@/types/rekap";
 
 const LOCAL_STORAGE_KEY = "titipkuy_pengambilan_laba";
@@ -68,32 +69,34 @@ export default function AdminRekapPage() {
     <div className="space-y-8 px-4 py-6 sm:px-6 lg:px-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-heading text-2xl font-bold">Rekap Keuangan</h1>
-          <p className="mt-1 text-sm text-foreground/60">
+          <h1 className="text-2xl font-extrabold text-tk-charcoal">Rekap Keuangan</h1>
+          <p className="mt-1 text-sm text-tk-muted">
             Ringkasan omzet, tren, dan kalkulator pembagian laba.
           </p>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="bulan">Pilih Bulan</Label>
+        <div>
+          <Label htmlFor="bulan" className={tkLabelClass}>
+            Pilih Bulan
+          </Label>
           <Input
             id="bulan"
             type="month"
             value={bulan}
             onChange={(e) => setBulan(e.target.value)}
-            className="w-40"
+            className={cn(tkInputClass, "w-40")}
           />
         </div>
       </div>
 
       {isLoading && (
-        <div className="flex items-center gap-2 text-sm text-foreground/60">
+        <div className="flex items-center gap-2 text-sm text-tk-muted">
           <Loader2 className="animate-spin" size={16} />
           Memuat data rekap...
         </div>
       )}
 
       {!isLoading && !data && (
-        <p className="text-sm text-foreground/60">
+        <p className="text-sm text-tk-muted">
           Data belum bisa dimuat. Database mungkin belum terhubung.
         </p>
       )}
@@ -101,11 +104,12 @@ export default function AdminRekapPage() {
       {data && (
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard label="Omzet Bulan Ini" value={formatRupiah(data.omzetBulanIni)} />
-            <StatCard label="Jumlah Transaksi" value={String(data.jumlahTransaksi)} />
+            <StatCard label="Omzet Bulan Ini" value={formatRupiah(data.omzetBulanIni)} accent="orange" />
+            <StatCard label="Jumlah Transaksi" value={String(data.jumlahTransaksi)} accent="sage" />
             <StatCard
               label="Rata-rata per Transaksi"
               value={formatRupiah(data.rataRataPerTransaksi)}
+              accent="charcoal"
             />
             <StatCard
               label="Belum Dibayar"
@@ -114,13 +118,13 @@ export default function AdminRekapPage() {
             />
           </div>
 
-          <section className="glass-card space-y-3 rounded-2xl p-5">
-            <h2 className="font-heading font-bold">Omzet per Paket</h2>
+          <section className="space-y-3 rounded-lg border-2 border-tk-charcoal bg-white p-5 [box-shadow:3px_3px_0_var(--tk-charcoal)]">
+            <h2 className="font-extrabold text-tk-charcoal">Omzet per Paket</h2>
             <OmzetBarChart data={data.breakdownPaket} />
           </section>
 
-          <section className="glass-card space-y-3 rounded-2xl p-5">
-            <h2 className="font-heading font-bold">Tren 6 Bulan Terakhir</h2>
+          <section className="space-y-3 rounded-lg border-2 border-tk-charcoal bg-white p-5 [box-shadow:3px_3px_0_var(--tk-charcoal)]">
+            <h2 className="font-extrabold text-tk-charcoal">Tren 6 Bulan Terakhir</h2>
             <TrenAreaChart data={data.tren6Bulan} />
           </section>
 
@@ -131,7 +135,7 @@ export default function AdminRekapPage() {
           />
 
           <section className="space-y-3">
-            <h2 className="font-heading font-bold">Riwayat Pengambilan</h2>
+            <h2 className="font-extrabold text-tk-charcoal">Riwayat Pengambilan</h2>
             <WithdrawalHistory data={pengambilanList} onDelete={handleDeletePengambilan} />
           </section>
         </>

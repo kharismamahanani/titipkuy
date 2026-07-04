@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { TkButton } from "@/components/ui/tk-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { tkInputClass, tkLabelClass, tkSelectTriggerClass } from "@/lib/form-style";
 import type { AntarJemputOption } from "@/types/antar-jemput";
 
 const TIPE_OPTIONS = [
@@ -113,25 +114,32 @@ export function AntarJemputFormDialog({ open, onOpenChange, option }: AntarJempu
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{option ? "Edit Opsi Antar-Jemput" : "Tambah Opsi Antar-Jemput"}</DialogTitle>
+          <DialogTitle className="text-tk-charcoal">
+            {option ? "Edit Opsi Antar-Jemput" : "Tambah Opsi Antar-Jemput"}
+          </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="label">Label</Label>
+          <div>
+            <Label htmlFor="label" className={tkLabelClass}>
+              Label
+            </Label>
             <Input
               id="label"
               placeholder="Motor - Radius <3 km dari hub"
               value={form.label}
               onChange={(e) => setForm({ ...form, label: e.target.value })}
               required
+              className={tkInputClass}
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="tipe">Tipe</Label>
+          <div>
+            <Label htmlFor="tipe" className={tkLabelClass}>
+              Tipe
+            </Label>
             <Select value={form.tipe} onValueChange={(v) => v && setForm({ ...form, tipe: v })}>
-              <SelectTrigger id="tipe" className="w-full">
+              <SelectTrigger id="tipe" className={tkSelectTriggerClass}>
                 <SelectValue>
                   {(v: string) => TIPE_OPTIONS.find((opt) => opt.value === v)?.label ?? v}
                 </SelectValue>
@@ -146,13 +154,15 @@ export function AntarJemputFormDialog({ open, onOpenChange, option }: AntarJempu
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="radiusLabel">Radius</Label>
+          <div>
+            <Label htmlFor="radiusLabel" className={tkLabelClass}>
+              Radius
+            </Label>
             <Select
               value={form.radiusLabel}
               onValueChange={(v) => v && setForm({ ...form, radiusLabel: v })}
             >
-              <SelectTrigger id="radiusLabel" className="w-full">
+              <SelectTrigger id="radiusLabel" className={tkSelectTriggerClass}>
                 <SelectValue>
                   {(v: string) => RADIUS_OPTIONS.find((opt) => opt.value === v)?.label ?? v}
                 </SelectValue>
@@ -167,8 +177,10 @@ export function AntarJemputFormDialog({ open, onOpenChange, option }: AntarJempu
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="harga">Harga (Rp)</Label>
+          <div>
+            <Label htmlFor="harga" className={tkLabelClass}>
+              Harga (Rp)
+            </Label>
             <Input
               id="harga"
               type="number"
@@ -176,21 +188,25 @@ export function AntarJemputFormDialog({ open, onOpenChange, option }: AntarJempu
               value={form.harga}
               onChange={(e) => setForm({ ...form, harga: e.target.value })}
               required
+              className={tkInputClass}
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="kapasitasLabel">Kapasitas (opsional)</Label>
+          <div>
+            <Label htmlFor="kapasitasLabel" className={tkLabelClass}>
+              Kapasitas (opsional)
+            </Label>
             <Input
               id="kapasitasLabel"
               placeholder="Maks. 2 Box S atau 1 Koper Kabin"
               value={form.kapasitasLabel}
               onChange={(e) => setForm({ ...form, kapasitasLabel: e.target.value })}
+              className={tkInputClass}
             />
           </div>
 
-          <div className="flex items-center justify-between rounded-lg border border-card-border px-3 py-2">
-            <Label htmlFor="aktif" className="cursor-pointer">
+          <div className="flex items-center justify-between rounded-lg border-2 border-tk-charcoal bg-white px-3 py-2">
+            <Label htmlFor="aktif" className="cursor-pointer text-sm font-bold text-tk-charcoal">
               Status Aktif
             </Label>
             <Switch
@@ -200,14 +216,10 @@ export function AntarJemputFormDialog({ open, onOpenChange, option }: AntarJempu
             />
           </div>
 
-          <Button
-            type="submit"
-            disabled={isSaving}
-            className="w-full bg-gradient-to-r from-primary-from to-primary-to text-white"
-          >
-            {isSaving && <Loader2 className="animate-spin" size={16} />}
+          <TkButton type="submit" variant="primary" disabled={isSaving} className="w-full justify-center">
+            {isSaving && <Loader2 className="mr-2 animate-spin" size={16} />}
             Simpan
-          </Button>
+          </TkButton>
         </form>
       </DialogContent>
     </Dialog>

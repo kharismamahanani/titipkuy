@@ -8,7 +8,9 @@ import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { TkCard } from "@/components/ui/tk-card";
 import { cn, formatRupiah } from "@/lib/utils";
+import { tkInputClass, tkLabelClass } from "@/lib/form-style";
 import { buildStoragePath, uploadToStorage } from "@/lib/supabase";
 import { AntarJemputPicker } from "@/components/pesan/antar-jemput-picker";
 import { HUB_CONFIG, JAM_DROP_OFF_MANDIRI } from "@/lib/constants";
@@ -149,23 +151,21 @@ export function Step2PaketTanggal({
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="font-heading text-xl font-bold">Pilih Paket & Tanggal</h2>
-        <p className="mt-1 text-sm text-foreground/60">
+        <h2 className="text-xl font-extrabold text-tk-charcoal">Pilih Paket & Tanggal</h2>
+        <p className="mt-1 text-sm text-tk-muted">
           Pilih paket yang sesuai, lalu tentukan tanggal masuk barang.
         </p>
       </div>
 
-      <div className="flex justify-center gap-2">
+      <div className="flex justify-center gap-3">
         {(["harian", "bulanan"] as const).map((t) => (
           <button
             key={t}
             type="button"
             onClick={() => setTab(t)}
             className={cn(
-              "rounded-full border px-5 py-2 text-sm font-semibold transition-colors",
-              tab === t
-                ? "border-transparent bg-gradient-to-r from-primary-from to-primary-to text-white"
-                : "border-card-border text-foreground/70 hover:bg-primary/10"
+              "rounded-lg border-2 border-tk-charcoal px-5 py-2 text-sm font-bold transition-colors",
+              tab === t ? "bg-tk-charcoal text-tk-cream" : "bg-tk-cream text-tk-charcoal"
             )}
           >
             {t === "harian" ? "🧳 Harian" : "🎓 Bulanan"}
@@ -173,11 +173,9 @@ export function Step2PaketTanggal({
         ))}
       </div>
 
-      {state === "loading" && (
-        <p className="text-sm text-foreground/60">Memuat paket...</p>
-      )}
+      {state === "loading" && <p className="text-sm text-tk-muted">Memuat paket...</p>}
       {state === "error" && (
-        <p className="text-sm text-destructive">
+        <p className="text-sm font-semibold text-[#C0392B]">
           Gagal memuat paket. Coba muat ulang halaman ini.
         </p>
       )}
@@ -194,16 +192,18 @@ export function Step2PaketTanggal({
                 disabled={isBlocked}
                 onClick={() => !isBlocked && onPaketChange(item)}
                 className={cn(
-                  "glass-card rounded-2xl p-4 text-left transition-transform hover:scale-[1.02]",
-                  isSelected && "gradient-border ring-2 ring-primary-from",
-                  isBlocked && "cursor-not-allowed opacity-40 hover:scale-100"
+                  "rounded-lg border-2 border-tk-charcoal bg-white p-4 text-left transition-all",
+                  isSelected
+                    ? "bg-tk-orange/15 [box-shadow:3px_3px_0_var(--tk-charcoal)]"
+                    : "hover:[box-shadow:3px_3px_0_var(--tk-charcoal)]",
+                  isBlocked && "cursor-not-allowed opacity-40 hover:shadow-none"
                 )}
               >
-                <p className="font-heading font-bold">{item.nama}</p>
-                <p className="text-xs text-foreground/60">
+                <p className="font-extrabold text-tk-charcoal">{item.nama}</p>
+                <p className="text-xs text-tk-muted">
                   {item.durasiHari ? `${item.durasiHari} hari` : "Harian"}
                 </p>
-                <p className="gradient-text mt-2 text-lg font-extrabold">
+                <p className="mt-2 text-lg font-extrabold text-tk-orange">
                   {formatRupiah(item.harga)}
                 </p>
               </button>
@@ -214,8 +214,8 @@ export function Step2PaketTanggal({
 
       {paket && (
         <div className="space-y-3">
-          <Label>Tanggal Masuk Barang</Label>
-          <div className="glass-card inline-block rounded-2xl p-2">
+          <Label className={tkLabelClass}>Tanggal Masuk Barang</Label>
+          <div className="inline-block rounded-lg border-2 border-tk-charcoal bg-white p-2">
             <Calendar
               mode="single"
               selected={tanggalMasuk ?? undefined}
@@ -225,20 +225,20 @@ export function Step2PaketTanggal({
           </div>
 
           {saturdaySatuHariConflict && (
-            <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-200">
+            <div className="rounded-lg border-2 border-[#C0392B] bg-white p-3 text-xs font-semibold text-[#C0392B]">
               ⚠️ Titip 1 hari di hari Sabtu tidak tersedia karena hub tutup di hari Minggu. Pilih
               durasi minimal 2 hari, atau pilih hari lain.
             </div>
           )}
 
           {tanggalMasuk && tanggalJatuhTempo && (
-            <p className="text-sm text-foreground/70">
+            <p className="text-sm text-tk-muted">
               Masuk{" "}
-              <span className="font-semibold text-foreground">
+              <span className="font-bold text-tk-charcoal">
                 {format(tanggalMasuk, "d MMMM yyyy", { locale: localeId })}
               </span>{" "}
               &rarr; Jatuh tempo{" "}
-              <span className="font-semibold text-foreground">
+              <span className="font-bold text-tk-charcoal">
                 {format(tanggalJatuhTempo, "d MMMM yyyy", { locale: localeId })}
               </span>
             </p>
@@ -247,13 +247,15 @@ export function Step2PaketTanggal({
       )}
 
       {paket?.perluDeklarasi && (
-        <div className="glass-card space-y-4 rounded-2xl p-5">
-          <p className="text-sm font-semibold text-accent">
+        <TkCard className="space-y-4">
+          <p className="text-sm font-bold text-tk-orange-dark">
             Paket ini butuh deklarasi nilai barang
           </p>
 
-          <div className="space-y-2">
-            <Label htmlFor="nilaiDeklarasi">Nilai Deklarasi Barang (Rp)</Label>
+          <div>
+            <Label htmlFor="nilaiDeklarasi" className={tkLabelClass}>
+              Nilai Deklarasi Barang (Rp)
+            </Label>
             <Input
               id="nilaiDeklarasi"
               type="number"
@@ -262,11 +264,12 @@ export function Step2PaketTanggal({
               onChange={(e) =>
                 onDeklarasiChange({ ...deklarasi, nilaiDeklarasi: e.target.value })
               }
+              className={tkInputClass}
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="buktiKepemilikan">
+          <div>
+            <Label htmlFor="buktiKepemilikan" className={tkLabelClass}>
               Bukti Kepemilikan (STNK/BPKB/nota)
             </Label>
             <Input
@@ -278,18 +281,19 @@ export function Step2PaketTanggal({
                 const file = e.target.files?.[0];
                 if (file) handleBuktiUpload(file);
               }}
+              className={tkInputClass}
             />
-            <p className="text-xs text-foreground/50">Maksimal 5MB.</p>
-            {isUploadingBukti && (
-              <p className="text-xs text-foreground/60">Mengupload...</p>
-            )}
+            <p className="mt-1 text-xs text-tk-light">Maksimal 5MB.</p>
+            {isUploadingBukti && <p className="mt-1 text-xs text-tk-muted">Mengupload...</p>}
             {deklarasi.buktiKepemilikanUrl && !isUploadingBukti && (
-              <p className="text-xs text-primary-from">✓ Bukti sudah terupload</p>
+              <p className="mt-1 text-xs font-bold text-tk-sage-dark">✓ Bukti sudah terupload</p>
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="deskripsiDeklarasi">Deskripsi Detail Barang</Label>
+          <div>
+            <Label htmlFor="deskripsiDeklarasi" className={tkLabelClass}>
+              Deskripsi Detail Barang
+            </Label>
             <Textarea
               id="deskripsiDeklarasi"
               placeholder="Merek, model, no seri, dll"
@@ -300,17 +304,18 @@ export function Step2PaketTanggal({
                   deskripsiDeklarasi: e.target.value,
                 })
               }
+              className={cn(tkInputClass, "min-h-24")}
             />
           </div>
-        </div>
+        </TkCard>
       )}
 
       {paket && tanggalMasuk && (
-        <div className="glass-card space-y-4 rounded-2xl p-5">
-          <Label>🚚 Bagaimana barang kamu sampai ke hub?</Label>
+        <TkCard className="space-y-4">
+          <Label className={tkLabelClass}>🚚 Bagaimana barang kamu sampai ke hub?</Label>
 
           {!armadaValid && (
-            <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-200">
+            <div className="rounded-lg border-2 border-[#C0392B] bg-white p-3 text-xs font-semibold text-[#C0392B]">
               {isSunday
                 ? "🚫 Armada tidak beroperasi di hari Minggu. Pilih hari lain atau gunakan opsi kirim mandiri."
                 : "⚠️ Pemesanan armada minimal H-1 (24 jam sebelumnya). Untuk hari ini, pilih opsi kirim mandiri."}
@@ -323,13 +328,13 @@ export function Step2PaketTanggal({
                 type="button"
                 onClick={() => onMetodePengirimanChange("armada")}
                 className={cn(
-                  "w-full rounded-xl border px-4 py-3 text-left text-sm transition-colors",
+                  "w-full rounded-lg border-2 border-tk-charcoal px-4 py-3 text-left text-sm transition-colors",
                   metodePengiriman === "armada"
-                    ? "border-transparent bg-gradient-to-r from-primary-from to-primary-to text-white"
-                    : "border-card-border text-foreground/80 hover:bg-primary/10"
+                    ? "bg-tk-charcoal text-tk-cream"
+                    : "bg-white text-tk-charcoal hover:bg-tk-cream-alt"
                 )}
               >
-                <span className="font-semibold">◉ Dijemput armada TitipKuy!</span>
+                <span className="font-bold">◉ Dijemput armada TitipKuy!</span>
               </button>
             )}
 
@@ -340,19 +345,19 @@ export function Step2PaketTanggal({
                 onAntarJemputOptionChange(null);
               }}
               className={cn(
-                "w-full rounded-xl border px-4 py-3 text-left text-sm transition-colors",
+                "w-full rounded-lg border-2 border-tk-charcoal px-4 py-3 text-left text-sm transition-colors",
                 metodePengiriman === "mandiri"
-                  ? "border-transparent bg-gradient-to-r from-primary-from to-primary-to text-white"
-                  : "border-card-border text-foreground/80 hover:bg-primary/10"
+                  ? "bg-tk-charcoal text-tk-cream"
+                  : "bg-white text-tk-charcoal hover:bg-tk-cream-alt"
               )}
             >
-              <span className="font-semibold">
+              <span className="font-bold">
                 ○ Saya kirim sendiri atau via Grab/Lalamove/ekspedisi
               </span>
               <span
                 className={cn(
                   "mt-1 block text-xs",
-                  metodePengiriman === "mandiri" ? "text-white/80" : "text-foreground/50"
+                  metodePengiriman === "mandiri" ? "text-tk-cream/80" : "text-tk-muted"
                 )}
               >
                 Info: {HUB_CONFIG.suhat.nama}, {HUB_CONFIG.suhat.alamat}. Jam drop-off:{" "}
@@ -368,13 +373,13 @@ export function Step2PaketTanggal({
               hideMandiriOption
             />
           ) : (
-            <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/10 p-3 text-xs text-yellow-200">
+            <div className="rounded-lg border-2 border-tk-orange bg-tk-orange/10 p-3 text-xs text-tk-charcoal">
               📌 Jam drop-off ke {HUB_CONFIG.suhat.nama}: {JAM_DROP_OFF_MANDIRI} (Senin–Sabtu).
               Alamat: {HUB_CONFIG.suhat.alamat}. Setelah submit, kamu akan dapat Kode Unik di
               halaman konfirmasi — tulis kode itu di kardus/koper sebelum dikirim.
             </div>
           )}
-        </div>
+        </TkCard>
       )}
     </div>
   );

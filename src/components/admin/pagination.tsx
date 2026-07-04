@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { TkButton } from "@/components/ui/tk-button";
 
 interface PaginationProps {
   page: number;
@@ -14,29 +14,29 @@ export function Pagination({ page, totalPages, onPageChange }: PaginationProps) 
 
   return (
     <div className="flex items-center justify-between pt-2">
-      <Button
+      <TkButton
         type="button"
         size="sm"
-        variant="outline"
+        variant="secondary"
         disabled={page <= 1}
         onClick={() => onPageChange(page - 1)}
       >
-        <ChevronLeft size={14} />
+        <ChevronLeft size={14} className="mr-1" />
         Sebelumnya
-      </Button>
-      <p className="text-sm text-foreground/60">
+      </TkButton>
+      <p className="text-sm text-tk-muted">
         Halaman {page} dari {totalPages}
       </p>
-      <Button
+      <TkButton
         type="button"
         size="sm"
-        variant="outline"
+        variant="secondary"
         disabled={page >= totalPages}
         onClick={() => onPageChange(page + 1)}
       >
         Berikutnya
-        <ChevronRight size={14} />
-      </Button>
+        <ChevronRight size={14} className="ml-1" />
+      </TkButton>
     </div>
   );
 }

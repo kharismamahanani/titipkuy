@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { TkButton } from "@/components/ui/tk-button";
 
 interface TandaiSelesaiButtonProps {
   transaksiId: string;
@@ -22,7 +22,7 @@ export function TandaiSelesaiButton({
 
   if (statusTransaksi === "SELESAI") {
     return (
-      <span className="flex items-center gap-2 text-sm font-medium text-primary-from">
+      <span className="flex items-center gap-2 text-sm font-bold text-tk-sage-dark">
         <CheckCircle2 size={18} />
         Transaksi Selesai
       </span>
@@ -53,17 +53,12 @@ export function TandaiSelesaiButton({
 
   return (
     <div className="space-y-1">
-      <Button
-        type="button"
-        disabled={disabled}
-        onClick={handleClick}
-        className="bg-gradient-to-r from-primary-from to-primary-to text-white"
-      >
-        {isLoading && <Loader2 className="animate-spin" size={16} />}
+      <TkButton type="button" variant="primary" disabled={disabled} onClick={handleClick}>
+        {isLoading && <Loader2 className="mr-1.5 animate-spin" size={16} />}
         Tandai Selesai
-      </Button>
+      </TkButton>
       {jumlahFotoKeluar === 0 && (
-        <p className="text-xs text-foreground/50">
+        <p className="text-xs text-tk-light">
           Upload minimal 1 foto keluar dulu untuk mengaktifkan tombol ini.
         </p>
       )}

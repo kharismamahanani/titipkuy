@@ -33,7 +33,7 @@ export function LogoutButton({ collapsed }: LogoutButtonProps) {
       onClick={handleLogout}
       disabled={isLoading}
       className={cn(
-        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-foreground/70 transition-colors hover:bg-destructive/10 hover:text-destructive",
+        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold text-tk-cream/80 transition-colors hover:bg-white/[0.08] hover:text-tk-cream",
         collapsed && "justify-center"
       )}
     >
