@@ -13,6 +13,24 @@ const MENU_LINKS = [
   { label: "Cara Kerja", href: "#cara-kerja" },
 ];
 
+function LogoMark() {
+  return (
+    <svg viewBox="0 0 64 64" className="h-9 w-9 shrink-0" aria-hidden="true">
+      <circle cx="32" cy="32" r="30" fill="#E89C65" stroke="#3D4A41" strokeWidth="3" />
+      <rect x="19" y="42" width="4" height="10" rx="2" fill="#3D4A41" transform="rotate(-12 21 42)" />
+      <rect x="38" y="42" width="4" height="10" rx="2" fill="#3D4A41" transform="rotate(14 40 42)" />
+      <rect x="15" y="28" width="8" height="16" rx="4" fill="#E89C65" stroke="#3D4A41" strokeWidth="2.5" />
+      <rect x="21" y="26" width="16" height="18" rx="7" fill="#7FA99B" stroke="#3D4A41" strokeWidth="2.5" />
+      <rect x="18" y="34" width="18" height="11" rx="2" fill="#FAF6F0" stroke="#3D4A41" strokeWidth="2.5" />
+      <line x1="27" y1="34" x2="27" y2="45" stroke="#3D4A41" strokeWidth="1.5" />
+      <circle cx="30" cy="18" r="8" fill="#FAF6F0" stroke="#3D4A41" strokeWidth="2.5" />
+      <path d="M22 17 Q22 9 30 10 Q39 9 39 16 Q34 12 30 13 Q26 12 22 17 Z" fill="#3D4A41" />
+      <circle cx="27.5" cy="19" r="1" fill="#3D4A41" />
+      <circle cx="33" cy="19" r="1" fill="#3D4A41" />
+    </svg>
+  );
+}
+
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -21,11 +39,13 @@ export function Navbar() {
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-8 py-[14px]">
         <Link
           href="/"
-          className="flex shrink-0 items-center gap-1 text-xl font-extrabold"
+          className="flex shrink-0 items-center gap-2 text-xl font-extrabold"
         >
-          <span className="text-tk-charcoal">Titip</span>
-          <span className="text-tk-orange">Kuy!</span>
-          <span className="text-base">📦</span>
+          <LogoMark />
+          <span>
+            <span className="text-tk-charcoal">Titip</span>
+            <span className="text-tk-orange">Kuy!</span>
+          </span>
         </Link>
 
         <div className="hidden items-center gap-8 md:flex">
