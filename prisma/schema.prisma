@@ -45,6 +45,13 @@ model Transaksi {
   nilaiDeklarasi   Int?        // diisi jika perluDeklarasi = true
   deskripsiDeklarasi String?   // merek, model, no seri barang bernilai tinggi
   buktiKepemilikanUrl String?  // URL bukti kepemilikan (STNK/BPKB/nota) di Supabase Storage
+  // Sistem ganti rugi berlapis (lihat src/lib/ganti-rugi.ts)
+  tierGantiRugi    String?     // "standar" | "deklarasi" | "bernilaiTinggi"
+  premiGantiRugi   Int?        // nominal rupiah premi perlindungan barang
+  // Dokumen wajib khusus paket "Titip Motor" (verifikasi kepemilikan)
+  ktpUrl           String?     // URL foto KTP pemilik motor
+  stnkUrl          String?     // URL foto STNK motor
+  bpkbUrl          String?     // URL foto BPKB motor (opsional)
   tanggalMasuk     DateTime
   tanggalJatuhTempo DateTime
   statusBayar      StatusBayar @default(BELUM_BAYAR)

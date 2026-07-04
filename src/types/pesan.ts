@@ -12,10 +12,18 @@ export interface PelangganData {
   noKtpKtm: string;
 }
 
+// Nilai deklarasi untuk sistem ganti rugi berlapis (lihat src/lib/ganti-rugi.ts).
+// Kosong / "0" berarti tier "standar" (gratis, plafon Rp300.000).
 export interface DeklarasiData {
   nilaiDeklarasi: string;
-  deskripsiDeklarasi: string;
-  buktiKepemilikanUrl: string | null;
+}
+
+// Dokumen wajib khusus paket "Titip Motor" — lihat src/lib/supabase.ts
+// (bucket "dokumen").
+export interface DokumenMotorData {
+  ktpUrl: string | null;
+  stnkUrl: string | null;
+  bpkbUrl: string | null;
 }
 
 export interface ChecklistData {
@@ -23,7 +31,9 @@ export interface ChecklistData {
   barangTerlarang: boolean;
   jatuhTempo: boolean;
   lepasSetelah30Hari: boolean;
+  pengemasanWajib: boolean;
   deklarasiBenar: boolean;
+  motorDeklarasiBenar: boolean;
 }
 
 export type MetodePengiriman = "armada" | "mandiri";
@@ -33,6 +43,7 @@ export interface PesanFormData {
   paket: Paket | null;
   tanggalMasuk: Date | null;
   deklarasi: DeklarasiData;
+  dokumenMotor: DokumenMotorData;
   metodePengiriman: MetodePengiriman;
   antarJemputOption: AntarJemputOption | null;
   checklist: ChecklistData;
@@ -51,8 +62,11 @@ export const INITIAL_FORM_DATA: PesanFormData = {
   tanggalMasuk: null,
   deklarasi: {
     nilaiDeklarasi: "",
-    deskripsiDeklarasi: "",
-    buktiKepemilikanUrl: null,
+  },
+  dokumenMotor: {
+    ktpUrl: null,
+    stnkUrl: null,
+    bpkbUrl: null,
   },
   metodePengiriman: "armada",
   antarJemputOption: null,
@@ -61,7 +75,9 @@ export const INITIAL_FORM_DATA: PesanFormData = {
     barangTerlarang: false,
     jatuhTempo: false,
     lepasSetelah30Hari: false,
+    pengemasanWajib: false,
     deklarasiBenar: false,
+    motorDeklarasiBenar: false,
   },
   tandaTanganDataUrl: null,
 };

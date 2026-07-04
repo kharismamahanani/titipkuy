@@ -20,6 +20,7 @@ const BUCKET_BY_PREFIX: Record<string, string> = {
   deklarasi: "fotos",
   ttd: "ttd",
   perjanjian: "perjanjian",
+  dokumen: "dokumen",
 };
 
 function resolveBucketAndPath(path: string) {

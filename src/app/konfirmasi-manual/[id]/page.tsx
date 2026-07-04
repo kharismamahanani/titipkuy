@@ -14,7 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { PerjanjianDialog } from "@/components/pesan/perjanjian-dialog";
 import { SignatureCanvas } from "@/components/pesan/signature-canvas";
 import { PerjanjianPdfDocument } from "@/components/konfirmasi/perjanjian-pdf";
-import { CHECKLIST_ITEMS, DEKLARASI_ITEM } from "@/lib/checklist-items";
+import { CHECKLIST_ITEMS, DEKLARASI_ITEM, MOTOR_ITEM } from "@/lib/checklist-items";
 import { dataUrlToFile, formatRupiah } from "@/lib/utils";
 import { uploadToStorage } from "@/lib/supabase";
 import { ADMIN_NAME, formatWhatsAppDisplay, getWhatsAppUrl } from "@/constants/site";
@@ -30,11 +30,13 @@ type KonfirmasiManualData = TransaksiDetail & {
 };
 
 const EMPTY_CHECKLIST: ChecklistData = {
+  pengemasanWajib: false,
   limitGantiRugi: false,
   barangTerlarang: false,
   jatuhTempo: false,
   lepasSetelah30Hari: false,
   deklarasiBenar: false,
+  motorDeklarasiBenar: false,
 };
 
 const ERROR_MESSAGES: Record<ErrorCode, string> = {
@@ -83,9 +85,15 @@ function KonfirmasiManualContent() {
       });
   }, [params.id, token]);
 
-  const requiredChecks: (keyof ChecklistData)[] = data?.paket.perluDeklarasi
-    ? ["limitGantiRugi", "barangTerlarang", "jatuhTempo", "lepasSetelah30Hari", "deklarasiBenar"]
-    : ["limitGantiRugi", "barangTerlarang", "jatuhTempo", "lepasSetelah30Hari"];
+  const requiredChecks: (keyof ChecklistData)[] = [
+    "pengemasanWajib",
+    "limitGantiRugi",
+    "barangTerlarang",
+    "jatuhTempo",
+    "lepasSetelah30Hari",
+    ...(data?.paket.perluDeklarasi ? (["deklarasiBenar"] as const) : []),
+    ...(data?.paket.kategori === "motor" ? (["motorDeklarasiBenar"] as const) : []),
+  ];
   const canSubmit = requiredChecks.every((key) => checklist[key]) && !!tandaTanganDataUrl;
 
   async function handleSubmit() {
@@ -150,7 +158,11 @@ function KonfirmasiManualContent() {
   if (!data) return null;
 
   const { pelanggan, paket } = data;
-  const items = paket.perluDeklarasi ? [...CHECKLIST_ITEMS, DEKLARASI_ITEM] : CHECKLIST_ITEMS;
+  const items = [
+    ...CHECKLIST_ITEMS,
+    ...(paket.perluDeklarasi ? [DEKLARASI_ITEM] : []),
+    ...(paket.kategori === "motor" ? [MOTOR_ITEM] : []),
+  ];
   const waMessage = `Halo TitipKuy! Saya sudah bayar order ${data.nomorRef} a.n ${pelanggan.nama}. Bukti terlampir.`;
 
   if (isConfirmed) {

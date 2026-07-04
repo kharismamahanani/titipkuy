@@ -36,6 +36,11 @@ export interface TransaksiDetail {
   nilaiDeklarasi: number | null;
   deskripsiDeklarasi: string | null;
   buktiKepemilikanUrl: string | null;
+  tierGantiRugi: string | null;
+  premiGantiRugi: number | null;
+  ktpUrl: string | null;
+  stnkUrl: string | null;
+  bpkbUrl: string | null;
   tanggalMasuk: string;
   tanggalJatuhTempo: string;
   statusBayar: "BELUM_BAYAR" | "LUNAS";

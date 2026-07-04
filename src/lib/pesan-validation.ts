@@ -1,5 +1,5 @@
 import type { Paket } from "@/types/paket";
-import type { DeklarasiData, PelangganData } from "@/types/pesan";
+import type { DeklarasiData, DokumenMotorData, PelangganData } from "@/types/pesan";
 
 const WHATSAPP_REGEX = /^08\d{8,11}$/;
 
@@ -26,7 +26,8 @@ export function validateStep1(data: PelangganData) {
 export function validateStep2(
   paket: Paket | null,
   tanggalMasuk: Date | null,
-  deklarasi: DeklarasiData
+  deklarasi: DeklarasiData,
+  dokumenMotor: DokumenMotorData
 ) {
   const errors: string[] = [];
 
@@ -43,16 +44,17 @@ export function validateStep2(
     );
   }
 
-  if (paket?.perluDeklarasi) {
-    if (!deklarasi.nilaiDeklarasi.trim()) {
-      errors.push("Isi nilai deklarasi barang");
+  const isMotor = paket?.kategori === "motor";
+
+  if (!isMotor && deklarasi.nilaiDeklarasi.trim()) {
+    const nilai = Number(deklarasi.nilaiDeklarasi);
+    if (!Number.isFinite(nilai) || nilai <= 300_000) {
+      errors.push("Nilai deklarasi minimal Rp300.001");
     }
-    if (!deklarasi.buktiKepemilikanUrl) {
-      errors.push("Upload bukti kepemilikan barang");
-    }
-    if (!deklarasi.deskripsiDeklarasi.trim()) {
-      errors.push("Isi deskripsi detail barang");
-    }
+  }
+
+  if (isMotor && (!dokumenMotor.ktpUrl || !dokumenMotor.stnkUrl)) {
+    errors.push("KTP dan STNK wajib diupload untuk paket Titip Motor");
   }
 
   return errors;

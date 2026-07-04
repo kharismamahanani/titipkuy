@@ -1,6 +1,6 @@
 "use client";
 
-import { Tag, Camera, Bike, FileText } from "lucide-react";
+import { Tag, Camera, Bike, FileText, Box } from "lucide-react";
 import { TkCard } from "@/components/ui/tk-card";
 import { cn } from "@/lib/utils";
 import type { TkCardProps } from "@/components/ui/tk-card";
@@ -12,10 +12,16 @@ const ALASAN: {
   variant: NonNullable<TkCardProps["variant"]>;
 }[] = [
   {
+    icon: Box,
+    title: "📦 Kemasan Wajib, Kondisi Terjamin",
+    desc: "Semua barang wajib dalam kardus atau bubble wrap. Kondisi masuk = kondisi keluar. Jika beda, kami tanggung.",
+    variant: "orange",
+  },
+  {
     icon: Tag,
     title: "🏷️ Label Bernomor Seri",
     desc: "Setiap barang dapat label unik bernomor seri. Scan QR di label untuk cek status barangmu kapan saja.",
-    variant: "orange",
+    variant: "default",
   },
   {
     icon: Camera,

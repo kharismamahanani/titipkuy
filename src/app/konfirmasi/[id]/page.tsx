@@ -131,6 +131,16 @@ export default function KonfirmasiPage({ params }: { params: { id: string } }) {
           </p>
         </TkCard>
 
+        <TkCard className="space-y-1.5 text-sm text-tk-charcoal">
+          <p className="font-extrabold">📦 Sebelum kirim barangmu:</p>
+          <p>✓ Masukkan ke kardus dan tutup dengan lakban</p>
+          <p>✓ ATAU bungkus bubble wrap minimal 2 lapis</p>
+          <p>✓ Tulis Kode Unik ({kodeUnik}) di luar kardus dengan spidol</p>
+          <p className="font-bold text-[#C0392B]">
+            ✓ Barang tanpa kemasan tidak akan diterima di hub
+          </p>
+        </TkCard>
+
         {transaksi.metodePengiriman === "mandiri" && (
           <TkCard className="space-y-3 text-sm text-tk-charcoal">
             <p>
@@ -171,6 +181,12 @@ export default function KonfirmasiPage({ params }: { params: { id: string } }) {
           <SummaryRow label="Nama" value={pelanggan.nama} />
           <SummaryRow label="Paket" value={paket.nama} />
           <SummaryRow label="Harga Paket" value={formatRupiah(paket.harga)} />
+          {!!transaksi.premiGantiRugi && (
+            <SummaryRow
+              label="Premi Perlindungan"
+              value={formatRupiah(transaksi.premiGantiRugi)}
+            />
+          )}
           {transaksi.antarJemputOption && (
             <SummaryRow
               label="Antar-Jemput"
@@ -179,7 +195,11 @@ export default function KonfirmasiPage({ params }: { params: { id: string } }) {
           )}
           <SummaryRow
             label="TOTAL"
-            value={formatRupiah(paket.harga + (transaksi.antarJemputOption?.harga ?? 0))}
+            value={formatRupiah(
+              paket.harga +
+                (transaksi.premiGantiRugi ?? 0) +
+                (transaksi.antarJemputOption?.harga ?? 0)
+            )}
           />
           <SummaryRow
             label="Masuk"

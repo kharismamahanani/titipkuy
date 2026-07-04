@@ -48,6 +48,11 @@ export async function POST(request: Request) {
       nilaiDeklarasi,
       deskripsiDeklarasi,
       buktiKepemilikanUrl,
+      tierGantiRugi,
+      premiGantiRugi,
+      ktpUrl,
+      stnkUrl,
+      bpkbUrl,
       tandaTanganUrl,
       checklist,
       penjemputan,
@@ -60,7 +65,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Paket tidak ditemukan" }, { status: 400 });
     }
 
+    const isMotor = paket.kategori === "motor";
+
     const requiredChecklist = [
+      "pengemasanWajib",
       "limitGantiRugi",
       "barangTerlarang",
       "jatuhTempo",
@@ -68,21 +76,19 @@ export async function POST(request: Request) {
     ] as const;
     const checklistOk = requiredChecklist.every((key) => checklist?.[key] === true);
     const deklarasiChecklistOk =
-      !paket.perluDeklarasi || checklist?.deklarasiBenar === true;
+      !tierGantiRugi || tierGantiRugi === "standar" || checklist?.deklarasiBenar === true;
+    const motorChecklistOk = !isMotor || checklist?.motorDeklarasiBenar === true;
 
-    if (!checklistOk || !deklarasiChecklistOk) {
+    if (!checklistOk || !deklarasiChecklistOk || !motorChecklistOk) {
       return NextResponse.json(
         { error: "Semua persetujuan wajib dicentang" },
         { status: 400 }
       );
     }
 
-    if (
-      paket.perluDeklarasi &&
-      (!nilaiDeklarasi || !buktiKepemilikanUrl || !deskripsiDeklarasi)
-    ) {
+    if (isMotor && (!ktpUrl || !stnkUrl)) {
       return NextResponse.json(
-        { error: "Data deklarasi barang belum lengkap" },
+        { error: "KTP dan STNK wajib diupload untuk paket Titip Motor" },
         { status: 400 }
       );
     }
@@ -141,9 +147,15 @@ export async function POST(request: Request) {
               paket: {
                 connect: { id: paket.id },
               },
-              nilaiDeklarasi: paket.perluDeklarasi ? Number(nilaiDeklarasi) : null,
-              deskripsiDeklarasi: paket.perluDeklarasi ? deskripsiDeklarasi : null,
-              buktiKepemilikanUrl: paket.perluDeklarasi ? buktiKepemilikanUrl : null,
+              nilaiDeklarasi:
+                tierGantiRugi && tierGantiRugi !== "standar" ? Number(nilaiDeklarasi) : null,
+              deskripsiDeklarasi: deskripsiDeklarasi || null,
+              buktiKepemilikanUrl: buktiKepemilikanUrl || null,
+              tierGantiRugi: tierGantiRugi ?? "standar",
+              premiGantiRugi: premiGantiRugi ?? 0,
+              ktpUrl: isMotor ? ktpUrl : null,
+              stnkUrl: isMotor ? stnkUrl : null,
+              bpkbUrl: isMotor ? bpkbUrl || null : null,
               tanggalMasuk: tanggalMasukDate,
               tanggalJatuhTempo,
               metodePengiriman: metodePengiriman ?? null,
@@ -158,7 +170,7 @@ export async function POST(request: Request) {
               klausulLimitGantiRugi: true,
               klausulBarangTerlarang: true,
               klausulJatuhTempo: true,
-              klausulDeklarasiNilai: paket.perluDeklarasi,
+              klausulDeklarasiNilai: tierGantiRugi !== "standar",
               // Foto kondisi barang sekarang diambil admin saat barang
               // benar-benar tiba di hub (lihat FotoKeluarUploader/foto
               // masuk di panel admin), bukan diupload pelanggan di sini.

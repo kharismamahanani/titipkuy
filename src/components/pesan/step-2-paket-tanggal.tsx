@@ -1,24 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { addDays, format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { TkCard } from "@/components/ui/tk-card";
 import { cn, formatRupiah } from "@/lib/utils";
 import { tkInputClass, tkLabelClass } from "@/lib/form-style";
 import { buildStoragePath, uploadToStorage } from "@/lib/supabase";
+import { GANTI_RUGI, hitungPremi, tentukanTier } from "@/lib/ganti-rugi";
 import { AntarJemputPicker } from "@/components/pesan/antar-jemput-picker";
 import { HUB_CONFIG, JAM_DROP_OFF_MANDIRI } from "@/lib/constants";
 import type { Paket } from "@/types/paket";
-import type { DeklarasiData, MetodePengiriman } from "@/types/pesan";
+import type { DeklarasiData, DokumenMotorData, MetodePengiriman } from "@/types/pesan";
 import type { AntarJemputOption } from "@/types/antar-jemput";
 
-const MAX_BUKTI_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_UPLOAD_SIZE = 5 * 1024 * 1024; // 5MB
 
 // Armada TitipKuy! hanya bisa dipesan minimal H-1 (24 jam sebelumnya) dan
 // tidak beroperasi di hari Minggu.
@@ -33,6 +35,7 @@ interface Step2Props {
   paket: Paket | null;
   tanggalMasuk: Date | null;
   deklarasi: DeklarasiData;
+  dokumenMotor: DokumenMotorData;
   metodePengiriman: MetodePengiriman;
   antarJemputOption: AntarJemputOption | null;
   preselectedPaketId?: string;
@@ -40,6 +43,7 @@ interface Step2Props {
   onPaketChange: (paket: Paket) => void;
   onTanggalChange: (date: Date) => void;
   onDeklarasiChange: (data: DeklarasiData) => void;
+  onDokumenMotorChange: (data: DokumenMotorData) => void;
   onMetodePengirimanChange: (metode: MetodePengiriman) => void;
   onAntarJemputOptionChange: (option: AntarJemputOption | null) => void;
 }
@@ -49,6 +53,7 @@ export function Step2PaketTanggal({
   paket,
   tanggalMasuk,
   deklarasi,
+  dokumenMotor,
   metodePengiriman,
   antarJemputOption,
   preselectedPaketId,
@@ -56,13 +61,17 @@ export function Step2PaketTanggal({
   onPaketChange,
   onTanggalChange,
   onDeklarasiChange,
+  onDokumenMotorChange,
   onMetodePengirimanChange,
   onAntarJemputOptionChange,
 }: Step2Props) {
   const [paketList, setPaketList] = useState<Paket[]>([]);
   const [state, setState] = useState<"loading" | "success" | "error">("loading");
-  const [isUploadingBukti, setIsUploadingBukti] = useState(false);
   const [tab, setTab] = useState<"harian" | "bulanan">(preselectedMode ?? "harian");
+  const [pilihDeklarasi, setPilihDeklarasi] = useState(!!deklarasi.nilaiDeklarasi);
+  const [uploadingDokumen, setUploadingDokumen] = useState<
+    Record<"ktp" | "stnk" | "bpkb", boolean>
+  >({ ktp: false, stnk: false, bpkb: false });
 
   useEffect(() => {
     let isMounted = true;
@@ -96,25 +105,23 @@ export function Step2PaketTanggal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function handleBuktiUpload(file: File) {
-    if (file.size > MAX_BUKTI_SIZE) {
+  async function handleDokumenUpload(jenis: "ktp" | "stnk" | "bpkb", file: File) {
+    if (file.size > MAX_UPLOAD_SIZE) {
       toast.error("Ukuran file maksimal 5MB");
       return;
     }
 
-    setIsUploadingBukti(true);
+    setUploadingDokumen((prev) => ({ ...prev, [jenis]: true }));
     try {
-      const path = buildStoragePath(`deklarasi/${transactionId}`, file.name);
+      const path = buildStoragePath(`dokumen/motor/${transactionId}`, `${jenis}-${file.name}`);
       const url = await uploadToStorage(path, file);
-      onDeklarasiChange({ ...deklarasi, buktiKepemilikanUrl: url });
-      toast.success("Bukti kepemilikan terupload");
+      onDokumenMotorChange({ ...dokumenMotor, [`${jenis}Url`]: url });
+      toast.success(`${jenis.toUpperCase()} terupload`);
     } catch (error) {
       console.error("Upload error:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Gagal upload bukti kepemilikan, coba lagi"
-      );
+      toast.error(error instanceof Error ? error.message : `Gagal upload ${jenis.toUpperCase()}, coba lagi`);
     } finally {
-      setIsUploadingBukti(false);
+      setUploadingDokumen((prev) => ({ ...prev, [jenis]: false }));
     }
   }
 
@@ -131,6 +138,12 @@ export function Step2PaketTanggal({
   const isSaturday = tanggalMasuk ? tanggalMasuk.getDay() === 6 : false;
   const armadaValid = tanggalMasuk ? isTanggalValidUntukArmada(tanggalMasuk) : true;
   const saturdaySatuHariConflict = isSaturday && paket?.durasiHari === 1;
+  const isMotor = paket?.kategori === "motor";
+
+  const nilaiDeklarasiNum = Number(deklarasi.nilaiDeklarasi) || 0;
+  const tierGantiRugi = tentukanTier(nilaiDeklarasiNum);
+  const durasiHari = paket?.durasiHari ?? 1;
+  const premi = tierGantiRugi === "standar" ? 0 : hitungPremi(nilaiDeklarasiNum, durasiHari);
 
   useEffect(() => {
     if (tanggalMasuk && !armadaValid && metodePengiriman === "armada") {
@@ -246,67 +259,126 @@ export function Step2PaketTanggal({
         </div>
       )}
 
-      {paket?.perluDeklarasi && (
+      {paket && !isMotor && (
         <TkCard className="space-y-4">
-          <p className="text-sm font-bold text-tk-orange-dark">
-            Paket ini butuh deklarasi nilai barang
+          <p className="text-sm font-extrabold text-tk-charcoal">🛡️ Perlindungan Barang</p>
+
+          <div className="space-y-2">
+            <button
+              type="button"
+              onClick={() => {
+                setPilihDeklarasi(false);
+                onDeklarasiChange({ nilaiDeklarasi: "" });
+              }}
+              className={cn(
+                "w-full rounded-lg border-2 border-tk-charcoal px-4 py-3 text-left text-sm transition-colors",
+                !pilihDeklarasi
+                  ? "bg-tk-charcoal text-tk-cream"
+                  : "bg-white text-tk-charcoal hover:bg-tk-cream-alt"
+              )}
+            >
+              <span className="font-bold">○ Standar (tanpa deklarasi) — GRATIS</span>
+              <span
+                className={cn(
+                  "mt-1 block text-xs",
+                  !pilihDeklarasi ? "text-tk-cream/80" : "text-tk-muted"
+                )}
+              >
+                {GANTI_RUGI.standar.deskripsi}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setPilihDeklarasi(true)}
+              className={cn(
+                "w-full rounded-lg border-2 border-tk-charcoal px-4 py-3 text-left text-sm transition-colors",
+                pilihDeklarasi
+                  ? "bg-tk-charcoal text-tk-cream"
+                  : "bg-white text-tk-charcoal hover:bg-tk-cream-alt"
+              )}
+            >
+              <span className="font-bold">○ Saya ingin deklarasi nilai barang</span>
+            </button>
+          </div>
+
+          {pilihDeklarasi && (
+            <div>
+              <Label htmlFor="nilaiDeklarasi" className={tkLabelClass}>
+                Nilai Deklarasi (Rp)
+              </Label>
+              <Input
+                id="nilaiDeklarasi"
+                type="number"
+                min={300001}
+                placeholder="Contoh: 2000000"
+                value={deklarasi.nilaiDeklarasi}
+                onChange={(e) => onDeklarasiChange({ nilaiDeklarasi: e.target.value })}
+                className={tkInputClass}
+              />
+              <p className="mt-1 text-xs text-tk-light">Minimal Rp300.001</p>
+
+              {nilaiDeklarasiNum > 300_000 && (
+                <div className="mt-3 rounded-lg border-2 border-tk-orange bg-tk-orange/10 p-3 text-xs text-tk-charcoal">
+                  {tierGantiRugi === "deklarasi" && (
+                    <p>
+                      <span className="font-extrabold">Tier Deklarasi</span> — Premi:{" "}
+                      <span className="font-extrabold">{formatRupiah(premi)}</span>/bulan (1% dari
+                      nilai)
+                    </p>
+                  )}
+                  {tierGantiRugi === "bernilaiTinggi" && (
+                    <>
+                      <p>
+                        <span className="font-extrabold">Tier Bernilai Tinggi</span> — Premi:{" "}
+                        <span className="font-extrabold">{formatRupiah(premi)}</span>/bulan (2%
+                        dari nilai)
+                      </p>
+                      <p className="mt-1 font-bold text-[#C0392B]">
+                        ⚠️ Wajib tunjukkan foto nota/serial number saat serah terima di hub
+                      </p>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </TkCard>
+      )}
+
+      {paket && isMotor && (
+        <TkCard className="space-y-4">
+          <p className="text-sm font-extrabold text-tk-charcoal">🏍️ Dokumen Wajib untuk Titip Motor</p>
+          <p className="text-xs text-tk-muted">
+            Upload dokumen berikut (format JPG/PNG/PDF, maks. 5MB per file):
           </p>
 
-          <div>
-            <Label htmlFor="nilaiDeklarasi" className={tkLabelClass}>
-              Nilai Deklarasi Barang (Rp)
-            </Label>
-            <Input
-              id="nilaiDeklarasi"
-              type="number"
-              placeholder="Contoh: 5000000"
-              value={deklarasi.nilaiDeklarasi}
-              onChange={(e) =>
-                onDeklarasiChange({ ...deklarasi, nilaiDeklarasi: e.target.value })
-              }
-              className={tkInputClass}
-            />
-          </div>
+          <DokumenUploadField
+            id="ktp"
+            label="KTP Pemilik Motor *"
+            url={dokumenMotor.ktpUrl}
+            isUploading={uploadingDokumen.ktp}
+            onUpload={(file) => handleDokumenUpload("ktp", file)}
+          />
+          <DokumenUploadField
+            id="stnk"
+            label="STNK Motor *"
+            url={dokumenMotor.stnkUrl}
+            isUploading={uploadingDokumen.stnk}
+            onUpload={(file) => handleDokumenUpload("stnk", file)}
+          />
+          <DokumenUploadField
+            id="bpkb"
+            label="BPKB (opsional, jika ada)"
+            url={dokumenMotor.bpkbUrl}
+            isUploading={uploadingDokumen.bpkb}
+            onUpload={(file) => handleDokumenUpload("bpkb", file)}
+          />
 
-          <div>
-            <Label htmlFor="buktiKepemilikan" className={tkLabelClass}>
-              Bukti Kepemilikan (STNK/BPKB/nota)
-            </Label>
-            <Input
-              id="buktiKepemilikan"
-              type="file"
-              accept="image/*,application/pdf"
-              disabled={isUploadingBukti}
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleBuktiUpload(file);
-              }}
-              className={tkInputClass}
-            />
-            <p className="mt-1 text-xs text-tk-light">Maksimal 5MB.</p>
-            {isUploadingBukti && <p className="mt-1 text-xs text-tk-muted">Mengupload...</p>}
-            {deklarasi.buktiKepemilikanUrl && !isUploadingBukti && (
-              <p className="mt-1 text-xs font-bold text-tk-sage-dark">✓ Bukti sudah terupload</p>
-            )}
-          </div>
-
-          <div>
-            <Label htmlFor="deskripsiDeklarasi" className={tkLabelClass}>
-              Deskripsi Detail Barang
-            </Label>
-            <Textarea
-              id="deskripsiDeklarasi"
-              placeholder="Merek, model, no seri, dll"
-              value={deklarasi.deskripsiDeklarasi}
-              onChange={(e) =>
-                onDeklarasiChange({
-                  ...deklarasi,
-                  deskripsiDeklarasi: e.target.value,
-                })
-              }
-              className={cn(tkInputClass, "min-h-24")}
-            />
-          </div>
+          <p className="text-xs text-tk-light">
+            ℹ️ Dokumen disimpan aman dan hanya diakses oleh tim TitipKuy! untuk keperluan
+            verifikasi kepemilikan.
+          </p>
         </TkCard>
       )}
 
@@ -380,6 +452,66 @@ export function Step2PaketTanggal({
             </div>
           )}
         </TkCard>
+      )}
+    </div>
+  );
+}
+
+function DokumenUploadField({
+  id,
+  label,
+  url,
+  isUploading,
+  onUpload,
+}: {
+  id: string;
+  label: string;
+  url: string | null;
+  isUploading: boolean;
+  onUpload: (file: File) => void;
+}) {
+  const isPdf = url?.toLowerCase().endsWith(".pdf");
+
+  return (
+    <div>
+      <Label htmlFor={id} className={tkLabelClass}>
+        {label}
+      </Label>
+      <Input
+        id={id}
+        type="file"
+        accept="image/*,application/pdf"
+        disabled={isUploading}
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) onUpload(file);
+        }}
+        className={tkInputClass}
+      />
+      {isUploading && (
+        <p className="mt-1 flex items-center gap-1.5 text-xs text-tk-muted">
+          <Loader2 className="animate-spin" size={12} />
+          Mengupload...
+        </p>
+      )}
+      {url && !isUploading && (
+        <div className="mt-2 flex items-center gap-2">
+          {isPdf ? (
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs font-bold text-tk-orange-dark underline"
+            >
+              📄 Lihat file PDF
+            </a>
+          ) : (
+            <div className="relative h-16 w-16 overflow-hidden rounded-lg border-2 border-tk-charcoal">
+              <Image src={url} alt={label} fill unoptimized className="object-cover" />
+            </div>
+          )}
+          <p className="text-xs font-bold text-tk-sage-dark">✓ Terupload</p>
+        </div>
       )}
     </div>
   );

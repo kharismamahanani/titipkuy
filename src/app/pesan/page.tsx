@@ -12,10 +12,12 @@ import { Step3Perjanjian } from "@/components/pesan/step-3-perjanjian";
 import { dataUrlToFile } from "@/lib/utils";
 import { uploadToStorage } from "@/lib/supabase";
 import { validateStep1, validateStep2 } from "@/lib/pesan-validation";
+import { hitungPremi, tentukanTier } from "@/lib/ganti-rugi";
 import { INITIAL_FORM_DATA, type ChecklistData, type PesanFormData } from "@/types/pesan";
 import type { PelangganData } from "@/types/pesan";
 
 const REQUIRED_CHECKS: (keyof ChecklistData)[] = [
+  "pengemasanWajib",
   "limitGantiRugi",
   "barangTerlarang",
   "jatuhTempo",
@@ -40,13 +42,22 @@ function PesanForm() {
   >({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const isMotor = formData.paket?.kategori === "motor";
+  const nilaiDeklarasiNum = Number(formData.deklarasi.nilaiDeklarasi) || 0;
+  const tierGantiRugi = tentukanTier(nilaiDeklarasiNum);
+
   function handleNext() {
     if (step === 1) {
       const errors = validateStep1(formData.pelanggan);
       setStep1Errors(errors);
       if (Object.keys(errors).length > 0) return;
     } else if (step === 2) {
-      const errors = validateStep2(formData.paket, formData.tanggalMasuk, formData.deklarasi);
+      const errors = validateStep2(
+        formData.paket,
+        formData.tanggalMasuk,
+        formData.deklarasi,
+        formData.dokumenMotor
+      );
       if (errors.length > 0) {
         toast.error(errors[0]);
         return;
@@ -59,9 +70,11 @@ function PesanForm() {
     setStep((s) => Math.max(s - 1, 1));
   }
 
-  const requiredChecks = formData.paket?.perluDeklarasi
-    ? [...REQUIRED_CHECKS, "deklarasiBenar" as const]
-    : REQUIRED_CHECKS;
+  const requiredChecks = [
+    ...REQUIRED_CHECKS,
+    ...(tierGantiRugi !== "standar" ? (["deklarasiBenar"] as const) : []),
+    ...(isMotor ? (["motorDeklarasiBenar"] as const) : []),
+  ];
   // Tanda tangan divalidasi langsung di Step3Perjanjian saat tombol submit
   // diklik (baca fresh dari kanvas, bukan dari state ini yang bisa lag satu
   // render di belakang) — di sini cukup syarat checklist saja.
@@ -81,6 +94,10 @@ function PesanForm() {
         signatureFile
       );
 
+      const durasiHari = formData.paket.durasiHari ?? 1;
+      const premiGantiRugi =
+        tierGantiRugi === "standar" ? 0 : hitungPremi(nilaiDeklarasiNum, durasiHari);
+
       const res = await fetch("/api/transaksi", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -89,11 +106,12 @@ function PesanForm() {
           pelanggan: formData.pelanggan,
           paketId: formData.paket.id,
           tanggalMasuk: formData.tanggalMasuk,
-          nilaiDeklarasi: formData.deklarasi.nilaiDeklarasi
-            ? Number(formData.deklarasi.nilaiDeklarasi)
-            : undefined,
-          deskripsiDeklarasi: formData.deklarasi.deskripsiDeklarasi || undefined,
-          buktiKepemilikanUrl: formData.deklarasi.buktiKepemilikanUrl || undefined,
+          nilaiDeklarasi: tierGantiRugi === "standar" ? undefined : nilaiDeklarasiNum,
+          tierGantiRugi,
+          premiGantiRugi,
+          ktpUrl: formData.dokumenMotor.ktpUrl || undefined,
+          stnkUrl: formData.dokumenMotor.stnkUrl || undefined,
+          bpkbUrl: formData.dokumenMotor.bpkbUrl || undefined,
           tandaTanganUrl,
           checklist: formData.checklist,
           metodePengiriman: formData.metodePengiriman,
@@ -135,6 +153,7 @@ function PesanForm() {
               paket={formData.paket}
               tanggalMasuk={formData.tanggalMasuk}
               deklarasi={formData.deklarasi}
+              dokumenMotor={formData.dokumenMotor}
               metodePengiriman={formData.metodePengiriman}
               antarJemputOption={formData.antarJemputOption}
               preselectedPaketId={preselectedPaketId}
@@ -145,6 +164,9 @@ function PesanForm() {
               }
               onDeklarasiChange={(deklarasi) =>
                 setFormData((prev) => ({ ...prev, deklarasi }))
+              }
+              onDokumenMotorChange={(dokumenMotor) =>
+                setFormData((prev) => ({ ...prev, dokumenMotor }))
               }
               onMetodePengirimanChange={(metodePengiriman) =>
                 setFormData((prev) => ({ ...prev, metodePengiriman }))

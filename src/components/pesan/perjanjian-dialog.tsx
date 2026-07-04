@@ -30,29 +30,44 @@ export function PerjanjianDialog() {
           </p>
 
           <h3 className="font-heading font-semibold text-foreground">
-            1. Ganti Rugi
+            1. Kewajiban Pengemasan
           </h3>
           <p>
-            Penyedia Jasa bertanggung jawab atas kehilangan atau kerusakan
-            barang akibat kelalaian Penyedia Jasa, dengan batas maksimal
-            ganti rugi Rp500.000 per kardus/barang, kecuali Penitip mengisi
-            nilai deklarasi resmi di awal pemesanan — maka ganti rugi
-            mengikuti nilai deklarasi tersebut (maksimal sesuai bukti
-            kepemilikan yang dilampirkan).
+            Semua barang WAJIB dikemas dalam kardus tertutup atau dibungkus
+            bubble wrap minimal 2 lapis sebelum diserahkan ke TitipKuy!.
+            TitipKuy! berhak menolak barang yang tidak terkemas sesuai
+            ketentuan ini. Kerusakan pada barang yang diserahkan tanpa
+            kemasan yang layak bukan tanggung jawab TitipKuy!.
           </p>
 
           <h3 className="font-heading font-semibold text-foreground">
-            2. Barang Terlarang
+            2. Ganti Rugi
+          </h3>
+          <p>
+            Tanpa deklarasi nilai, ganti rugi maksimal Rp300.000 per barang
+            (tier Standar). Dengan deklarasi nilai barang di awal pemesanan,
+            ganti rugi mengikuti nilai deklarasi tersebut — maksimal
+            Rp5.000.000 (tier Deklarasi Mandiri, premi 1%/bulan) atau
+            maksimal Rp20.000.000 untuk barang bernilai tinggi (premi
+            2%/bulan). Ganti rugi hanya berlaku untuk kehilangan atau
+            kerusakan akibat kelalaian TitipKuy! yang dibuktikan dengan foto
+            kondisi barang saat masuk vs saat keluar. Klaim wajib diajukan
+            saat pengambilan barang di hub.
+          </p>
+
+          <h3 className="font-heading font-semibold text-foreground">
+            3. Barang Terlarang
           </h3>
           <p>
             Penitip dilarang menitipkan makanan/minuman mudah basi, bahan
             berbahaya/mudah terbakar, hewan hidup, senjata, narkotika, atau
-            barang ilegal lainnya. Penyedia Jasa berhak menolak atau
+            barang ilegal lainnya. Pelanggaran ketentuan ini membatalkan
+            perjanjian tanpa refund, dan Penyedia Jasa berhak menolak atau
             mengeluarkan barang tersebut tanpa kompensasi apa pun.
           </p>
 
           <h3 className="font-heading font-semibold text-foreground">
-            3. Jangka Waktu & Denda Keterlambatan
+            4. Jangka Waktu & Denda Keterlambatan
           </h3>
           <p>
             Barang harus diambil paling lambat pada tanggal jatuh tempo yang
@@ -62,7 +77,7 @@ export function PerjanjianDialog() {
           </p>
 
           <h3 className="font-heading font-semibold text-foreground">
-            4. Barang Tidak Diambil
+            5. Barang Tidak Diambil
           </h3>
           <p>
             Apabila barang tidak diambil dalam waktu lebih dari 30 (tiga
@@ -73,7 +88,7 @@ export function PerjanjianDialog() {
           </p>
 
           <h3 className="font-heading font-semibold text-foreground">
-            5. Dokumentasi
+            6. Dokumentasi
           </h3>
           <p>
             Penyedia Jasa akan mendokumentasikan kondisi barang melalui foto
@@ -83,7 +98,7 @@ export function PerjanjianDialog() {
           </p>
 
           <h3 className="font-heading font-semibold text-foreground">
-            6. Persetujuan
+            7. Persetujuan
           </h3>
           <p>
             Dengan mencentang kotak persetujuan dan menandatangani secara

@@ -20,7 +20,12 @@ export function CaraTitipMandiri() {
           <p className="mt-3 text-tk-muted">Kirim via Grab, Lalamove, atau datang langsung.</p>
         </div>
 
-        <div className="mt-12 space-y-2">
+        <div className="mt-8 rounded-lg border-2 border-[#C0392B] bg-[#C0392B]/10 p-4 text-sm font-bold text-[#C0392B]">
+          📦 SYARAT WAJIB: Semua barang harus dalam kardus tertutup atau terbungkus bubble
+          wrap. Barang tanpa kemasan TIDAK diterima.
+        </div>
+
+        <div className="mt-8 space-y-2">
           {STEPS.map((text, index) => (
             <div key={text} className="flex items-start gap-4">
               <div className="flex flex-col items-center">

@@ -15,7 +15,8 @@ import {
 import { PerjanjianDialog } from "@/components/pesan/perjanjian-dialog";
 import { tkErrorClass } from "@/lib/form-style";
 import { formatRupiah } from "@/lib/utils";
-import { CHECKLIST_ITEMS, DEKLARASI_ITEM } from "@/lib/checklist-items";
+import { CHECKLIST_ITEMS, DEKLARASI_ITEM, MOTOR_ITEM } from "@/lib/checklist-items";
+import { hitungPremi, tentukanTier } from "@/lib/ganti-rugi";
 import type { ChecklistData, PesanFormData } from "@/types/pesan";
 
 interface Step3Props {
@@ -36,9 +37,18 @@ export function Step3Perjanjian({
   canSubmit,
 }: Step3Props) {
   const { pelanggan, paket, tanggalMasuk, checklist } = formData;
-  const items = paket?.perluDeklarasi
-    ? [...CHECKLIST_ITEMS, DEKLARASI_ITEM]
-    : CHECKLIST_ITEMS;
+  const isMotor = paket?.kategori === "motor";
+  const nilaiDeklarasiNum = Number(formData.deklarasi.nilaiDeklarasi) || 0;
+  const tierGantiRugi = tentukanTier(nilaiDeklarasiNum);
+  const durasiHari = paket?.durasiHari ?? 1;
+  const premi =
+    tierGantiRugi === "standar" ? 0 : hitungPremi(nilaiDeklarasiNum, durasiHari);
+
+  const items = [
+    ...CHECKLIST_ITEMS,
+    ...(tierGantiRugi !== "standar" ? [DEKLARASI_ITEM] : []),
+    ...(isMotor ? [MOTOR_ITEM] : []),
+  ];
 
   const signatureRef = useRef<SignatureCanvasHandle>(null);
   const [signatureError, setSignatureError] = useState<string | null>(null);
@@ -88,6 +98,14 @@ export function Step3Perjanjian({
             {paket?.nama} {paket ? `— ${formatRupiah(paket.harga)}` : ""}
           </span>
         </div>
+        {premi > 0 && (
+          <div className="flex justify-between">
+            <span className="text-tk-muted">
+              Premi perlindungan {tierGantiRugi === "bernilaiTinggi" ? "2%" : "1%"}
+            </span>
+            <span className="font-bold text-tk-charcoal">{formatRupiah(premi)}</span>
+          </div>
+        )}
         {formData.antarJemputOption && (
           <div className="flex justify-between">
             <span className="text-tk-muted">Antar-jemput</span>
@@ -99,7 +117,9 @@ export function Step3Perjanjian({
         <div className="flex justify-between border-t-2 border-tk-charcoal pt-2">
           <span className="font-extrabold text-tk-charcoal">TOTAL</span>
           <span className="text-lg font-extrabold text-tk-orange">
-            {formatRupiah((paket?.harga ?? 0) + (formData.antarJemputOption?.harga ?? 0))}
+            {formatRupiah(
+              (paket?.harga ?? 0) + premi + (formData.antarJemputOption?.harga ?? 0)
+            )}
           </span>
         </div>
         <div className="flex justify-between">

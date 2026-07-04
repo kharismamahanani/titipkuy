@@ -100,6 +100,12 @@ export default async function AdminTransaksiDetailPage({
           value={transaksi.statusBayar === "LUNAS" ? "Lunas" : "Belum Lunas"}
         />
         <Row label="Status Transaksi" value={transaksi.statusTransaksi} />
+        {transaksi.tierGantiRugi && (
+          <Row label="Tier Ganti Rugi" value={TIER_LABEL[transaksi.tierGantiRugi] ?? transaksi.tierGantiRugi} />
+        )}
+        {!!transaksi.premiGantiRugi && (
+          <Row label="Premi Perlindungan" value={`${formatRupiah(transaksi.premiGantiRugi)}/bulan`} />
+        )}
         {transaksi.nilaiDeklarasi != null && (
           <Row label="Nilai Deklarasi" value={formatRupiah(transaksi.nilaiDeklarasi)} />
         )}
@@ -107,6 +113,17 @@ export default async function AdminTransaksiDetailPage({
           <Row label="Deskripsi Barang" value={transaksi.deskripsiDeklarasi} />
         )}
       </TkCard>
+
+      {(transaksi.ktpUrl || transaksi.stnkUrl || transaksi.bpkbUrl) && (
+        <section className="space-y-3">
+          <h2 className="font-extrabold text-tk-charcoal">📋 Dokumen Motor</h2>
+          <div className="flex flex-wrap gap-4">
+            {transaksi.ktpUrl && <DokumenThumbnail label="KTP" url={transaksi.ktpUrl} />}
+            {transaksi.stnkUrl && <DokumenThumbnail label="STNK" url={transaksi.stnkUrl} />}
+            {transaksi.bpkbUrl && <DokumenThumbnail label="BPKB" url={transaksi.bpkbUrl} />}
+          </div>
+        </section>
+      )}
 
       <section className="space-y-3">
         <h2 className="font-extrabold text-tk-charcoal">Foto Saat Masuk</h2>
@@ -166,5 +183,43 @@ function Row({ label, value }: { label: string; value: string }) {
       <span className="text-tk-muted">{label}</span>
       <span className="font-bold text-tk-charcoal">{value}</span>
     </div>
+  );
+}
+
+const TIER_LABEL: Record<string, string> = {
+  standar: "Standar",
+  deklarasi: "Deklarasi Mandiri",
+  bernilaiTinggi: "Barang Bernilai Tinggi",
+};
+
+function dokumenViewHref(url: string) {
+  return `/api/admin/dokumen-url?url=${encodeURIComponent(url)}`;
+}
+
+function DokumenThumbnail({ label, url }: { label: string; url: string }) {
+  const href = dokumenViewHref(url);
+  const isPdf = url.toLowerCase().endsWith(".pdf");
+
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex flex-col items-center gap-1.5"
+    >
+      {isPdf ? (
+        <div className="flex h-24 w-24 items-center justify-center rounded-lg border-2 border-tk-charcoal bg-white text-3xl">
+          📄
+        </div>
+      ) : (
+        // eslint-disable-next-line @next/next/no-img-element -- gambar dari signed URL redirect, tidak cocok dioptimasi next/image
+        <img
+          src={href}
+          alt={label}
+          className="h-24 w-24 rounded-lg border-2 border-tk-charcoal object-cover"
+        />
+      )}
+      <span className="text-xs font-bold text-tk-charcoal">{label}</span>
+    </a>
   );
 }
