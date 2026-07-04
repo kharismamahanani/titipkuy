@@ -461,6 +461,10 @@ export function Step2PaketTanggal({
               onChange={onAntarJemputOptionChange}
               hideMandiriOption
               allowedArmada={armadaBisa}
+              onOutOfRange={() => {
+                onMetodePengirimanChange("mandiri");
+                onAntarJemputOptionChange(null);
+              }}
             />
           ) : (
             <div className="rounded-lg border-2 border-tk-orange bg-tk-orange/10 p-3 text-xs text-tk-charcoal">

@@ -5,17 +5,20 @@ import { Loader2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { tkLabelClass } from "@/lib/form-style";
 import { cn, formatRupiah } from "@/lib/utils";
+import { tkButtonVariants } from "@/components/ui/tk-button";
 import { JAM_DROP_OFF_MANDIRI, JAM_OPERASIONAL_HUB_SUHAT } from "@/lib/constants";
 import { useDeteksiLokasi } from "@/hooks/use-deteksi-lokasi";
-import { DeteksiLokasiBlock } from "@/components/shared/deteksi-lokasi-block";
 import type { AntarJemputOption } from "@/types/antar-jemput";
 import type { TipeArmada } from "@/lib/armada-rules";
+
+type RadiusLabel = "<3km" | "3-6km";
 
 interface AntarJemputPickerProps {
   value: AntarJemputOption | null;
   onChange: (option: AntarJemputOption | null) => void;
   hideMandiriOption?: boolean;
   allowedArmada?: TipeArmada;
+  onOutOfRange?: () => void;
 }
 
 export function AntarJemputPicker({
@@ -23,10 +26,12 @@ export function AntarJemputPicker({
   onChange,
   hideMandiriOption,
   allowedArmada = "semua",
+  onOutOfRange,
 }: AntarJemputPickerProps) {
   const [options, setOptions] = useState<AntarJemputOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { detect, isDetecting, result, error } = useDeteksiLokasi();
+  const [manualRadius, setManualRadius] = useState<RadiusLabel | null>(null);
+  const { detect, isDetecting, result, error, isPermissionDenied, reset } = useDeteksiLokasi();
 
   useEffect(() => {
     fetch("/api/antar-jemput")
@@ -36,18 +41,45 @@ export function AntarJemputPicker({
       .finally(() => setIsLoading(false));
   }, []);
 
+  useEffect(() => {
+    if (result?.kategori === "jauh") onOutOfRange?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [result?.kategori]);
+
   function handleDetect() {
-    detect((detected) => {
-      if (detected.kategori === "jauh") return;
-      const radiusLabel = detected.kategori === "dekat" ? "<3km" : "3-6km";
-      const match = options.find((o) => o.tipe === "motor" && o.radiusLabel === radiusLabel);
-      if (match) onChange(match);
-    });
+    setManualRadius(null);
+    detect();
   }
 
-  const disabledByJarak = result?.kategori === "jauh";
-  const visibleOptions =
-    allowedArmada === "mobil" ? options.filter((o) => o.tipe !== "motor") : options;
+  function handleDeteksiUlang() {
+    reset();
+    setManualRadius(null);
+  }
+
+  const detectedRadius: RadiusLabel | null =
+    result && result.kategori !== "jauh"
+      ? result.kategori === "dekat"
+        ? "<3km"
+        : "3-6km"
+      : null;
+
+  const effectiveRadius = detectedRadius ?? manualRadius;
+
+  const visibleOptions = options
+    .filter((o) => (allowedArmada === "mobil" ? o.tipe !== "motor" : true))
+    .filter((o) => o.radiusLabel === effectiveRadius);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4 rounded-lg border-2 border-tk-charcoal bg-white p-5">
+        <Label className={tkLabelClass}>🛵 Mau barangmu dijemput / diantar? (Opsional)</Label>
+        <p className="flex items-center gap-2 text-sm text-tk-muted">
+          <Loader2 className="animate-spin" size={16} />
+          Memuat opsi antar-jemput...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 rounded-lg border-2 border-tk-charcoal bg-white p-5">
@@ -59,20 +91,126 @@ export function AntarJemputPicker({
         <p>{JAM_OPERASIONAL_HUB_SUHAT.libur}</p>
       </div>
 
-      <DeteksiLokasiBlock
-        isDetecting={isDetecting}
-        jarak={result?.jarak ?? null}
-        kategori={result?.kategori ?? null}
-        error={error}
-        onDetect={handleDetect}
-      />
+      {!result && !error && (
+        <div className="space-y-2">
+          <button
+            type="button"
+            onClick={handleDetect}
+            disabled={isDetecting}
+            className={cn(tkButtonVariants({ variant: "secondary", size: "sm" }), "w-full justify-center")}
+          >
+            {isDetecting ? (
+              <Loader2 className="mr-1.5 animate-spin" size={14} />
+            ) : (
+              <span className="mr-1.5">📍</span>
+            )}
+            Deteksi Lokasiku
+          </button>
+          <p className="text-xs text-tk-muted">
+            Deteksi lokasi diperlukan untuk menentukan tarif antar-jemput yang sesuai dengan
+            jarakmu dari hub.
+          </p>
+        </div>
+      )}
 
-      {isLoading ? (
-        <p className="flex items-center gap-2 text-sm text-tk-muted">
-          <Loader2 className="animate-spin" size={16} />
-          Memuat opsi antar-jemput...
-        </p>
-      ) : (
+      {result?.kategori === "jauh" && (
+        <div className="space-y-2">
+          <div className="rounded-lg border-2 border-[#C0392B] bg-white p-3 text-xs font-semibold text-[#C0392B]">
+            ❌ Lokasi kamu ({result.jarak.toFixed(1)} km) di luar radius layanan antar-jemput
+            TitipKuy! (maks. 6 km dari Hub Suhat). Gunakan opsi Kirim Mandiri via
+            Grab/Lalamove.
+          </div>
+          <button
+            type="button"
+            onClick={handleDeteksiUlang}
+            className="text-xs font-bold text-tk-orange-dark underline underline-offset-4"
+          >
+            Deteksi ulang
+          </button>
+        </div>
+      )}
+
+      {detectedRadius && (
+        <div className="flex items-center justify-between gap-2 rounded-lg border-2 border-tk-sage bg-tk-sage/10 p-3 text-xs font-bold text-tk-charcoal">
+          <span>
+            📍 Jarakmu: {result?.jarak.toFixed(1)} km dari Hub Suhat
+          </span>
+          <button
+            type="button"
+            onClick={handleDeteksiUlang}
+            className="shrink-0 text-tk-orange-dark underline underline-offset-4"
+          >
+            Deteksi ulang
+          </button>
+        </div>
+      )}
+
+      {error && isPermissionDenied && !manualRadius && (
+        <div className="space-y-2">
+          <p className="text-xs font-semibold text-[#C0392B]">
+            Izin lokasi ditolak. Pilih radius secara manual:
+          </p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setManualRadius("<3km")}
+              className={cn(
+                "flex-1 rounded-lg border-2 border-tk-charcoal px-3 py-2 text-xs font-bold",
+                "bg-white text-tk-charcoal hover:bg-tk-cream-alt"
+              )}
+            >
+              &lt;3 km
+            </button>
+            <button
+              type="button"
+              onClick={() => setManualRadius("3-6km")}
+              className={cn(
+                "flex-1 rounded-lg border-2 border-tk-charcoal px-3 py-2 text-xs font-bold",
+                "bg-white text-tk-charcoal hover:bg-tk-cream-alt"
+              )}
+            >
+              3–6 km
+            </button>
+          </div>
+        </div>
+      )}
+
+      {error && !isPermissionDenied && !manualRadius && (
+        <div className="space-y-2">
+          <p className="text-xs font-semibold text-[#C0392B]">{error} Pilih radius secara manual:</p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setManualRadius("<3km")}
+              className="flex-1 rounded-lg border-2 border-tk-charcoal bg-white px-3 py-2 text-xs font-bold text-tk-charcoal hover:bg-tk-cream-alt"
+            >
+              &lt;3 km
+            </button>
+            <button
+              type="button"
+              onClick={() => setManualRadius("3-6km")}
+              className="flex-1 rounded-lg border-2 border-tk-charcoal bg-white px-3 py-2 text-xs font-bold text-tk-charcoal hover:bg-tk-cream-alt"
+            >
+              3–6 km
+            </button>
+          </div>
+        </div>
+      )}
+
+      {manualRadius && (
+        <div className="flex items-center justify-between gap-2 rounded-lg border-2 border-tk-orange bg-tk-orange/10 p-3 text-xs font-semibold text-tk-charcoal">
+          <span>Radius dipilih manual: {manualRadius}</span>
+          <button
+            type="button"
+            onClick={handleDeteksiUlang}
+            className="shrink-0 text-tk-orange-dark underline underline-offset-4"
+          >
+            Ubah
+          </button>
+        </div>
+      )}
+
+      {effectiveRadius && (
         <div className="space-y-2">
           {!hideMandiriOption && (
             <button
@@ -95,14 +233,12 @@ export function AntarJemputPicker({
               <button
                 key={option.id}
                 type="button"
-                disabled={disabledByJarak}
                 onClick={() => onChange(option)}
                 className={cn(
                   "w-full rounded-lg border-2 border-tk-charcoal px-4 py-2.5 text-left text-sm transition-colors",
                   isSelected
                     ? "bg-tk-charcoal text-tk-cream"
-                    : "bg-white text-tk-charcoal hover:bg-tk-cream-alt",
-                  disabledByJarak && "cursor-not-allowed opacity-40 hover:bg-white"
+                    : "bg-white text-tk-charcoal hover:bg-tk-cream-alt"
                 )}
               >
                 <span className="flex items-center justify-between">
@@ -119,33 +255,32 @@ export function AntarJemputPicker({
                     {option.kapasitasLabel}
                   </span>
                 )}
-                {option.tipe === "motor" && allowedArmada === "semua" && (
-                  <span
-                    className={cn(
-                      "mt-1 block text-xs italic",
-                      isSelected ? "text-tk-cream/80" : "text-tk-muted"
-                    )}
-                  >
-                    Maks. 2 Box S atau 1 Koper Kabin
-                  </span>
-                )}
               </button>
             );
           })}
+
+          {manualRadius && (
+            <p className="text-[11px] text-tk-light">
+              Pastikan kamu memilih radius yang sesuai. Tarif disesuaikan saat konfirmasi
+              dengan admin via WhatsApp.
+            </p>
+          )}
         </div>
       )}
 
-      {value === null && !hideMandiriOption ? (
+      {effectiveRadius && value === null && !hideMandiriOption ? (
         <div className="rounded-lg border-2 border-tk-orange bg-tk-orange/10 p-3 text-xs text-tk-charcoal">
           📌 Jam drop-off: {JAM_DROP_OFF_MANDIRI} (Senin–Sabtu). Setelah submit, kamu
           akan menerima Kode Unik via WhatsApp. Tulis kode itu di kardus/koper
           sebelum dikirim.
         </div>
       ) : (
-        <p className="text-xs text-tk-light">
-          Penjemputan armada TitipKuy! hanya pada jam operasional. Hari Minggu &
-          tanggal merah: armada tidak tersedia, gunakan opsi kirim mandiri.
-        </p>
+        effectiveRadius && (
+          <p className="text-xs text-tk-light">
+            Penjemputan armada TitipKuy! hanya pada jam operasional. Hari Minggu &
+            tanggal merah: armada tidak tersedia, gunakan opsi kirim mandiri.
+          </p>
+        )
       )}
     </div>
   );

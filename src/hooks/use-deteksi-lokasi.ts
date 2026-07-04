@@ -20,15 +20,18 @@ export function useDeteksiLokasi() {
   const [isDetecting, setIsDetecting] = useState(false);
   const [result, setResult] = useState<DeteksiLokasiResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isPermissionDenied, setIsPermissionDenied] = useState(false);
 
   function detect(onResult?: (result: DeteksiLokasiResult) => void) {
     if (!navigator.geolocation) {
       setError("Perangkatmu tidak mendukung deteksi lokasi.");
+      setIsPermissionDenied(false);
       return;
     }
 
     setIsDetecting(true);
     setError(null);
+    setIsPermissionDenied(false);
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -43,7 +46,8 @@ export function useDeteksiLokasi() {
         setIsDetecting(false);
         onResult?.(next);
       },
-      () => {
+      (geoError) => {
+        setIsPermissionDenied(geoError.code === geoError.PERMISSION_DENIED);
         setError("Gagal mengambil lokasi. Pastikan izin lokasi diaktifkan.");
         setIsDetecting(false);
       },
@@ -51,5 +55,11 @@ export function useDeteksiLokasi() {
     );
   }
 
-  return { detect, isDetecting, result, error };
+  function reset() {
+    setResult(null);
+    setError(null);
+    setIsPermissionDenied(false);
+  }
+
+  return { detect, isDetecting, result, error, isPermissionDenied, reset };
 }

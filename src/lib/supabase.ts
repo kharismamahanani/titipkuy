@@ -92,6 +92,17 @@ function assertValidPathSegment(value: string, label: string) {
   }
 }
 
+// Bucket "dokumen" hanya punya SELECT policy untuk role "authenticated"
+// (bukan "anon"), supaya dokumen sensitif (KTP/STNK/BPKB) tidak bisa
+// dibaca sembarangan dari client publik. Konsekuensinya: upload dengan
+// upsert:true GAGAL dengan pesan RLS yang membingungkan ("new row
+// violates row-level security policy"), karena Supabase perlu melakukan
+// pre-check SELECT untuk deteksi konflik saat upsert, dan anon tidak
+// punya akses SELECT ke bucket itu. Path dokumen sudah selalu unik
+// (timestamp + random), jadi upsert:false aman dipakai di sini dan
+// tidak memerlukan pelonggaran policy privasi.
+const BUCKETS_WITHOUT_UPSERT = new Set(["dokumen"]);
+
 export async function uploadToStorage(path: string, file: File) {
   if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error(
@@ -103,14 +114,16 @@ export async function uploadToStorage(path: string, file: File) {
   }
 
   assertValidPathSegment(path, "path");
+  if (path.includes("undefined") || path.includes("null")) {
+    throw new Error(`Path upload mengandung "undefined"/"null": ${path}`);
+  }
 
   const { bucket, objectPath } = resolveBucketAndPath(path);
-  console.log("Upload path:", `${bucket}/${objectPath}`);
 
   try {
     const { error } = await supabase.storage
       .from(bucket)
-      .upload(objectPath, file, { upsert: true });
+      .upload(objectPath, file, { upsert: !BUCKETS_WITHOUT_UPSERT.has(bucket) });
 
     if (error) {
       console.log("Upload error detail:", JSON.stringify(error));
