@@ -36,6 +36,11 @@ export async function GET(request: Request) {
     }
     const breakdownPaket = Array.from(breakdownMap, ([nama, omzet]) => ({ nama, omzet }));
 
+    const pengeluaranBulan = await prisma.pengeluaran.findMany({
+      where: { tanggal: { gte: start, lt: end } },
+    });
+    const pengeluaranBulanIni = pengeluaranBulan.reduce((sum, p) => sum + p.jumlah, 0);
+
     // Data 6 bulan terakhir (termasuk bulan terpilih) untuk grafik tren
     const selectedMonthDate = start;
     const trendStart = new Date(
@@ -64,6 +69,26 @@ export async function GET(request: Request) {
     }
     const tren6Bulan = Array.from(trendMap, ([bulan, omzet]) => ({ bulan, omzet }));
 
+    // Pengeluaran per bulan untuk 6 bulan yang sama, dipakai grafik omzet vs pengeluaran
+    const trendPengeluaran = await prisma.pengeluaran.findMany({
+      where: { tanggal: { gte: trendStart, lt: end } },
+    });
+    const pengeluaranTrendMap = new Map<string, number>();
+    for (let i = 0; i < 6; i++) {
+      const monthDate = subMonths(selectedMonthDate, 5 - i);
+      pengeluaranTrendMap.set(format(monthDate, "yyyy-MM"), 0);
+    }
+    for (const p of trendPengeluaran) {
+      const key = format(p.tanggal, "yyyy-MM");
+      if (pengeluaranTrendMap.has(key)) {
+        pengeluaranTrendMap.set(key, (pengeluaranTrendMap.get(key) ?? 0) + p.jumlah);
+      }
+    }
+    const tren6BulanPengeluaran = Array.from(pengeluaranTrendMap, ([bulan, pengeluaran]) => ({
+      bulan,
+      pengeluaran,
+    }));
+
     return NextResponse.json({
       bulan,
       omzetBulanIni,
@@ -72,6 +97,8 @@ export async function GET(request: Request) {
       totalBelumDibayar,
       breakdownPaket,
       tren6Bulan,
+      pengeluaranBulanIni,
+      tren6BulanPengeluaran,
     });
   } catch (error) {
     console.error("[GET /api/admin/rekap]", error);

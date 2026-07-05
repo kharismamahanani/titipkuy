@@ -174,3 +174,14 @@ model AntarJemputOption {
   urutan         Int      @default(0)
   transaksi      Transaksi[]
 }
+
+// Pencatatan pengeluaran operasional harian (bensin, label, packaging, dll)
+// untuk dihitung terhadap omzet di Rekap Keuangan (laba bersih & margin).
+model Pengeluaran {
+  id          String   @id @default(cuid())
+  tanggal     DateTime @db.Date
+  kategori    String   // "bensin" | "label" | "packaging" | "listrik" | "servisArmada" | "komunikasi" | "lainnya"
+  deskripsi   String
+  jumlah      Int      // nominal rupiah
+  createdAt   DateTime @default(now())
+}

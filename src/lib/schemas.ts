@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { KATEGORI_PENGELUARAN } from "@/lib/pengeluaran";
 
 export const PelangganSchema = z.object({
   nama: z.string().min(2).max(100),
@@ -77,4 +78,12 @@ export const TransaksiManualSchema = z.object({
   antarJemput: z.boolean().optional(),
   penjemputan: PenjemputanSchema.optional().nullable(),
   catatanAdmin: z.string().optional().nullable(),
+});
+
+// POST /api/admin/pengeluaran
+export const PengeluaranSchema = z.object({
+  tanggal: z.string().min(1, "Tanggal wajib diisi"),
+  kategori: z.enum(KATEGORI_PENGELUARAN.map((k) => k.value) as [string, ...string[]]),
+  deskripsi: z.string().min(1, "Deskripsi wajib diisi").max(200),
+  jumlah: z.number().int().positive(),
 });
