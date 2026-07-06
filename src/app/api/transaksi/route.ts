@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { incrementSlotUsage } from "@/lib/slot";
 import { bookingRatelimit, getClientIp } from "@/lib/rate-limit";
+import { toUtcMidnightFromLocalDate } from "@/lib/date-utils";
 import { HUB_CONFIG } from "@/lib/constants";
 import { TransaksiSchema } from "@/lib/schemas";
 
@@ -93,6 +94,8 @@ export async function POST(request: Request) {
       );
     }
 
+    let armadaTersediaId: string | null = null;
+
     if (antarJemputId) {
       const antarJemputOption = await prisma.antarJemputOption.findUnique({
         where: { id: antarJemputId },
@@ -120,6 +123,10 @@ export async function POST(request: Request) {
             { status: 409 }
           );
         }
+        // Dipakai untuk Rekap Jadwal Perjalanan di panel admin — flow
+        // pelanggan tidak memilih sesi spesifik, jadi sesiPenjemputan
+        // dibiarkan null dan tanggalPenjemputan mengikuti tanggalMasuk.
+        armadaTersediaId = armadaTersedia.id;
       }
     }
 
@@ -162,8 +169,16 @@ export async function POST(request: Request) {
               antarJemputOption: antarJemputId
                 ? { connect: { id: antarJemputId } }
                 : undefined,
-              armada: penjemputan ? { connect: { id: penjemputan.armadaId } } : undefined,
-              tanggalPenjemputan: penjemputan ? new Date(penjemputan.tanggal) : null,
+              armada: armadaTersediaId
+                ? { connect: { id: armadaTersediaId } }
+                : penjemputan
+                  ? { connect: { id: penjemputan.armadaId } }
+                  : undefined,
+              tanggalPenjemputan: armadaTersediaId
+                ? toUtcMidnightFromLocalDate(tanggalMasukDate)
+                : penjemputan
+                  ? new Date(penjemputan.tanggal)
+                  : null,
               sesiPenjemputan: penjemputan ? penjemputan.sesiWaktu : null,
               perjanjianDisetujui: true,
               waktuPersetujuan: new Date(),

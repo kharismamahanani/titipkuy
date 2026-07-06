@@ -68,6 +68,26 @@ export default function AdminArsipPage() {
     window.open(pdfUrl, "_blank", "noopener,noreferrer");
   }
 
+  async function handleGeneratePdf(t: TransaksiSearchResult) {
+    setDownloadingId(t.id);
+    try {
+      const res = await fetch(`/api/admin/transaksi/${t.id}/generate-pdf`, {
+        method: "POST",
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Gagal membuat PDF perjanjian");
+
+      setResults((prev) =>
+        prev.map((item) => (item.id === t.id ? { ...item, pdfUrl: result.pdfUrl } : item))
+      );
+      toast.success("PDF perjanjian berhasil dibuat");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Gagal membuat PDF perjanjian");
+    } finally {
+      setDownloadingId(null);
+    }
+  }
+
   async function handleDownloadPdf(t: TransaksiSearchResult) {
     if (!t.pdfUrl) {
       toast.error("PDF perjanjian belum tersedia untuk transaksi ini");
@@ -174,26 +194,43 @@ export default function AdminArsipPage() {
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex flex-wrap gap-2">
-                    <TkButton
-                      type="button"
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => handleLihatPdf(t.pdfUrl)}
-                    >
-                      Lihat PDF
-                    </TkButton>
-                    <TkButton
-                      type="button"
-                      size="sm"
-                      variant="secondary"
-                      disabled={downloadingId === t.id}
-                      onClick={() => handleDownloadPdf(t)}
-                    >
-                      {downloadingId === t.id && (
-                        <Loader2 className="mr-1.5 animate-spin" size={14} />
-                      )}
-                      Download PDF
-                    </TkButton>
+                    {t.pdfUrl ? (
+                      <>
+                        <TkButton
+                          type="button"
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => handleLihatPdf(t.pdfUrl)}
+                        >
+                          Lihat PDF
+                        </TkButton>
+                        <TkButton
+                          type="button"
+                          size="sm"
+                          variant="secondary"
+                          disabled={downloadingId === t.id}
+                          onClick={() => handleDownloadPdf(t)}
+                        >
+                          {downloadingId === t.id && (
+                            <Loader2 className="mr-1.5 animate-spin" size={14} />
+                          )}
+                          Download PDF
+                        </TkButton>
+                      </>
+                    ) : (
+                      <TkButton
+                        type="button"
+                        size="sm"
+                        variant="primary"
+                        disabled={downloadingId === t.id}
+                        onClick={() => handleGeneratePdf(t)}
+                      >
+                        {downloadingId === t.id && (
+                          <Loader2 className="mr-1.5 animate-spin" size={14} />
+                        )}
+                        Generate PDF
+                      </TkButton>
+                    )}
                     <Link
                       href={`/admin/transaksi/${t.id}`}
                       className={tkButtonVariants({ variant: "secondary", size: "sm" })}

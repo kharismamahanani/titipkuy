@@ -10,6 +10,7 @@ import { FotoKeluarUploader } from "@/components/admin/foto-keluar-uploader";
 import { TandaiSelesaiButton } from "@/components/admin/tandai-selesai-button";
 import { TandaiBarangTibaButton } from "@/components/admin/tandai-barang-tiba-button";
 import { BatalkanTransaksiButton } from "@/components/admin/batalkan-transaksi-button";
+import { GeneratePdfButton } from "@/components/admin/generate-pdf-button";
 
 export const dynamic = "force-dynamic";
 
@@ -173,6 +174,7 @@ export default async function AdminTransaksiDetailPage({
       )}
 
       <div className="flex flex-wrap gap-3">
+        <GeneratePdfButton transaksiId={transaksi.id} pdfUrl={transaksi.pdfUrl} />
         <TandaiSelesaiButton
           transaksiId={transaksi.id}
           statusTransaksi={transaksi.statusTransaksi}

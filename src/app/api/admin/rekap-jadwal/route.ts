@@ -1,39 +1,33 @@
 import { NextResponse } from "next/server";
-import { endOfMonth, endOfWeek, startOfMonth, startOfWeek } from "date-fns";
+import { endOfWeek, startOfWeek } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import { prisma } from "@/lib/prisma";
+import { toUtcMidnightFromLocalDate } from "@/lib/date-utils";
 
-function parseTanggalLocal(tanggal: string) {
-  const [y, m, d] = tanggal.split("-").map(Number);
-  return new Date(y, m - 1, d);
-}
-
-// range=tanggal (butuh ?tanggal=YYYY-MM-DD) | minggu (default) | bulan
+// range=hari (default, hari ini) | minggu (minggu ini) | semua (tanpa filter tanggal)
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const range = searchParams.get("range") ?? "minggu";
-    const tanggalParam = searchParams.get("tanggal");
-    const acuan = tanggalParam ? parseTanggalLocal(tanggalParam) : new Date();
+    const range = searchParams.get("range") ?? "hari";
+    const now = new Date();
 
-    let gte: Date;
-    let lte: Date;
+    let tanggalFilter: { gte: Date; lte: Date } | undefined;
 
-    if (range === "tanggal") {
-      gte = new Date(acuan.getFullYear(), acuan.getMonth(), acuan.getDate());
-      lte = gte;
-    } else if (range === "bulan") {
-      gte = startOfMonth(acuan);
-      lte = endOfMonth(acuan);
-    } else {
-      gte = startOfWeek(acuan, { locale: localeId });
-      lte = endOfWeek(acuan, { locale: localeId });
+    if (range === "hari") {
+      const hariIni = toUtcMidnightFromLocalDate(now);
+      tanggalFilter = { gte: hariIni, lte: hariIni };
+    } else if (range === "minggu") {
+      tanggalFilter = {
+        gte: toUtcMidnightFromLocalDate(startOfWeek(now, { locale: localeId })),
+        lte: toUtcMidnightFromLocalDate(endOfWeek(now, { locale: localeId })),
+      };
     }
+    // range === "semua" -> tanggalFilter tetap undefined, tidak difilter tanggal
 
     const bookings = await prisma.transaksi.findMany({
       where: {
         armadaId: { not: null },
-        tanggalPenjemputan: { gte, lte },
+        ...(tanggalFilter ? { tanggalPenjemputan: tanggalFilter } : {}),
       },
       include: {
         pelanggan: true,

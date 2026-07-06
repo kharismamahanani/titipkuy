@@ -11,12 +11,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { tkInputClass, tkSelectTriggerClass } from "@/lib/form-style";
+import { tkSelectTriggerClass } from "@/lib/form-style";
 import { SLOT_SESI } from "@/lib/constants";
 
-type RangeFilter = "minggu" | "bulan" | "tanggal";
+type RangeFilter = "hari" | "minggu" | "semua";
 
 interface RekapBooking {
   id: string;
@@ -30,22 +29,18 @@ interface RekapBooking {
 }
 
 export function RekapJadwalArmada() {
-  const [range, setRange] = useState<RangeFilter>("minggu");
-  const [tanggal, setTanggal] = useState(() => format(new Date(), "yyyy-MM-dd"));
+  const [range, setRange] = useState<RangeFilter>("hari");
   const [bookings, setBookings] = useState<RekapBooking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     setIsLoading(true);
-    const params = new URLSearchParams({ range });
-    if (range === "tanggal") params.set("tanggal", tanggal);
-
-    fetch(`/api/admin/rekap-jadwal?${params.toString()}`)
+    fetch(`/api/admin/rekap-jadwal?range=${range}`)
       .then((res) => res.json())
       .then((result: { data: RekapBooking[] }) => setBookings(result.data ?? []))
       .catch(() => setBookings([]))
       .finally(() => setIsLoading(false));
-  }, [range, tanggal]);
+  }, [range]);
 
   return (
     <div className="space-y-3">
@@ -56,20 +51,12 @@ export function RekapJadwalArmada() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="minggu">Minggu ini</SelectItem>
-              <SelectItem value="bulan">Bulan ini</SelectItem>
-              <SelectItem value="tanggal">Pilih tanggal</SelectItem>
+              <SelectItem value="hari">Hari Ini</SelectItem>
+              <SelectItem value="minggu">Minggu Ini</SelectItem>
+              <SelectItem value="semua">Semua</SelectItem>
             </SelectContent>
           </Select>
         </div>
-        {range === "tanggal" && (
-          <Input
-            type="date"
-            value={tanggal}
-            onChange={(e) => setTanggal(e.target.value)}
-            className={cnInput()}
-          />
-        )}
       </div>
 
       {isLoading ? (
@@ -121,8 +108,4 @@ export function RekapJadwalArmada() {
       )}
     </div>
   );
-}
-
-function cnInput() {
-  return tkInputClass + " w-44";
 }
