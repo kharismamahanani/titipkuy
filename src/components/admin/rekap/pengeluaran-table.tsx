@@ -5,7 +5,7 @@ import { id as localeId } from "date-fns/locale";
 import { Trash2 } from "lucide-react";
 import { formatRupiah, cn } from "@/lib/utils";
 import { tkDangerButtonClass } from "@/lib/form-style";
-import { labelKategoriPengeluaran } from "@/lib/pengeluaran";
+import { labelKategoriPengeluaran, labelSubKategoriPengeluaran } from "@/lib/pengeluaran";
 import type { Pengeluaran } from "@/types/rekap";
 
 interface PengeluaranTableProps {
@@ -16,7 +16,7 @@ interface PengeluaranTableProps {
 export function PengeluaranTable({ data, onDelete }: PengeluaranTableProps) {
   if (data.length === 0) {
     return (
-      <p className="text-sm text-tk-light">Belum ada pengeluaran dicatat bulan ini.</p>
+      <p className="text-sm text-tk-light">Belum ada pengeluaran dicatat untuk kategori ini bulan ini.</p>
     );
   }
 
@@ -29,7 +29,7 @@ export function PengeluaranTable({ data, onDelete }: PengeluaranTableProps) {
         <thead className="bg-tk-charcoal text-tk-cream">
           <tr>
             <th className="px-4 py-3 font-bold">Tanggal</th>
-            <th className="px-4 py-3 font-bold">Kategori</th>
+            <th className="px-4 py-3 font-bold">Subkategori</th>
             <th className="px-4 py-3 font-bold">Deskripsi</th>
             <th className="px-4 py-3 font-bold">Jumlah</th>
             <th className="px-4 py-3 font-bold"></th>
@@ -48,7 +48,7 @@ export function PengeluaranTable({ data, onDelete }: PengeluaranTableProps) {
                 {format(new Date(item.tanggal), "d MMM yyyy", { locale: localeId })}
               </td>
               <td className="px-4 py-3 text-tk-charcoal">
-                {labelKategoriPengeluaran(item.kategori)}
+                {labelSubKategoriPengeluaran(item.kategori, item.subKategori)}
               </td>
               <td className="px-4 py-3 text-tk-muted">{item.deskripsi}</td>
               <td className="px-4 py-3 font-bold text-tk-charcoal">{formatRupiah(item.jumlah)}</td>
@@ -67,7 +67,7 @@ export function PengeluaranTable({ data, onDelete }: PengeluaranTableProps) {
         <tfoot>
           <tr className="border-t-2 border-tk-charcoal bg-tk-cream-alt">
             <td className="px-4 py-3 font-extrabold text-tk-charcoal" colSpan={3}>
-              Total Pengeluaran Bulan Ini
+              Total {labelKategoriPengeluaran(sorted[0].kategori)} Bulan Ini
             </td>
             <td className="px-4 py-3 font-extrabold text-tk-charcoal" colSpan={2}>
               {formatRupiah(total)}

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { KATEGORI_PENGELUARAN } from "@/lib/pengeluaran";
+import { ALL_SUBKATEGORI, KATEGORI_PENGELUARAN } from "@/lib/pengeluaran";
 
 export const PelangganSchema = z.object({
   nama: z.string().min(2).max(100),
@@ -84,6 +84,36 @@ export const TransaksiManualSchema = z.object({
 export const PengeluaranSchema = z.object({
   tanggal: z.string().min(1, "Tanggal wajib diisi"),
   kategori: z.enum(KATEGORI_PENGELUARAN.map((k) => k.value) as [string, ...string[]]),
+  subKategori: z.enum(ALL_SUBKATEGORI as [string, ...string[]]),
   deskripsi: z.string().min(1, "Deskripsi wajib diisi").max(200),
   jumlah: z.number().int().positive(),
 });
+
+// POST /api/admin/modal-awal
+export const ModalAwalSchema = z.object({
+  nama: z.string().min(1, "Nama item wajib diisi").max(200),
+  jumlah: z.number().int().positive(),
+  tanggal: z.string().min(1, "Tanggal wajib diisi"),
+  keterangan: z.string().max(300).optional().nullable(),
+});
+
+// PUT /api/admin/konfigurasi-keuangan
+export const KonfigurasiKeuanganSchema = z
+  .object({
+    persenOperasional: z.number().int().min(0).max(100),
+    persenPengembangan: z.number().int().min(0).max(100),
+    persenTabungan: z.number().int().min(0).max(100),
+    persenPribadi: z.number().int().min(0).max(100),
+    targetModalKembali: z.number().int().min(0).default(0),
+  })
+  .superRefine((data, ctx) => {
+    const total =
+      data.persenOperasional + data.persenPengembangan + data.persenTabungan + data.persenPribadi;
+    if (total !== 100) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Total persentase harus 100% (saat ini ${total}%)`,
+        path: ["persenOperasional"],
+      });
+    }
+  });

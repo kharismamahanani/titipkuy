@@ -89,6 +89,53 @@ export async function GET(request: Request) {
       pengeluaran,
     }));
 
+    // BEP Tracker — akumulasi laba SEPANJANG WAKTU (bukan hanya bulan
+    // terpilih) dibanding total modal awal, supaya progress balik modal
+    // konsisten terlepas dari bulan mana yang sedang dilihat di dropdown.
+    const [semuaTransaksiLunas, semuaPengeluaran, semuaModalAwal, konfigurasi] = await Promise.all([
+      prisma.transaksi.findMany({
+        where: { statusBayar: "LUNAS" },
+        include: { paket: true },
+      }),
+      prisma.pengeluaran.findMany(),
+      prisma.modalAwal.findMany(),
+      prisma.konfigurasiKeuangan.findFirst(),
+    ]);
+
+    const omzetSepanjangWaktu = semuaTransaksiLunas.reduce((sum, t) => sum + t.paket.harga, 0);
+    const pengeluaranSepanjangWaktu = semuaPengeluaran.reduce((sum, p) => sum + p.jumlah, 0);
+    const labaKumulatif = omzetSepanjangWaktu - pengeluaranSepanjangWaktu;
+
+    const totalModalAwal = semuaModalAwal.reduce((sum, m) => sum + m.jumlah, 0);
+    const targetModal =
+      konfigurasi && konfigurasi.targetModalKembali > 0
+        ? konfigurasi.targetModalKembali
+        : totalModalAwal;
+
+    const sudahKembali = Math.max(0, Math.min(labaKumulatif, targetModal));
+    const sisaModal = Math.max(0, targetModal - sudahKembali);
+    const progressPercent = targetModal > 0 ? Math.min(100, (sudahKembali / targetModal) * 100) : 0;
+
+    // Rata-rata laba 3 bulan terakhir (dari tren6Bulan yang sudah dihitung)
+    const laba6Bulan = tren6Bulan.map((t, i) => t.omzet - (tren6BulanPengeluaran[i]?.pengeluaran ?? 0));
+    const laba3BulanTerakhir = laba6Bulan.slice(-3);
+    const rataLaba3Bulan =
+      laba3BulanTerakhir.length > 0
+        ? laba3BulanTerakhir.reduce((sum, v) => sum + v, 0) / laba3BulanTerakhir.length
+        : 0;
+    const estimasiBulanBEP =
+      sisaModal > 0 && rataLaba3Bulan > 0 ? Math.ceil(sisaModal / rataLaba3Bulan) : null;
+
+    const bepTracker = {
+      totalModalAwal: targetModal,
+      sudahKembali,
+      sisaModal,
+      progressPercent,
+      rataLaba3Bulan,
+      estimasiBulanBEP,
+      bepTercapai: targetModal === 0 || sudahKembali >= targetModal,
+    };
+
     return NextResponse.json({
       bulan,
       omzetBulanIni,
@@ -99,6 +146,7 @@ export async function GET(request: Request) {
       tren6Bulan,
       pengeluaranBulanIni,
       tren6BulanPengeluaran,
+      bepTracker,
     });
   } catch (error) {
     console.error("[GET /api/admin/rekap]", error);

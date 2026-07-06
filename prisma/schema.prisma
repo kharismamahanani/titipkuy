@@ -180,8 +180,32 @@ model AntarJemputOption {
 model Pengeluaran {
   id          String   @id @default(cuid())
   tanggal     DateTime @db.Date
-  kategori    String   // "bensin" | "label" | "packaging" | "listrik" | "servisArmada" | "komunikasi" | "lainnya"
+  kategori    String   // "biaya_tetap" | "biaya_variabel" | "pengembangan"
+  subKategori String   // "listrik" | "internet" | "bensin" | "label" | "lakban" | "iklan" | "printer" | "lainnya"
   deskripsi   String
   jumlah      Int      // nominal rupiah
   createdAt   DateTime @default(now())
+}
+
+// Item modal awal usaha (mis. printer thermal, rak, dll) — dipakai sebagai
+// acuan target di BEP Tracker (Rekap Keuangan).
+model ModalAwal {
+  id          String   @id @default(cuid())
+  nama        String   // "Thermal Printer Xprinter XP-420B"
+  jumlah      Int      // nominal rupiah
+  tanggal     DateTime // tanggal pembelian
+  keterangan  String?
+  createdAt   DateTime @default(now())
+}
+
+// Singleton konfigurasi alokasi laba bulanan (persenOperasional +
+// persenPengembangan + persenTabungan + persenPribadi harus = 100).
+model KonfigurasiKeuangan {
+  id                    String   @id @default(cuid())
+  persenOperasional     Int      @default(40)
+  persenPengembangan    Int      @default(20)
+  persenTabungan        Int      @default(20)
+  persenPribadi         Int      @default(20)
+  targetModalKembali    Int      @default(0)
+  updatedAt             DateTime @updatedAt
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { TkButton } from "@/components/ui/tk-button";
@@ -13,23 +13,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import { tkInputClass, tkLabelClass } from "@/lib/form-style";
-import { KATEGORI_PENGELUARAN } from "@/lib/pengeluaran";
+import { KATEGORI_PENGELUARAN, SUBKATEGORI_BY_KATEGORI } from "@/lib/pengeluaran";
+import type { KategoriPengeluaran } from "@/lib/pengeluaran";
 import type { Pengeluaran } from "@/types/rekap";
 
 interface PengeluaranFormProps {
+  activeKategori: KategoriPengeluaran;
   onSaved: (pengeluaran: Pengeluaran) => void;
 }
 
-export function PengeluaranForm({ onSaved }: PengeluaranFormProps) {
+export function PengeluaranForm({ activeKategori, onSaved }: PengeluaranFormProps) {
+  const subKategoriOptions = SUBKATEGORI_BY_KATEGORI[activeKategori];
   const [tanggal, setTanggal] = useState(() => format(new Date(), "yyyy-MM-dd"));
-  const [kategori, setKategori] = useState<string>(KATEGORI_PENGELUARAN[0].value);
+  const [subKategori, setSubKategori] = useState<string>(subKategoriOptions[0].value);
   const [deskripsi, setDeskripsi] = useState("");
   const [jumlah, setJumlah] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
+  useEffect(() => {
+    setSubKategori(subKategoriOptions[0].value);
+  }, [activeKategori, subKategoriOptions]);
+
   const jumlahNum = Number(jumlah) || 0;
-  const canSubmit = tanggal && kategori && deskripsi.trim() && jumlahNum > 0 && !isSaving;
+  const canSubmit = tanggal && subKategori && deskripsi.trim() && jumlahNum > 0 && !isSaving;
 
   async function handleSubmit() {
     if (!canSubmit) return;
@@ -39,7 +47,13 @@ export function PengeluaranForm({ onSaved }: PengeluaranFormProps) {
       const res = await fetch("/api/admin/pengeluaran", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tanggal, kategori, deskripsi: deskripsi.trim(), jumlah: jumlahNum }),
+        body: JSON.stringify({
+          tanggal,
+          kategori: activeKategori,
+          subKategori,
+          deskripsi: deskripsi.trim(),
+          jumlah: jumlahNum,
+        }),
       });
       const result = await res.json();
       if (!res.ok) throw new Error(result.error || "Gagal menyimpan pengeluaran");
@@ -71,15 +85,15 @@ export function PengeluaranForm({ onSaved }: PengeluaranFormProps) {
       </div>
 
       <div>
-        <Label className={tkLabelClass}>Kategori</Label>
-        <Select value={kategori} onValueChange={(v) => v && setKategori(v)}>
+        <Label className={tkLabelClass}>Subkategori</Label>
+        <Select value={subKategori} onValueChange={(v) => v && setSubKategori(v)}>
           <SelectTrigger className={tkInputClass}>
             <SelectValue>
-              {(v: string) => KATEGORI_PENGELUARAN.find((k) => k.value === v)?.label ?? v}
+              {(v: string) => subKategoriOptions.find((k) => k.value === v)?.label ?? v}
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            {KATEGORI_PENGELUARAN.map((k) => (
+            {subKategoriOptions.map((k) => (
               <SelectItem key={k.value} value={k.value}>
                 {k.label}
               </SelectItem>
@@ -114,7 +128,7 @@ export function PengeluaranForm({ onSaved }: PengeluaranFormProps) {
             value={jumlah}
             onChange={(e) => setJumlah(e.target.value)}
             placeholder="0"
-            className={tkInputClass}
+            className={cn(tkInputClass)}
           />
         </div>
       </div>
@@ -130,6 +144,32 @@ export function PengeluaranForm({ onSaved }: PengeluaranFormProps) {
           + Catat Pengeluaran
         </TkButton>
       </div>
+    </div>
+  );
+}
+
+export function KategoriTabs({
+  active,
+  onChange,
+}: {
+  active: KategoriPengeluaran;
+  onChange: (kategori: KategoriPengeluaran) => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {KATEGORI_PENGELUARAN.map((k) => (
+        <button
+          key={k.value}
+          type="button"
+          onClick={() => onChange(k.value)}
+          className={cn(
+            "rounded-lg border-2 border-tk-charcoal px-4 py-2 text-sm font-bold transition-colors",
+            active === k.value ? "bg-tk-charcoal text-tk-cream" : "bg-white text-tk-charcoal"
+          )}
+        >
+          {k.icon} {k.label}
+        </button>
+      ))}
     </div>
   );
 }

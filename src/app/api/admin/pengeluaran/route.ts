@@ -36,12 +36,13 @@ export async function POST(request: Request) {
       );
     }
 
-    const { tanggal, kategori, deskripsi, jumlah } = parsed.data;
+    const { tanggal, kategori, subKategori, deskripsi, jumlah } = parsed.data;
 
     const pengeluaran = await prisma.pengeluaran.create({
       data: {
         tanggal: new Date(tanggal),
         kategori,
+        subKategori,
         deskripsi,
         jumlah,
       },
