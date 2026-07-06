@@ -107,6 +107,13 @@ export async function POST(request: Request) {
               hub,
               zonaRak: zonaRak || null,
               catatanAdmin: catatanAdmin || null,
+              armada:
+                antarJemput && penjemputan
+                  ? { connect: { id: penjemputan.armadaId } }
+                  : undefined,
+              tanggalPenjemputan:
+                antarJemput && penjemputan ? new Date(penjemputan.tanggal) : null,
+              sesiPenjemputan: antarJemput && penjemputan ? penjemputan.sesiWaktu : null,
               konfirmasiToken,
               konfirmasiTokenExpiresAt,
             },

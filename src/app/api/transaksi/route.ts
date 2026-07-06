@@ -162,6 +162,9 @@ export async function POST(request: Request) {
               antarJemputOption: antarJemputId
                 ? { connect: { id: antarJemputId } }
                 : undefined,
+              armada: penjemputan ? { connect: { id: penjemputan.armadaId } } : undefined,
+              tanggalPenjemputan: penjemputan ? new Date(penjemputan.tanggal) : null,
+              sesiPenjemputan: penjemputan ? penjemputan.sesiWaktu : null,
               perjanjianDisetujui: true,
               waktuPersetujuan: new Date(),
               ipAddress,

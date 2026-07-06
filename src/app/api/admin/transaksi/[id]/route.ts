@@ -38,12 +38,13 @@ export async function PATCH(
 ) {
   try {
     const body = await request.json();
-    const { statusBayar, statusTransaksi, barangTibaMandiri } = body ?? {};
+    const { statusBayar, statusTransaksi, barangTibaMandiri, alasanPembatalan } = body ?? {};
 
     const data: {
       statusBayar?: StatusBayar;
       statusTransaksi?: StatusTransaksi;
       barangTibaMandiri?: boolean;
+      alasanPembatalan?: string;
     } = {};
 
     if (barangTibaMandiri !== undefined) {
@@ -79,6 +80,45 @@ export async function PATCH(
             { status: 400 }
           );
         }
+      }
+
+      if (statusTransaksi === "DIBATALKAN") {
+        const current = await prisma.transaksi.findUnique({
+          where: { id: params.id },
+          select: {
+            statusTransaksi: true,
+            statusBayar: true,
+            fotoMasuk: { select: { id: true }, take: 1 },
+          },
+        });
+
+        if (!current) {
+          return NextResponse.json({ error: "Transaksi tidak ditemukan" }, { status: 404 });
+        }
+
+        const sudahMasukHub = current.fotoMasuk.length > 0;
+        const bisaDibatalkan =
+          current.statusTransaksi === "AKTIF" &&
+          (current.statusBayar === "BELUM_BAYAR" || !sudahMasukHub);
+
+        if (!bisaDibatalkan) {
+          return NextResponse.json(
+            {
+              error:
+                "Transaksi tidak bisa dibatalkan otomatis — barang sudah di hub dan sudah dibayar",
+            },
+            { status: 400 }
+          );
+        }
+
+        if (!alasanPembatalan || !String(alasanPembatalan).trim()) {
+          return NextResponse.json(
+            { error: "Alasan pembatalan wajib diisi" },
+            { status: 400 }
+          );
+        }
+
+        data.alasanPembatalan = String(alasanPembatalan).trim();
       }
 
       data.statusTransaksi = statusTransaksi;

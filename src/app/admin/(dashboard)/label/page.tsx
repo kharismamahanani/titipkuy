@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter, useSearchParams } from "next/navigation";
 import { format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
@@ -17,9 +18,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { PrintableLabel } from "@/components/admin/printable-label";
+import { ThermalLabel } from "@/components/admin/thermal-label";
 import { tkInputClass, tkLabelClass, tkSelectTriggerClass } from "@/lib/form-style";
 import { cn, formatRupiah } from "@/lib/utils";
 import type { TransaksiSearchResult } from "@/types/transaksi";
+
+type PrintMode = "a4" | "thermal" | null;
 
 const KATEGORI_BARANG_OPTIONS = [
   { value: "kardus", label: "Kardus" },
@@ -42,6 +47,27 @@ function AdminLabelPageContent() {
   const [deskripsiBarang, setDeskripsiBarang] = useState("");
   const [kategoriBarang, setKategoriBarang] = useState("kardus");
   const [isAdding, setIsAdding] = useState(false);
+  const [printMode, setPrintMode] = useState<PrintMode>(null);
+  const [origin, setOrigin] = useState("");
+
+  useEffect(() => {
+    setOrigin(window.location.origin);
+  }, []);
+
+  useEffect(() => {
+    if (!printMode) return;
+
+    const handleAfterPrint = () => setPrintMode(null);
+    window.addEventListener("afterprint", handleAfterPrint);
+    // Tunggu DOM commit dulu (setState async) sebelum trigger print,
+    // supaya area print sudah terisi konten mode yang baru.
+    const timer = setTimeout(() => window.print(), 50);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("afterprint", handleAfterPrint);
+    };
+  }, [printMode]);
 
   useEffect(() => {
     if (!transaksiIdParam) return;
@@ -97,6 +123,7 @@ function AdminLabelPageContent() {
       setDeskripsiBarang("");
       toast.success(`Barang ditambahkan: ${result.kodeLabel}`);
     } catch (error) {
+      console.error("[handleAddBarang]", error);
       toast.error(error instanceof Error ? error.message : "Gagal menambah barang");
     } finally {
       setIsAdding(false);
@@ -104,8 +131,13 @@ function AdminLabelPageContent() {
   }
 
   function handlePrint() {
-    if (!selected) return;
-    router.push(`/admin/label/print/${selected.id}`);
+    if (!selected || selected.barangLabel.length === 0) return;
+    setPrintMode("a4");
+  }
+
+  function handlePrintThermal() {
+    if (!selected || selected.barangLabel.length === 0) return;
+    setPrintMode("thermal");
   }
 
   async function handleDeleteBarang(barangId: string) {
@@ -274,6 +306,22 @@ function AdminLabelPageContent() {
               </TkButton>
             </div>
 
+            <div className="flex flex-col items-end gap-2 rounded-lg border-2 border-dashed border-tk-charcoal/40 bg-tk-cream-alt p-3">
+              <p className="text-right text-[11px] leading-snug text-tk-muted">
+                Pengaturan printer: Xprinter XP-420B | Ukuran: 78×100mm | Margin: None |
+                Skala: 100% | Hilangkan header/footer
+              </p>
+              <TkButton
+                type="button"
+                variant="secondary"
+                size="sm"
+                disabled={selected.barangLabel.length === 0}
+                onClick={handlePrintThermal}
+              >
+                Print Thermal (78×100mm)
+              </TkButton>
+            </div>
+
             {selected.barangLabel.length === 0 ? (
               <p className="text-sm text-tk-light">Belum ada barang ditambahkan.</p>
             ) : (
@@ -304,6 +352,75 @@ function AdminLabelPageContent() {
           </div>
         </div>
       )}
+
+      {printMode === "a4" && (
+        <style>{`
+          @media print {
+            body > *:not(.label-print-area) { display: none !important; }
+            .label-print-area { display: block !important; }
+          }
+        `}</style>
+      )}
+
+      {printMode === "thermal" && (
+        <style>{`
+          @media print {
+            @page { size: 78mm 100mm; margin: 2mm; }
+            body > *:not(.label-print-area) { display: none !important; }
+            .label-print-area { display: block !important; }
+            .thermal-label {
+              width: 74mm; height: 96mm;
+              page-break-after: always;
+              font-family: 'Nunito', Arial, sans-serif;
+              padding: 2mm; box-sizing: border-box;
+            }
+            .thermal-label-header {
+              font-size: 7pt; font-weight: 800;
+              text-align: center; border-bottom: 1pt solid #3D4A41;
+              padding-bottom: 1mm; margin-bottom: 2mm;
+            }
+            .thermal-label-qr {
+              width: 50mm; height: 50mm;
+              margin: 0 auto 2mm; display: block;
+            }
+            .thermal-label-kode {
+              font-size: 12pt; font-weight: 800;
+              text-align: center; margin-bottom: 2mm;
+              letter-spacing: 1px;
+            }
+            .thermal-label-info {
+              font-size: 6pt; line-height: 1.5;
+              border-top: 0.5pt solid #ccc; padding-top: 1mm;
+            }
+          }
+        `}</style>
+      )}
+
+      {selected &&
+        printMode &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div className="label-print-area hidden">
+            {selected.barangLabel.map((barang) =>
+              printMode === "thermal" ? (
+                <ThermalLabel
+                  key={barang.id}
+                  barang={barang}
+                  transaksi={selected}
+                  verifyUrl={`${origin}/transaksi/${selected.id}`}
+                />
+              ) : (
+                <PrintableLabel
+                  key={barang.id}
+                  barang={barang}
+                  transaksi={selected}
+                  verifyUrl={`${origin}/transaksi/${selected.id}`}
+                />
+              )
+            )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

@@ -59,6 +59,7 @@ model Transaksi {
   hub              String?   // "suhat" | "tidar" — hub penyimpanan untuk order ini
   zonaRak          String?
   catatanAdmin     String?
+  alasanPembatalan String?   // diisi admin saat membatalkan transaksi
   // Nomor urut sekuensial, dipakai untuk membangun Kode Unik (mis. LELY-0089)
   nomorUrut        Int       @default(autoincrement())
   // "armada" (dijemput TitipKuy!) | "mandiri" (kirim sendiri/Grab/ekspedisi)
@@ -68,6 +69,13 @@ model Transaksi {
   // Layanan antar-jemput (add-on opsional, bukan paket terpisah)
   antarJemputOption AntarJemputOption? @relation(fields:[antarJemputId], references:[id])
   antarJemputId     String?
+  // Booking armada penjemputan (diisi saat incrementSlotUsage dipanggil di
+  // alur pemesanan customer maupun order manual admin) — dipakai untuk
+  // Rekap Jadwal Perjalanan di panel admin.
+  armada             Armada?   @relation(fields:[armadaId], references:[id])
+  armadaId           String?
+  tanggalPenjemputan DateTime? @db.Date
+  sesiPenjemputan    String?   // "pagi" | "siang"
   // Order manual via WhatsApp (dibuat admin) — link konfirmasi berbasis token
   konfirmasiToken          String?   @unique
   konfirmasiTokenExpiresAt DateTime?
@@ -133,6 +141,7 @@ model Armada {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   slots        SlotArmada[]
+  transaksiPenjemputan Transaksi[]
 }
 
 model SlotArmada {

@@ -30,19 +30,19 @@ function namaHub(hub: string | null) {
 export function ThermalLabel({ barang, transaksi, verifyUrl }: ThermalLabelProps) {
   return (
     <div className="thermal-label flex h-[100mm] w-[78mm] flex-col text-black">
-      <div className="border-b border-black py-1 text-center text-[11px] font-bold">
+      <div className="thermal-label-header border-b border-black py-1 text-center text-[11px] font-bold">
         TitipKuy! · {namaHub(transaksi.hub)}
       </div>
 
       <div className="flex flex-1 items-center justify-center py-2">
-        <QRCodeSVG value={verifyUrl} size={170} />
+        <QRCodeSVG className="thermal-label-qr" value={verifyUrl} size={170} />
       </div>
 
-      <p className="border-y border-black py-1 text-center text-[16px] font-extrabold tracking-wide">
+      <p className="thermal-label-kode border-y border-black py-1 text-center text-[16px] font-extrabold tracking-wide">
         {barang.kodeLabel}
       </p>
 
-      <div className="space-y-0.5 px-1.5 py-1.5 text-[10px] leading-tight">
+      <div className="thermal-label-info space-y-0.5 px-1.5 py-1.5 text-[10px] leading-tight">
         <p>Nama : {namaDepan(transaksi.pelanggan.nama)}</p>
         <p>Paket : {transaksi.paket.nama}</p>
         <p>Masuk : {format(new Date(transaksi.tanggalMasuk), "d MMM yyyy", { locale: localeId })}</p>

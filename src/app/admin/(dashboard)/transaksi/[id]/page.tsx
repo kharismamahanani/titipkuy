@@ -9,6 +9,7 @@ import { FotoMasukUploader } from "@/components/admin/foto-masuk-uploader";
 import { FotoKeluarUploader } from "@/components/admin/foto-keluar-uploader";
 import { TandaiSelesaiButton } from "@/components/admin/tandai-selesai-button";
 import { TandaiBarangTibaButton } from "@/components/admin/tandai-barang-tiba-button";
+import { BatalkanTransaksiButton } from "@/components/admin/batalkan-transaksi-button";
 
 export const dynamic = "force-dynamic";
 
@@ -100,6 +101,9 @@ export default async function AdminTransaksiDetailPage({
           value={transaksi.statusBayar === "LUNAS" ? "Lunas" : "Belum Lunas"}
         />
         <Row label="Status Transaksi" value={transaksi.statusTransaksi} />
+        {transaksi.statusTransaksi === "DIBATALKAN" && transaksi.alasanPembatalan && (
+          <Row label="Alasan Pembatalan" value={transaksi.alasanPembatalan} />
+        )}
         {transaksi.tierGantiRugi && (
           <Row label="Tier Ganti Rugi" value={TIER_LABEL[transaksi.tierGantiRugi] ?? transaksi.tierGantiRugi} />
         )}
@@ -168,11 +172,19 @@ export default async function AdminTransaksiDetailPage({
         </section>
       )}
 
-      <TandaiSelesaiButton
-        transaksiId={transaksi.id}
-        statusTransaksi={transaksi.statusTransaksi}
-        jumlahFotoKeluar={transaksi.fotoKeluar.length}
-      />
+      <div className="flex flex-wrap gap-3">
+        <TandaiSelesaiButton
+          transaksiId={transaksi.id}
+          statusTransaksi={transaksi.statusTransaksi}
+          jumlahFotoKeluar={transaksi.fotoKeluar.length}
+        />
+        <BatalkanTransaksiButton
+          transaksiId={transaksi.id}
+          statusTransaksi={transaksi.statusTransaksi}
+          statusBayar={transaksi.statusBayar}
+          sudahMasukHub={transaksi.fotoMasuk.length > 0}
+        />
+      </div>
     </div>
   );
 }

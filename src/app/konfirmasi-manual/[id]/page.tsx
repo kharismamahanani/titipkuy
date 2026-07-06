@@ -9,13 +9,14 @@ import Image from "next/image";
 import { CheckCircle2, Loader2, XCircle } from "lucide-react";
 import { pdf } from "@react-pdf/renderer";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { TkButton } from "@/components/ui/tk-button";
+import { TkCard } from "@/components/ui/tk-card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PerjanjianDialog } from "@/components/pesan/perjanjian-dialog";
 import { SignatureCanvas } from "@/components/pesan/signature-canvas";
 import { PerjanjianPdfDocument } from "@/components/konfirmasi/perjanjian-pdf";
 import { CHECKLIST_ITEMS, DEKLARASI_ITEM, MOTOR_ITEM } from "@/lib/checklist-items";
-import { dataUrlToFile, formatRupiah } from "@/lib/utils";
+import { cn, dataUrlToFile, formatRupiah } from "@/lib/utils";
 import { uploadToStorage } from "@/lib/supabase";
 import { uploadViaApi } from "@/lib/upload-via-api";
 import { ADMIN_NAME, formatWhatsAppDisplay, getWhatsAppUrl } from "@/constants/site";
@@ -46,6 +47,9 @@ const ERROR_MESSAGES: Record<ErrorCode, string> = {
   EXPIRED: "Link ini sudah kedaluwarsa (berlaku 24 jam). Hubungi admin TitipKuy! untuk minta link baru.",
   UNKNOWN: "Terjadi kesalahan. Coba muat ulang halaman ini.",
 };
+
+const TK_CHECKBOX_CLASS =
+  "mt-0.5 rounded-[4px] border-tk-charcoal data-checked:border-tk-charcoal data-checked:bg-tk-orange data-checked:text-tk-charcoal";
 
 function KonfirmasiManualContent() {
   const params = useParams<{ id: string }>();
@@ -150,7 +154,7 @@ function KonfirmasiManualContent() {
   if (state === "error") {
     return (
       <CenteredMessage>
-        <XCircle className="mx-auto mb-4 text-destructive" size={48} />
+        <XCircle className="mx-auto mb-4 text-[#C0392B]" size={48} />
         <p className="mx-auto max-w-sm">{ERROR_MESSAGES[errorCode]}</p>
       </CenteredMessage>
     );
@@ -168,23 +172,21 @@ function KonfirmasiManualContent() {
 
   if (isConfirmed) {
     return (
-      <div className="min-h-screen bg-bg-dark px-4 py-12 sm:px-6">
+      <div className="min-h-screen bg-tk-cream px-4 py-12 sm:px-6">
         <div className="mx-auto max-w-xl space-y-6">
           <div className="text-center">
-            <CheckCircle2 className="mx-auto text-primary-from" size={72} strokeWidth={1.5} />
-            <h1 className="mt-4 font-heading text-2xl font-bold sm:text-3xl">
+            <CheckCircle2 className="mx-auto text-tk-sage-dark" size={72} strokeWidth={1.5} />
+            <h1 className="mt-4 text-2xl font-extrabold text-tk-charcoal sm:text-3xl">
               Pesanan Dikonfirmasi! 🎉
             </h1>
           </div>
 
           <div className="text-center">
-            <p className="text-sm text-foreground/60">Nomor Referensi</p>
-            <p className="gradient-text font-heading text-3xl font-extrabold sm:text-4xl">
-              {data.nomorRef}
-            </p>
+            <p className="text-sm text-tk-muted">Nomor Referensi</p>
+            <p className="text-3xl font-extrabold text-tk-orange sm:text-4xl">{data.nomorRef}</p>
           </div>
 
-          <div className="glass-card space-y-2 rounded-2xl p-6 text-sm">
+          <TkCard className="space-y-2 text-sm">
             <SummaryRow label="Nama" value={pelanggan.nama} />
             <SummaryRow label="Paket" value={paket.nama} />
             <SummaryRow label="Harga Paket" value={formatRupiah(paket.harga)} />
@@ -206,11 +208,13 @@ function KonfirmasiManualContent() {
               label="Jatuh tempo"
               value={format(new Date(data.tanggalJatuhTempo), "d MMM yyyy", { locale: localeId })}
             />
-          </div>
+          </TkCard>
 
-          <div className="glass-card flex flex-col items-center gap-3 rounded-2xl p-6">
-            <p className="text-sm font-medium">Scan QRIS atau transfer ke rekening di bawah</p>
-            <div className="rounded-xl bg-white p-4">
+          <TkCard className="flex flex-col items-center gap-3">
+            <p className="text-sm font-bold text-tk-charcoal">
+              Scan QRIS atau transfer ke rekening di bawah
+            </p>
+            <div className="rounded-lg border-2 border-tk-charcoal bg-white p-4">
               <Image
                 src="/qris-titipkuy.png"
                 alt="QRIS TitipKuy!"
@@ -219,44 +223,42 @@ function KonfirmasiManualContent() {
                 className="h-auto w-[220px]"
               />
             </div>
-            <p className="text-center text-xs text-foreground/50">
+            <p className="text-center text-xs text-tk-light">
               Berlaku untuk semua bank & e-wallet
             </p>
-          </div>
+          </TkCard>
 
-          <div className="glass-card space-y-3 rounded-2xl p-6 text-center">
-            <p className="text-sm text-foreground/80">
-              Transfer/scan QRIS lalu konfirmasi ke WA
-            </p>
+          <TkCard variant="sage" className="space-y-3 text-center">
+            <p className="text-sm text-tk-cream">Transfer/scan QRIS lalu konfirmasi ke WA</p>
             <a
               href={getWhatsAppUrl(waMessage)}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block w-full rounded-full bg-gradient-to-r from-primary-from to-primary-to px-6 py-3 text-sm font-semibold text-white"
+              className="block w-full rounded-[var(--tk-radius)] border-[2.5px] border-tk-charcoal bg-tk-orange px-6 py-3 text-center text-sm font-extrabold text-tk-charcoal [box-shadow:var(--tk-shadow)]"
             >
               Konfirmasi Pembayaran via WhatsApp
             </a>
-            <p className="text-xs text-foreground/50">
+            <p className="text-xs text-tk-cream/80">
               Admin: {ADMIN_NAME} &middot; {formatWhatsAppDisplay()}
             </p>
-          </div>
+          </TkCard>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-bg-dark px-4 py-10 sm:px-6">
+    <div className="min-h-screen bg-tk-cream px-4 py-10 sm:px-6">
       <div className="mx-auto max-w-2xl space-y-6">
         <div className="text-center">
-          <p className="gradient-text font-heading text-lg font-extrabold">TitipKuy! 📦</p>
-          <h1 className="mt-2 font-heading text-xl font-bold">Konfirmasi Pesananmu</h1>
-          <p className="mt-1 text-sm text-foreground/60">
+          <p className="text-lg font-extrabold text-tk-orange">TitipKuy! 📦</p>
+          <h1 className="mt-2 text-xl font-bold text-tk-charcoal">Konfirmasi Pesananmu</h1>
+          <p className="mt-1 text-sm text-tk-muted">
             Order sudah dibuat admin — cek ringkasan, setujui perjanjian, lalu tanda tangan.
           </p>
         </div>
 
-        <div className="glass-card space-y-2 rounded-2xl p-5 text-sm">
+        <TkCard className="space-y-2 text-sm">
           <SummaryRow label="Nomor Ref" value={data.nomorRef} />
           <SummaryRow label="Nama" value={pelanggan.nama} />
           <SummaryRow label="Paket" value={paket.nama} />
@@ -282,7 +284,7 @@ function KonfirmasiManualContent() {
           {paket.perluDeklarasi && data.nilaiDeklarasi && (
             <SummaryRow label="Nilai Deklarasi" value={formatRupiah(data.nilaiDeklarasi)} />
           )}
-        </div>
+        </TkCard>
 
         <div className="space-y-3">
           {items.map((item) => {
@@ -290,17 +292,19 @@ function KonfirmasiManualContent() {
             return (
               <label
                 key={item.key}
-                className="glass-card flex cursor-pointer items-start gap-3 rounded-xl p-4"
+                className={cn(
+                  "flex cursor-pointer items-start gap-3 rounded-[var(--tk-radius)] border-2 border-tk-charcoal bg-white p-4 [box-shadow:var(--tk-shadow-sm)]"
+                )}
               >
                 <Checkbox
                   checked={checklist[item.key]}
                   onCheckedChange={(checked) =>
                     setChecklist({ ...checklist, [item.key]: checked === true })
                   }
-                  className="mt-0.5"
+                  className={TK_CHECKBOX_CLASS}
                 />
-                <Icon className="mt-0.5 shrink-0 text-primary-from" size={18} />
-                <span className="text-sm text-foreground/80">{item.label}</span>
+                <Icon className="mt-0.5 shrink-0 text-tk-orange" size={18} />
+                <span className="text-sm text-tk-charcoal">{item.label}</span>
               </label>
             );
           })}
@@ -309,25 +313,25 @@ function KonfirmasiManualContent() {
         <PerjanjianDialog />
 
         <div className="space-y-2">
-          <p className="text-sm font-medium">Tanda Tangan Digital</p>
+          <p className="text-sm font-bold text-tk-charcoal">Tanda Tangan Digital</p>
           <SignatureCanvas onChange={setTandaTanganDataUrl} />
         </div>
 
-        <div className="glass-card rounded-2xl p-5 text-center text-sm text-foreground/70">
+        <TkCard className="text-center text-sm text-tk-muted">
           📸 Foto kondisi barangmu akan dikirim ke WhatsApp setelah barang diterima dan
           dicek oleh tim kami di hub.
-        </div>
+        </TkCard>
 
-        <Button
+        <TkButton
           type="button"
+          variant="primary"
           disabled={!canSubmit || isSubmitting}
           onClick={handleSubmit}
-          className="w-full bg-gradient-to-r from-primary-from to-primary-to text-white"
-          size="lg"
+          className="w-full justify-center"
         >
-          {isSubmitting && <Loader2 className="animate-spin" size={16} />}
+          {isSubmitting && <Loader2 className="mr-2 animate-spin" size={16} />}
           Konfirmasi & Bayar
-        </Button>
+        </TkButton>
       </div>
     </div>
   );
@@ -336,15 +340,15 @@ function KonfirmasiManualContent() {
 function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between">
-      <span className="text-foreground/60">{label}</span>
-      <span className="font-medium">{value}</span>
+      <span className="text-tk-muted">{label}</span>
+      <span className="font-bold text-tk-charcoal">{value}</span>
     </div>
   );
 }
 
 function CenteredMessage({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-bg-dark px-4 text-center text-foreground/70">
+    <div className="flex min-h-screen items-center justify-center bg-tk-cream px-4 text-center text-tk-muted">
       <div>{children}</div>
     </div>
   );
