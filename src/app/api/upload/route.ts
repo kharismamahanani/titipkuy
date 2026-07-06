@@ -1,4 +1,3 @@
-import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -10,7 +9,6 @@ export async function POST(request: NextRequest) {
     console.log("[upload] supabaseUrl ada:", !!supabaseUrl);
     console.log("[upload] serviceKey ada:", !!serviceKey);
     console.log("[upload] serviceKey prefix:", serviceKey?.substring(0, 20));
-    console.log("[upload] serviceKey length:", serviceKey?.length);
 
     if (!supabaseUrl || !serviceKey) {
       return NextResponse.json(
@@ -18,8 +16,6 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
-
-    const supabaseAdmin = createClient(supabaseUrl, serviceKey);
 
     const formData = await request.formData();
     const file = formData.get("file") as File;
@@ -53,37 +49,39 @@ export async function POST(request: NextRequest) {
     console.log("[upload] cleanPath:", cleanPath);
 
     const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
 
-    console.log("[upload] buffer size:", buffer.length);
+    // Storage REST API langsung (bukan lewat supabase-js) — dipakai di sini
+    // terutama supaya kita bisa lihat status HTTP & body respons Storage API
+    // apa adanya untuk debugging, bukan hasil parse ulang oleh storage-js.
+    const storageUrl = `${supabaseUrl}/storage/v1/object/${bucket}/${cleanPath}`;
+    console.log("[upload] storageUrl:", storageUrl);
 
-    const { data, error } = await supabaseAdmin.storage
-      .from(bucket)
-      .upload(cleanPath, buffer, {
-        contentType: file.type || "application/octet-stream",
-        upsert: false,
-      });
+    const uploadRes = await fetch(storageUrl, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${serviceKey}`,
+        "Content-Type": file.type || "application/octet-stream",
+        "x-upsert": "false",
+      },
+      body: arrayBuffer,
+    });
 
-    console.log("[upload] result data:", JSON.stringify(data));
-    console.log("[upload] result error:", JSON.stringify(error));
+    console.log("[upload] HTTP status:", uploadRes.status);
+    const responseText = await uploadRes.text();
+    console.log("[upload] response body:", responseText);
 
-    if (error) {
+    if (!uploadRes.ok) {
       return NextResponse.json(
-        {
-          error: error.message,
-          errorDetail: JSON.stringify(error),
-          path: cleanPath,
-          bucket,
-        },
+        { error: `Storage error ${uploadRes.status}: ${responseText}`, path: cleanPath },
         { status: 500 }
       );
     }
 
-    const { data: urlData } = supabaseAdmin.storage.from(bucket).getPublicUrl(cleanPath);
+    const publicUrl = `${supabaseUrl}/storage/v1/object/public/${bucket}/${cleanPath}`;
 
     return NextResponse.json({
       path: cleanPath,
-      publicUrl: urlData.publicUrl,
+      publicUrl,
     });
   } catch (err) {
     console.error("[upload] exception:", err);
