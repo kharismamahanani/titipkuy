@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TitipKuy! 📦
 
-## Getting Started
+Aplikasi manajemen jasa penitipan barang — Malang, Indonesia.
 
-First, run the development server:
+## Tech Stack
+
+- Next.js 14 (App Router) + TypeScript
+- Tailwind CSS + Nunito font
+- Prisma ORM + PostgreSQL (Supabase)
+- Supabase Storage (bucket: `fotos`, `perjanjian`, `ttd`, `dokumen`)
+- Vercel (deployment)
+- Upstash Redis (rate limiting)
+
+## Environment Variables yang Dibutuhkan
+
+Buat file `.env.local` dengan variable berikut (nilai asli ada di Google
+Drive — JANGAN commit ke Git):
+
+- `DATABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `ADMIN_USERNAME`
+- `ADMIN_PASSWORD`
+- `INTERNAL_API_KEY`
+- `UPSTASH_REDIS_REST_URL`
+- `UPSTASH_REDIS_REST_TOKEN`
+
+## Setup Lokal
 
 ```bash
+npm install
+npx prisma generate
+npx prisma db push
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Deploy
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Push ke branch `main` → Vercel auto-deploy. Pastikan semua env vars sudah
+diisi di Vercel dashboard.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Backup & Recovery
 
-## Learn More
+- Source code: github.com/kharismamahanani/titipkuy (Private)
+- Env vars: disimpan di Google Drive (terenkripsi)
+- Database: Supabase project `tswlkkwecbhhnrdamlzg`
+- Rollback: Vercel Deployments → pilih deployment lama → Promote
 
-To learn more about Next.js, take a look at the following resources:
+## Keamanan
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Panel admin (`/admin/*` dan `/api/admin/*`) dilindungi terpusat lewat
+  `src/middleware.ts` — request tanpa cookie sesi admin yang valid otomatis
+  ditolak (halaman di-redirect ke `/admin/login`, API mengembalikan `401`).
+- Halaman verifikasi QR publik (`/transaksi/[id]`) hanya mengambil field
+  yang aman ditampilkan ke siapa saja (nama depan, status, tanggal, kode
+  label) lewat `select` eksplisit di `src/app/api/transaksi/[id]/verifikasi/route.ts`
+  — data sensitif (WhatsApp, alamat, KTP/KTM, dokumen, nilai deklarasi,
+  tanda tangan) tidak pernah dikirim ke endpoint ini.
+- Jangan commit file `.env*` apa pun — sudah di-cover oleh `.gitignore`.
