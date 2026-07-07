@@ -5,10 +5,10 @@ import { uploadToStorage } from "@/lib/supabase";
 import { PerjanjianPdfDocument } from "@/components/konfirmasi/perjanjian-pdf";
 import type { TransaksiDetail } from "@/types/transaksi";
 
-// Generate ulang PDF perjanjian di server — dipakai sebagai fallback untuk
-// transaksi lama yang pdfUrl-nya kosong (mis. pelanggan tidak sempat klik
-// "Download PDF Perjanjian" di halaman konfirmasi, atau generate otomatis
-// di konfirmasi-manual gagal diam-diam).
+// Generate ulang PDF pernyataan kesediaan di server — dipakai sebagai
+// fallback untuk transaksi lama yang pdfUrl-nya kosong (mis. pelanggan
+// tidak sempat klik "Download PDF Pernyataan" di halaman konfirmasi, atau
+// generate otomatis di konfirmasi-manual gagal diam-diam).
 export async function POST(
   _request: Request,
   { params }: { params: { id: string } }
@@ -70,6 +70,6 @@ export async function POST(
     return NextResponse.json({ pdfUrl });
   } catch (error) {
     console.error("[POST /api/admin/transaksi/:id/generate-pdf]", error);
-    return NextResponse.json({ error: "Gagal membuat PDF perjanjian" }, { status: 500 });
+    return NextResponse.json({ error: "Gagal membuat PDF pernyataan" }, { status: 500 });
   }
 }

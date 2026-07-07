@@ -56,7 +56,7 @@ export async function PATCH(
   } catch (error) {
     console.error("[PATCH /api/transaksi/:id]", error);
     return NextResponse.json(
-      { error: "Gagal menyimpan PDF perjanjian" },
+      { error: "Gagal menyimpan PDF pernyataan" },
       { status: 500 }
     );
   }

@@ -19,8 +19,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderRadius: 6,
   },
-  headerText: { color: "#FFFFFF", fontSize: 18, fontWeight: 700 },
-  headerSubtext: { color: "#FFFFFF", fontSize: 9, marginTop: 2 },
+  headerText: { color: "#FFFFFF", fontSize: 16, fontWeight: 700 },
   sectionTitle: { fontSize: 12, fontWeight: 700, marginBottom: 8 },
   paragraph: { marginBottom: 6, lineHeight: 1.5 },
   table: { marginTop: 4, marginBottom: 12 },
@@ -49,8 +48,7 @@ const styles = StyleSheet.create({
 function Header() {
   return (
     <View style={styles.header}>
-      <Text style={styles.headerText}>TitipKuy!</Text>
-      <Text style={styles.headerSubtext}>Perjanjian Penitipan Barang</Text>
+      <Text style={styles.headerText}>TitipKuy! — Pernyataan Kesediaan Penitipan Barang</Text>
     </View>
   );
 }
@@ -64,8 +62,12 @@ function Row({ label, value }: { label: string; value: string }) {
   );
 }
 
-function Footer({ kode }: { kode: string }) {
-  return <Text style={styles.footer}>TitipKuy! — {kode}</Text>;
+function Footer({ tanggalDibuat }: { tanggalDibuat: string }) {
+  return (
+    <Text style={styles.footer}>
+      Dokumen ini dibuat secara digital pada {tanggalDibuat}
+    </Text>
+  );
 }
 
 function formatTanggal(dateStr: string) {
@@ -80,9 +82,10 @@ export function PerjanjianPdfDocument({ transaksi }: PerjanjianPdfDocumentProps)
   const { pelanggan, paket, antarJemputOption } = transaksi;
   const totalAkhir = paket.harga + (antarJemputOption?.harga ?? 0);
   const kode = kodeTransaksi(transaksi.nomorUrut);
+  const tanggalDibuat = formatTanggal(transaksi.createdAt);
 
   return (
-    <Document title={`Perjanjian ${kode}`}>
+    <Document title={`Pernyataan Kesediaan ${kode}`}>
       <Page size="A4" style={styles.page}>
         <Header />
         <Text style={styles.sectionTitle}>Kode Transaksi: {kode}</Text>
@@ -119,7 +122,7 @@ export function PerjanjianPdfDocument({ transaksi }: PerjanjianPdfDocumentProps)
           </Text>
         ))}
 
-        <Footer kode={kode} />
+        <Footer tanggalDibuat={tanggalDibuat} />
       </Page>
 
       {paket.perluDeklarasi && (
@@ -141,17 +144,17 @@ export function PerjanjianPdfDocument({ transaksi }: PerjanjianPdfDocumentProps)
             </Text>
           ))}
 
-          <Footer kode={kode} />
+          <Footer tanggalDibuat={tanggalDibuat} />
         </Page>
       )}
 
       <Page size="A4" style={styles.page}>
         <Header />
-        <Text style={styles.sectionTitle}>Halaman Persetujuan & Tanda Tangan</Text>
+        <Text style={styles.sectionTitle}>Halaman Kesediaan & Tanda Tangan</Text>
         <Text style={styles.paragraph}>
           Dengan menandatangani secara digital di bawah ini, saya, {pelanggan.nama},
-          menyatakan telah membaca, memahami, dan menyetujui seluruh isi perjanjian
-          penitipan barang TitipKuy! ini, termasuk adendum (jika berlaku).
+          menyatakan telah membaca, memahami, dan menyetujui seluruh isi pernyataan
+          kesediaan penitipan barang TitipKuy! ini, termasuk adendum (jika berlaku).
         </Text>
 
         <View style={styles.signatureBox}>
@@ -167,7 +170,7 @@ export function PerjanjianPdfDocument({ transaksi }: PerjanjianPdfDocumentProps)
           </Text>
         </View>
 
-        <Footer kode={kode} />
+        <Footer tanggalDibuat={tanggalDibuat} />
       </Page>
     </Document>
   );

@@ -3,7 +3,7 @@
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const STEP_LABELS = ["Data Diri", "Paket & Metode Pengiriman", "Perjanjian"];
+const STEP_LABELS = ["Data Diri", "Paket & Metode Pengiriman", "Pernyataan Kesediaan"];
 
 interface ProgressBarProps {
   currentStep: number;

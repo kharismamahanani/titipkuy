@@ -9,7 +9,7 @@ const TRUST_ITEMS = [
   { icon: Tag, label: "Label Bernomor Seri" },
   { icon: Camera, label: "Foto Bukti" },
   { icon: Truck, label: "Antar-Jemput" },
-  { icon: ShieldCheck, label: "Perjanjian Digital" },
+  { icon: ShieldCheck, label: "Pernyataan Digital" },
 ];
 
 function HeroIllustration() {

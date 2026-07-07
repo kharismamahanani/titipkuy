@@ -22,7 +22,7 @@ export const CHECKLIST_ITEMS: {
     key: "barangTerlarang",
     icon: Ban,
     label:
-      "Barang yang dititipkan bukan narkotika, bahan berbahaya, makanan mudah busuk, hewan hidup, atau senjata. Pelanggaran: perjanjian batal tanpa refund.",
+      "Barang yang dititipkan bukan narkotika, bahan berbahaya, makanan mudah busuk, hewan hidup, atau senjata. Pelanggaran: pernyataan kesediaan ini batal tanpa pengembalian biaya.",
   },
   {
     key: "jatuhTempo",

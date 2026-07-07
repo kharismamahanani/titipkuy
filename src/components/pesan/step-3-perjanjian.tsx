@@ -81,9 +81,9 @@ export function Step3Perjanjian({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-extrabold text-tk-charcoal">Perjanjian & Konfirmasi</h2>
+        <h2 className="text-xl font-extrabold text-tk-charcoal">Pernyataan Kesediaan & Konfirmasi</h2>
         <p className="mt-1 text-sm text-tk-muted">
-          Cek ringkasan pesanan, setujui perjanjian, lalu tanda tangan.
+          Cek ringkasan pesanan, setujui pernyataan kesediaan, lalu tanda tangan.
         </p>
       </div>
 

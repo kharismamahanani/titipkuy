@@ -204,7 +204,7 @@ export default function AdminBuatOrderManualPage() {
     : "";
   // ✅ SUDAH DIISI — template pesan WhatsApp memakai ADMIN_NAME dari constants/site.ts
   const waMessage = successData
-    ? `Halo ${pelanggan.nama}! Pesanan ${ADMIN_NAME}-mu sudah dibuat 🎉\nKlik link ini untuk baca perjanjian, tanda tangan digital, dan konfirmasi pembayaran: ${confirmUrl}\nLink berlaku 24 jam. Ada pertanyaan? Balas WA ini ya!`
+    ? `Halo ${pelanggan.nama}! Pesanan ${ADMIN_NAME}-mu sudah dibuat 🎉\nKlik link ini untuk baca pernyataan kesediaan, tanda tangan digital, dan konfirmasi pembayaran: ${confirmUrl}\nLink berlaku 24 jam. Ada pertanyaan? Balas WA ini ya!`
     : "";
 
   return (

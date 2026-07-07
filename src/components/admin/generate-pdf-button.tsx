@@ -24,12 +24,12 @@ export function GeneratePdfButton({ transaksiId, pdfUrl }: GeneratePdfButtonProp
         method: "POST",
       });
       const result = await res.json();
-      if (!res.ok) throw new Error(result.error || "Gagal membuat PDF perjanjian");
+      if (!res.ok) throw new Error(result.error || "Gagal membuat PDF pernyataan");
 
-      toast.success("PDF perjanjian berhasil dibuat");
+      toast.success("PDF pernyataan berhasil dibuat");
       router.refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Gagal membuat PDF perjanjian");
+      toast.error(error instanceof Error ? error.message : "Gagal membuat PDF pernyataan");
     } finally {
       setIsLoading(false);
     }
@@ -42,7 +42,7 @@ export function GeneratePdfButton({ transaksiId, pdfUrl }: GeneratePdfButtonProp
       ) : (
         <FileText className="mr-1.5" size={16} />
       )}
-      Generate PDF Perjanjian
+      Generate PDF Pernyataan
     </TkButton>
   );
 }

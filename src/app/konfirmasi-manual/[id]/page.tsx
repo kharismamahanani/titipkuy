@@ -102,6 +102,13 @@ function KonfirmasiManualContent() {
   ];
   const canSubmit = requiredChecks.every((key) => checklist[key]) && !!tandaTanganDataUrl;
 
+  function handleSimpanQris() {
+    const link = document.createElement("a");
+    link.href = "/qris-titipkuy.png";
+    link.download = "QRIS-TitipKuy.png";
+    link.click();
+  }
+
   async function handleSubmit() {
     if (!canSubmit || !data || !tandaTanganDataUrl || !token) return;
 
@@ -224,10 +231,18 @@ function KonfirmasiManualContent() {
                 width={220}
                 height={310}
                 className="h-auto w-[220px]"
+                style={{ cursor: "pointer" }}
+                onClick={handleSimpanQris}
               />
             </div>
+            <TkButton type="button" variant="secondary" size="sm" onClick={handleSimpanQris}>
+              ⬇️ Simpan QRIS
+            </TkButton>
             <p className="text-center text-xs text-tk-light">
               Berlaku untuk semua bank & e-wallet
+            </p>
+            <p className="text-center text-xs text-tk-light">
+              Atau screenshot halaman ini untuk bayar nanti.
             </p>
           </TkCard>
 
@@ -257,7 +272,7 @@ function KonfirmasiManualContent() {
           <p className="text-lg font-extrabold text-tk-orange">TitipKuy! 📦</p>
           <h1 className="mt-2 text-xl font-bold text-tk-charcoal">Konfirmasi Pesananmu</h1>
           <p className="mt-1 text-sm text-tk-muted">
-            Order sudah dibuat admin — cek ringkasan, setujui perjanjian, lalu tanda tangan.
+            Order sudah dibuat admin — cek ringkasan, setujui pernyataan kesediaan, lalu tanda tangan.
           </p>
         </div>
 

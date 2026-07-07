@@ -37,8 +37,8 @@ const ALASAN: {
   },
   {
     icon: FileText,
-    title: "📄 Surat Perjanjian Digital",
-    desc: "Semua transaksi dilindungi surat perjanjian digital yang tersimpan rapi dan bisa diunduh kapan saja.",
+    title: "📄 Surat Pernyataan Kesediaan Digital",
+    desc: "Semua transaksi dilindungi surat pernyataan kesediaan digital yang tersimpan rapi dan bisa diunduh kapan saja.",
     variant: "default",
   },
 ];

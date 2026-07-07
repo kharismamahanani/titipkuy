@@ -63,7 +63,7 @@ export default function AdminArsipPage() {
 
   function handleLihatPdf(pdfUrl: string | null) {
     if (!pdfUrl) {
-      toast.error("PDF perjanjian belum tersedia untuk transaksi ini");
+      toast.error("PDF pernyataan belum tersedia untuk transaksi ini");
       return;
     }
     window.open(pdfUrl, "_blank", "noopener,noreferrer");
@@ -76,14 +76,14 @@ export default function AdminArsipPage() {
         method: "POST",
       });
       const result = await res.json();
-      if (!res.ok) throw new Error(result.error || "Gagal membuat PDF perjanjian");
+      if (!res.ok) throw new Error(result.error || "Gagal membuat PDF pernyataan");
 
       setResults((prev) =>
         prev.map((item) => (item.id === t.id ? { ...item, pdfUrl: result.pdfUrl } : item))
       );
-      toast.success("PDF perjanjian berhasil dibuat");
+      toast.success("PDF pernyataan berhasil dibuat");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Gagal membuat PDF perjanjian");
+      toast.error(error instanceof Error ? error.message : "Gagal membuat PDF pernyataan");
     } finally {
       setDownloadingId(null);
     }
@@ -91,7 +91,7 @@ export default function AdminArsipPage() {
 
   async function handleDownloadPdf(t: TransaksiSearchResult) {
     if (!t.pdfUrl) {
-      toast.error("PDF perjanjian belum tersedia untuk transaksi ini");
+      toast.error("PDF pernyataan belum tersedia untuk transaksi ini");
       return;
     }
 
@@ -104,7 +104,7 @@ export default function AdminArsipPage() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `Perjanjian-${kodeTransaksi(t.nomorUrut)}.pdf`;
+      link.download = `Pernyataan-${kodeTransaksi(t.nomorUrut)}.pdf`;
       link.click();
       URL.revokeObjectURL(url);
     } catch {
@@ -116,9 +116,9 @@ export default function AdminArsipPage() {
 
   return (
     <div className="px-4 py-6 sm:px-6 lg:px-8">
-      <h1 className="text-2xl font-extrabold text-tk-charcoal">Arsip Perjanjian</h1>
+      <h1 className="text-2xl font-extrabold text-tk-charcoal">Arsip Pernyataan</h1>
       <p className="mt-1 text-sm text-tk-muted">
-        Cari dan kelola dokumen perjanjian semua transaksi.
+        Cari dan kelola dokumen pernyataan kesediaan semua transaksi.
       </p>
 
       <form onSubmit={handleSearch} className="mt-6 flex gap-2">

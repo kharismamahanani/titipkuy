@@ -58,7 +58,7 @@ export default function KonfirmasiPage({ params }: { params: { id: string } }) {
       blob = await pdf(<PerjanjianPdfDocument transaksi={transaksi} />).toBlob();
     } catch (error) {
       console.error(error);
-      toast.error("Gagal membuat PDF perjanjian, coba lagi");
+      toast.error("Gagal membuat PDF pernyataan, coba lagi");
       setIsGeneratingPdf(false);
       return;
     }
@@ -66,10 +66,10 @@ export default function KonfirmasiPage({ params }: { params: { id: string } }) {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `Perjanjian-${kodeTransaksi(transaksi.nomorUrut)}.pdf`;
+    link.download = `Pernyataan-${kodeTransaksi(transaksi.nomorUrut)}.pdf`;
     link.click();
     URL.revokeObjectURL(url);
-    toast.success("PDF perjanjian berhasil diunduh");
+    toast.success("PDF pernyataan berhasil diunduh");
 
     try {
       const file = new File([blob], `${transaksi.id}.pdf`, {
@@ -107,6 +107,13 @@ export default function KonfirmasiPage({ params }: { params: { id: string } }) {
       .writeText(kode)
       .then(() => toast.success("Kode disalin!"))
       .catch(() => toast.error("Gagal menyalin kode"));
+  }
+
+  function handleSimpanQris() {
+    const link = document.createElement("a");
+    link.href = "/qris-titipkuy.png";
+    link.download = "QRIS-TitipKuy.png";
+    link.click();
   }
 
   return (
@@ -225,10 +232,18 @@ export default function KonfirmasiPage({ params }: { params: { id: string } }) {
               width={220}
               height={310}
               className="h-auto w-[220px]"
+              style={{ cursor: "pointer" }}
+              onClick={handleSimpanQris}
             />
           </div>
+          <TkButton type="button" variant="secondary" size="sm" onClick={handleSimpanQris}>
+            ⬇️ Simpan QRIS
+          </TkButton>
           <p className="text-center text-xs text-tk-light">
             Berlaku untuk semua bank & e-wallet
+          </p>
+          <p className="text-center text-xs text-tk-light">
+            Atau screenshot halaman ini untuk bayar nanti.
           </p>
         </TkCard>
 
@@ -255,7 +270,7 @@ export default function KonfirmasiPage({ params }: { params: { id: string } }) {
           onClick={handleDownloadPdf}
         >
           {isGeneratingPdf && <Loader2 className="mr-2 animate-spin" size={16} />}
-          Download PDF Perjanjian
+          Download PDF Pernyataan
         </TkButton>
       </div>
     </div>
