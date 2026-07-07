@@ -19,7 +19,7 @@ type RangeFilter = "hari" | "minggu" | "semua";
 
 interface RekapBooking {
   id: string;
-  nomorRef: string;
+  nomorUrut: number;
   tanggalPenjemputan: string;
   sesiPenjemputan: string | null;
   statusTransaksi: "AKTIF" | "SELESAI" | "DIBATALKAN";

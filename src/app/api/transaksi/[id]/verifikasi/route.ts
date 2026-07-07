@@ -16,6 +16,7 @@ export async function GET(
         statusTransaksi: true,
         tanggalMasuk: true,
         tanggalJatuhTempo: true,
+        nomorUrut: true,
         paket: { select: { nama: true } },
         pelanggan: { select: { nama: true } },
         barangLabel: { select: { kodeLabel: true } },
@@ -39,6 +40,7 @@ export async function GET(
       statusTransaksi: transaksi.statusTransaksi,
       tanggalMasuk: transaksi.tanggalMasuk,
       tanggalJatuhTempo: transaksi.tanggalJatuhTempo,
+      nomorUrut: transaksi.nomorUrut,
       kodeLabel: transaksi.barangLabel.map((b) => b.kodeLabel),
     });
   } catch (error) {

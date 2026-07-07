@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { tkInputClass } from "@/lib/form-style";
 import { cn } from "@/lib/utils";
+import { kodeTransaksi } from "@/lib/kode";
 import type { TransaksiSearchResult } from "@/types/transaksi";
 
 const STATUS_FILTERS = [
@@ -103,7 +104,7 @@ export default function AdminArsipPage() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `Perjanjian-${t.nomorRef}.pdf`;
+      link.download = `Perjanjian-${kodeTransaksi(t.nomorUrut)}.pdf`;
       link.click();
       URL.revokeObjectURL(url);
     } catch {
@@ -122,7 +123,7 @@ export default function AdminArsipPage() {
 
       <form onSubmit={handleSearch} className="mt-6 flex gap-2">
         <Input
-          placeholder="Cari nama pelanggan atau nomor ref..."
+          placeholder="Cari nama pelanggan atau kode TK-XXXX..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className={tkInputClass}
@@ -157,7 +158,7 @@ export default function AdminArsipPage() {
         <table className="w-full min-w-[800px] border-collapse text-left text-sm">
           <thead className="bg-tk-charcoal text-tk-cream">
             <tr>
-              <th className="px-4 py-3 font-bold">Nomor Ref</th>
+              <th className="px-4 py-3 font-bold">Kode</th>
               <th className="px-4 py-3 font-bold">Nama</th>
               <th className="px-4 py-3 font-bold">Paket</th>
               <th className="px-4 py-3 font-bold">Tanggal</th>
@@ -181,7 +182,9 @@ export default function AdminArsipPage() {
                   index % 2 === 0 ? "bg-white" : "bg-tk-cream"
                 )}
               >
-                <td className="px-4 py-3 font-bold text-tk-charcoal">{t.nomorRef}</td>
+                <td className="px-4 py-3 font-bold text-tk-charcoal">
+                  {kodeTransaksi(t.nomorUrut)}
+                </td>
                 <td className="px-4 py-3 text-tk-charcoal">{t.pelanggan.nama}</td>
                 <td className="px-4 py-3 text-tk-charcoal">{t.paket.nama}</td>
                 <td className="px-4 py-3 text-tk-charcoal">

@@ -4,6 +4,7 @@ import { id as localeId } from "date-fns/locale";
 import { AlertTriangle } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatRupiah } from "@/lib/utils";
+import { kodeTransaksi } from "@/lib/kode";
 import { StatCard } from "@/components/admin/stat-card";
 import { CopyWaButton } from "@/components/admin/copy-wa-button";
 import { TandaiLunasButton } from "@/components/admin/tandai-lunas-button";
@@ -116,7 +117,7 @@ export default async function AdminDashboardPage() {
                   <div>
                     <p className="text-sm font-bold text-tk-charcoal">{t.pelanggan.nama}</p>
                     <p className="text-xs text-tk-muted">
-                      {t.nomorRef} &middot; jatuh tempo {tanggal}
+                      {kodeTransaksi(t.nomorUrut)} &middot; jatuh tempo {tanggal}
                     </p>
                   </div>
                   <CopyWaButton message={message} />
@@ -134,7 +135,7 @@ export default async function AdminDashboardPage() {
           <table className="w-full min-w-[640px] border-collapse text-left text-sm">
             <thead className="bg-tk-charcoal text-tk-cream">
               <tr>
-                <th className="px-4 py-3 font-bold">Ref</th>
+                <th className="px-4 py-3 font-bold">Kode</th>
                 <th className="px-4 py-3 font-bold">Nama</th>
                 <th className="px-4 py-3 font-bold">Paket</th>
                 <th className="px-4 py-3 font-bold">Jatuh Tempo</th>
@@ -158,7 +159,9 @@ export default async function AdminDashboardPage() {
                     index % 2 === 0 ? "bg-white" : "bg-tk-cream"
                   )}
                 >
-                  <td className="px-4 py-3 font-bold text-tk-charcoal">{t.nomorRef}</td>
+                  <td className="px-4 py-3 font-bold text-tk-charcoal">
+                    {kodeTransaksi(t.nomorUrut)}
+                  </td>
                   <td className="px-4 py-3 text-tk-charcoal">{t.pelanggan.nama}</td>
                   <td className="px-4 py-3 text-tk-charcoal">{t.paket.nama}</td>
                   <td className="px-4 py-3 text-tk-charcoal">

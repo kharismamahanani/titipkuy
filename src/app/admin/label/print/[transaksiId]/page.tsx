@@ -7,6 +7,7 @@ import { Loader2, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PrintableLabel } from "@/components/admin/printable-label";
 import { ThermalLabel } from "@/components/admin/thermal-label";
+import { kodeTransaksi } from "@/lib/kode";
 import type { TransaksiSearchResult } from "@/types/transaksi";
 
 type FetchState = "loading" | "success" | "error";
@@ -25,7 +26,7 @@ export default function LabelPrintPage({
 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
-    documentTitle: transaksi ? `Label-${transaksi.nomorRef}` : "Label",
+    documentTitle: transaksi ? `Label-${kodeTransaksi(transaksi.nomorUrut)}` : "Label",
   });
 
   function triggerPrint(nextMode: PrintMode) {

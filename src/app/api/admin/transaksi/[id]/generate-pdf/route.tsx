@@ -25,7 +25,6 @@ export async function POST(
 
     const detail: TransaksiDetail = {
       id: transaksi.id,
-      nomorRef: transaksi.nomorRef,
       nomorUrut: transaksi.nomorUrut,
       pelanggan: {
         ...transaksi.pelanggan,

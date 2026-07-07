@@ -33,20 +33,3 @@ Apabila terjadi kehilangan atau kerusakan akibat kelalaian Penyedia Jasa, ganti 
 3. PERNYATAAN KEBENARAN DATA
 Penitip bertanggung jawab penuh atas kebenaran data (merek, model, nomor seri) dan nilai deklarasi yang diisi. Apabila di kemudian hari ditemukan ketidaksesuaian atau indikasi penggelembungan nilai, Penyedia Jasa berhak menyesuaikan atau menolak klaim ganti rugi.`;
 
-export function generateNomorRef(
-  hub: string,
-  paketKategori: string,
-  urutan: number
-): string {
-  const now = new Date();
-  const yyyymm = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
-  const urutanStr = String(urutan).padStart(4, "0");
-
-  // Catatan: format resmi nomorRef adalah TK-[HUB]-[YYYYMM]-[XXXX] (lihat
-  // prisma/schema.prisma). Parameter `paketKategori` disediakan sesuai
-  // permintaan untuk keperluan pencatatan/urutan per kategori paket, namun
-  // saat ini belum ditampilkan sebagai segmen terpisah pada kode referensi.
-  void paketKategori;
-
-  return `TK-${hub}-${yyyymm}-${urutanStr}`;
-}

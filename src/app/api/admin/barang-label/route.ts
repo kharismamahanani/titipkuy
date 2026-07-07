@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { generateKodeLabel } from "@/lib/label-kode";
-
-const MAX_KODE_LABEL_RETRY = 5;
+import { kodeLabel, MAX_BARANG_PER_TRANSAKSI } from "@/lib/kode";
 
 export async function POST(request: Request) {
   try {
@@ -19,39 +17,43 @@ export async function POST(request: Request) {
 
     const transaksi = await prisma.transaksi.findUnique({
       where: { id: transaksiId },
-      include: { paket: true },
     });
 
     if (!transaksi) {
       return NextResponse.json({ error: "Transaksi tidak ditemukan" }, { status: 404 });
     }
 
-    for (let attempt = 0; attempt < MAX_KODE_LABEL_RETRY; attempt++) {
-      try {
-        const jumlahLabel = await prisma.barangLabel.count();
-        const kodeLabel = generateKodeLabel(transaksi.paket, kategori, jumlahLabel + 1 + attempt);
+    const jumlahBarang = await prisma.barangLabel.count({ where: { transaksiId } });
 
-        const barangLabel = await prisma.barangLabel.create({
-          data: {
-            transaksiId,
-            kodeLabel,
-            deskripsi,
-            kategori,
-          },
-        });
-
-        return NextResponse.json(barangLabel, { status: 201 });
-      } catch (error) {
-        const isDuplicateKode =
-          error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002";
-        if (!isDuplicateKode) throw error;
-      }
+    if (jumlahBarang >= MAX_BARANG_PER_TRANSAKSI) {
+      return NextResponse.json(
+        { error: `Maksimal ${MAX_BARANG_PER_TRANSAKSI} barang per transaksi` },
+        { status: 400 }
+      );
     }
 
-    return NextResponse.json(
-      { error: "Gagal membuat kode label, coba lagi" },
-      { status: 500 }
-    );
+    try {
+      const barangLabel = await prisma.barangLabel.create({
+        data: {
+          transaksiId,
+          kodeLabel: kodeLabel(transaksi.nomorUrut, jumlahBarang),
+          deskripsi,
+          kategori,
+        },
+      });
+
+      return NextResponse.json(barangLabel, { status: 201 });
+    } catch (error) {
+      const isDuplicateKode =
+        error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002";
+      if (isDuplicateKode) {
+        return NextResponse.json(
+          { error: "Kode label bertabrakan, coba tambah lagi" },
+          { status: 409 }
+        );
+      }
+      throw error;
+    }
   } catch (error) {
     console.error("[POST /api/admin/barang-label]", error);
     return NextResponse.json({ error: "Gagal menambah barang" }, { status: 500 });

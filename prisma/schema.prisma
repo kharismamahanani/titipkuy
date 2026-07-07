@@ -37,7 +37,6 @@ model Paket {
 
 model Transaksi {
   id               String      @id @default(cuid())
-  nomorRef         String      @unique // TK-[HUB]-[YYYYMM]-[XXXX]
   pelanggan        Pelanggan   @relation(fields:[pelangganId], references:[id])
   pelangganId      String
   paket            Paket       @relation(fields:[paketId], references:[id])
@@ -60,8 +59,9 @@ model Transaksi {
   zonaRak          String?
   catatanAdmin     String?
   alasanPembatalan String?   // diisi admin saat membatalkan transaksi
-  // Nomor urut sekuensial, dipakai untuk membangun Kode Unik (mis. LELY-0089)
-  nomorUrut        Int       @default(autoincrement())
+  // Nomor urut sekuensial — basis satu-satunya kode transaksi TK-XXXX
+  // (lihat src/lib/kode.ts). @unique supaya kode transaksi terjamin unik.
+  nomorUrut        Int       @unique @default(autoincrement())
   // "armada" (dijemput TitipKuy!) | "mandiri" (kirim sendiri/Grab/ekspedisi)
   metodePengiriman String?
   // Dicentang admin setelah barang kiriman mandiri benar-benar tiba di hub
@@ -95,8 +95,23 @@ model Transaksi {
   fotoMasuk     FotoBarang[]  @relation("FotoMasuk")
   fotoKeluar    FotoBarang[]  @relation("FotoKeluar")
   barangLabel   BarangLabel[]
+  otpPengambilan OtpPengambilan[]
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
+}
+
+// OTP 6 digit dikirim ke WA pelanggan terdaftar untuk verifikasi identitas
+// saat pengambilan barang di hub — mencegah orang lain mengambil barang
+// dengan hanya mengetahui kode label/QR (yang tertempel di kardus, jadi
+// tidak benar-benar rahasia).
+model OtpPengambilan {
+  id           String   @id @default(cuid())
+  transaksiId  String
+  kode         String   // 6 digit
+  berlakuHingga DateTime
+  sudahDipakai Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  transaksi    Transaksi @relation(fields: [transaksiId], references: [id])
 }
 
 model FotoBarang {

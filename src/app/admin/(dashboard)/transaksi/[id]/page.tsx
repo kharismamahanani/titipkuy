@@ -4,10 +4,10 @@ import { format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import { prisma } from "@/lib/prisma";
 import { formatRupiah } from "@/lib/utils";
+import { kodeTransaksi } from "@/lib/kode";
 import { TkCard } from "@/components/ui/tk-card";
 import { FotoMasukUploader } from "@/components/admin/foto-masuk-uploader";
-import { FotoKeluarUploader } from "@/components/admin/foto-keluar-uploader";
-import { TandaiSelesaiButton } from "@/components/admin/tandai-selesai-button";
+import { PengambilanBarangSection } from "@/components/admin/pengambilan-barang-section";
 import { TandaiBarangTibaButton } from "@/components/admin/tandai-barang-tiba-button";
 import { BatalkanTransaksiButton } from "@/components/admin/batalkan-transaksi-button";
 import { GeneratePdfButton } from "@/components/admin/generate-pdf-button";
@@ -70,7 +70,9 @@ export default async function AdminTransaksiDetailPage({
         <Link href="/admin/transaksi" className="text-sm font-bold text-tk-orange-dark hover:underline">
           &larr; Kembali ke daftar transaksi
         </Link>
-        <h1 className="mt-2 text-2xl font-extrabold text-tk-charcoal">{transaksi.nomorRef}</h1>
+        <h1 className="mt-2 text-2xl font-extrabold text-tk-charcoal">
+          {kodeTransaksi(transaksi.nomorUrut)}
+        </h1>
       </div>
 
       <TkCard className="space-y-2 text-sm">
@@ -136,13 +138,12 @@ export default async function AdminTransaksiDetailPage({
         <FotoMasukUploader transaksiId={transaksi.id} fotoMasuk={fotoMasuk} />
       </section>
 
-      <section className="space-y-3">
-        <h2 className="font-extrabold text-tk-charcoal">Foto Saat Keluar</h2>
-        <p className="text-sm text-tk-muted">
-          Upload foto kondisi barang saat pelanggan mengambilnya.
-        </p>
-        <FotoKeluarUploader transaksiId={transaksi.id} fotoKeluar={fotoKeluar} />
-      </section>
+      <PengambilanBarangSection
+        transaksiId={transaksi.id}
+        statusTransaksi={transaksi.statusTransaksi}
+        fotoKeluar={fotoKeluar}
+        jumlahFotoKeluar={transaksi.fotoKeluar.length}
+      />
 
       <section className="space-y-3">
         <h2 className="font-extrabold text-tk-charcoal">Tanda Tangan</h2>
@@ -175,11 +176,6 @@ export default async function AdminTransaksiDetailPage({
 
       <div className="flex flex-wrap gap-3">
         <GeneratePdfButton transaksiId={transaksi.id} pdfUrl={transaksi.pdfUrl} />
-        <TandaiSelesaiButton
-          transaksiId={transaksi.id}
-          statusTransaksi={transaksi.statusTransaksi}
-          jumlahFotoKeluar={transaksi.fotoKeluar.length}
-        />
         <BatalkanTransaksiButton
           transaksiId={transaksi.id}
           statusTransaksi={transaksi.statusTransaksi}

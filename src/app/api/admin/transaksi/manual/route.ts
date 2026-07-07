@@ -1,22 +1,11 @@
 import crypto from "crypto";
 import { addDays } from "date-fns";
 import { NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { incrementSlotUsage } from "@/lib/slot";
-import { HUB_CONFIG } from "@/lib/constants";
 import { TransaksiManualSchema } from "@/lib/schemas";
 
-const MAX_NOMOR_REF_RETRY = 5;
 const TOKEN_VALID_MS = 24 * 60 * 60 * 1000;
-
-function generateNomorRef(hub: string) {
-  const now = new Date();
-  const yyyymm = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
-  const random = Math.floor(1000 + Math.random() * 9000);
-  const kode = HUB_CONFIG[hub as keyof typeof HUB_CONFIG]?.kode ?? HUB_CONFIG.suhat.kode;
-  return `TK-${kode}-${yyyymm}-${random}`;
-}
 
 export async function POST(request: Request) {
   try {
@@ -80,75 +69,59 @@ export async function POST(request: Request) {
     const konfirmasiToken = crypto.randomBytes(24).toString("hex");
     const konfirmasiTokenExpiresAt = new Date(Date.now() + TOKEN_VALID_MS);
 
-    for (let attempt = 0; attempt < MAX_NOMOR_REF_RETRY; attempt++) {
-      try {
-        const transaksi = await prisma.$transaction(async (tx) => {
-          const created = await tx.transaksi.create({
-            data: {
-              id,
-              nomorRef: generateNomorRef(hub),
-              pelanggan: existingPelanggan
-                ? { connect: { id: existingPelanggan.id } }
-                : {
-                    create: {
-                      nama: pelanggan.nama,
-                      whatsapp: pelanggan.whatsapp,
-                      alamatKos: pelanggan.alamatKos || "",
-                      kampus: pelanggan.kampus || null,
-                      noKtpKtm: pelanggan.noKtpKtm || null,
-                    },
-                  },
-              paket: { connect: { id: paket.id } },
-              nilaiDeklarasi: paket.perluDeklarasi ? Number(nilaiDeklarasi) : null,
-              deskripsiDeklarasi: paket.perluDeklarasi ? deskripsiDeklarasi : null,
-              buktiKepemilikanUrl: paket.perluDeklarasi ? buktiKepemilikanUrl : null,
-              tanggalMasuk: tanggalMasukDate,
-              tanggalJatuhTempo: tanggalJatuhTempoDate,
-              hub,
-              zonaRak: zonaRak || null,
-              catatanAdmin: catatanAdmin || null,
-              armada:
-                antarJemput && penjemputan
-                  ? { connect: { id: penjemputan.armadaId } }
-                  : undefined,
-              tanggalPenjemputan:
-                antarJemput && penjemputan ? new Date(penjemputan.tanggal) : null,
-              sesiPenjemputan: antarJemput && penjemputan ? penjemputan.sesiWaktu : null,
-              konfirmasiToken,
-              konfirmasiTokenExpiresAt,
-            },
-          });
+    const transaksi = await prisma.$transaction(async (tx) => {
+      const created = await tx.transaksi.create({
+        data: {
+          id,
+          pelanggan: existingPelanggan
+            ? { connect: { id: existingPelanggan.id } }
+            : {
+                create: {
+                  nama: pelanggan.nama,
+                  whatsapp: pelanggan.whatsapp,
+                  alamatKos: pelanggan.alamatKos || "",
+                  kampus: pelanggan.kampus || null,
+                  noKtpKtm: pelanggan.noKtpKtm || null,
+                },
+              },
+          paket: { connect: { id: paket.id } },
+          nilaiDeklarasi: paket.perluDeklarasi ? Number(nilaiDeklarasi) : null,
+          deskripsiDeklarasi: paket.perluDeklarasi ? deskripsiDeklarasi : null,
+          buktiKepemilikanUrl: paket.perluDeklarasi ? buktiKepemilikanUrl : null,
+          tanggalMasuk: tanggalMasukDate,
+          tanggalJatuhTempo: tanggalJatuhTempoDate,
+          hub,
+          zonaRak: zonaRak || null,
+          catatanAdmin: catatanAdmin || null,
+          armada:
+            antarJemput && penjemputan
+              ? { connect: { id: penjemputan.armadaId } }
+              : undefined,
+          tanggalPenjemputan:
+            antarJemput && penjemputan ? new Date(penjemputan.tanggal) : null,
+          sesiPenjemputan: antarJemput && penjemputan ? penjemputan.sesiWaktu : null,
+          konfirmasiToken,
+          konfirmasiTokenExpiresAt,
+        },
+      });
 
-          if (antarJemput && penjemputan) {
-            await incrementSlotUsage(tx, {
-              armadaId: penjemputan.armadaId,
-              tanggal: penjemputan.tanggal,
-              sesiWaktu: penjemputan.sesiWaktu,
-              hub: penjemputan.hub,
-            });
-          }
-
-          return created;
+      if (antarJemput && penjemputan) {
+        await incrementSlotUsage(tx, {
+          armadaId: penjemputan.armadaId,
+          tanggal: penjemputan.tanggal,
+          sesiWaktu: penjemputan.sesiWaktu,
+          hub: penjemputan.hub,
         });
-
-        return NextResponse.json({
-          id: transaksi.id,
-          nomorRef: transaksi.nomorRef,
-          token: konfirmasiToken,
-        });
-      } catch (error) {
-        const isDuplicateNomorRef =
-          error instanceof Prisma.PrismaClientKnownRequestError &&
-          error.code === "P2002";
-
-        if (!isDuplicateNomorRef) throw error;
       }
-    }
 
-    return NextResponse.json(
-      { error: "Gagal membuat nomor referensi, coba lagi" },
-      { status: 500 }
-    );
+      return created;
+    });
+
+    return NextResponse.json({
+      id: transaksi.id,
+      nomorUrut: transaksi.nomorUrut,
+      token: konfirmasiToken,
+    });
   } catch (error) {
     if (error instanceof Error && error.message === "SLOT_PENUH") {
       return NextResponse.json(

@@ -2,6 +2,7 @@ import { Document, Page, Text, View, StyleSheet, Image } from "@react-pdf/render
 import { format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import { formatRupiah } from "@/lib/utils";
+import { kodeTransaksi } from "@/lib/kode";
 import {
   PERJANJIAN_STANDAR,
   ADENDUM_BARANG_BERNILAI_TINGGI,
@@ -63,8 +64,8 @@ function Row({ label, value }: { label: string; value: string }) {
   );
 }
 
-function Footer({ nomorRef }: { nomorRef: string }) {
-  return <Text style={styles.footer}>TitipKuy! — {nomorRef}</Text>;
+function Footer({ kode }: { kode: string }) {
+  return <Text style={styles.footer}>TitipKuy! — {kode}</Text>;
 }
 
 function formatTanggal(dateStr: string) {
@@ -78,12 +79,13 @@ interface PerjanjianPdfDocumentProps {
 export function PerjanjianPdfDocument({ transaksi }: PerjanjianPdfDocumentProps) {
   const { pelanggan, paket, antarJemputOption } = transaksi;
   const totalAkhir = paket.harga + (antarJemputOption?.harga ?? 0);
+  const kode = kodeTransaksi(transaksi.nomorUrut);
 
   return (
-    <Document title={`Perjanjian ${transaksi.nomorRef}`}>
+    <Document title={`Perjanjian ${kode}`}>
       <Page size="A4" style={styles.page}>
         <Header />
-        <Text style={styles.sectionTitle}>No. Referensi: {transaksi.nomorRef}</Text>
+        <Text style={styles.sectionTitle}>Kode Transaksi: {kode}</Text>
 
         <View style={styles.table}>
           <Row label="Nama" value={pelanggan.nama} />
@@ -117,7 +119,7 @@ export function PerjanjianPdfDocument({ transaksi }: PerjanjianPdfDocumentProps)
           </Text>
         ))}
 
-        <Footer nomorRef={transaksi.nomorRef} />
+        <Footer kode={kode} />
       </Page>
 
       {paket.perluDeklarasi && (
@@ -139,7 +141,7 @@ export function PerjanjianPdfDocument({ transaksi }: PerjanjianPdfDocumentProps)
             </Text>
           ))}
 
-          <Footer nomorRef={transaksi.nomorRef} />
+          <Footer kode={kode} />
         </Page>
       )}
 
@@ -165,7 +167,7 @@ export function PerjanjianPdfDocument({ transaksi }: PerjanjianPdfDocumentProps)
           </Text>
         </View>
 
-        <Footer nomorRef={transaksi.nomorRef} />
+        <Footer kode={kode} />
       </Page>
     </Document>
   );

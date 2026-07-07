@@ -12,6 +12,7 @@ import { TkCard } from "@/components/ui/tk-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { cn } from "@/lib/utils";
 import { buildFotoPath, uploadToStorage } from "@/lib/supabase";
+import { kodeTransaksi } from "@/lib/kode";
 import type { VerifikasiPublik } from "@/types/transaksi";
 
 type FetchState = "loading" | "success" | "error";
@@ -75,6 +76,9 @@ export function VerifikasiClient({ id, isAdmin }: VerifikasiClientProps) {
               <div className="flex flex-col items-center gap-2 pb-2">
                 <CheckCircle2 className="text-tk-sage-dark" size={40} />
                 <p className="font-bold text-tk-charcoal">Barang Terverifikasi</p>
+                <p className="text-2xl font-extrabold text-tk-orange">
+                  {kodeTransaksi(data.nomorUrut)}
+                </p>
               </div>
               <Row label="Nama" value={data.namaDepan} />
               <Row label="Paket" value={data.paketNama} />

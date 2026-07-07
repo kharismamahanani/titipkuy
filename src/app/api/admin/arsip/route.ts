@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { buildKodeSearchFilter } from "@/lib/kode-search";
 
 const VALID_STATUS = ["AKTIF", "SELESAI", "DIBATALKAN"];
 
@@ -11,14 +12,7 @@ export async function GET(request: Request) {
 
     const transaksi = await prisma.transaksi.findMany({
       where: {
-        ...(search
-          ? {
-              OR: [
-                { nomorRef: { contains: search, mode: "insensitive" } },
-                { pelanggan: { nama: { contains: search, mode: "insensitive" } } },
-              ],
-            }
-          : {}),
+        ...(search ? { OR: buildKodeSearchFilter(search) } : {}),
         ...(status && VALID_STATUS.includes(status)
           ? { statusTransaksi: status as "AKTIF" | "SELESAI" | "DIBATALKAN" }
           : {}),

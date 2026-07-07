@@ -22,6 +22,7 @@ import { PrintableLabel } from "@/components/admin/printable-label";
 import { ThermalLabel } from "@/components/admin/thermal-label";
 import { tkInputClass, tkLabelClass, tkSelectTriggerClass } from "@/lib/form-style";
 import { cn, formatRupiah } from "@/lib/utils";
+import { kodeTransaksi } from "@/lib/kode";
 import type { TransaksiSearchResult } from "@/types/transaksi";
 
 type PrintMode = "a4" | "thermal" | null;
@@ -176,7 +177,7 @@ function AdminLabelPageContent() {
       {!isLoadingDeepLink && (
         <form onSubmit={handleSearch} className="mt-6 flex gap-2">
           <Input
-            placeholder="Cari nama pelanggan atau nomor ref..."
+            placeholder="Cari nama pelanggan atau kode TK-XXXX..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className={tkInputClass}
@@ -203,7 +204,7 @@ function AdminLabelPageContent() {
             >
               <p className="font-bold text-tk-charcoal">{t.pelanggan.nama}</p>
               <p className="text-xs text-tk-muted">
-                {t.nomorRef} &middot; {t.paket.nama}
+                {kodeTransaksi(t.nomorUrut)} &middot; {t.paket.nama}
               </p>
             </button>
           ))}

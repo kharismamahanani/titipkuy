@@ -3,7 +3,7 @@
 import { JAM_DROP_OFF_MANDIRI } from "@/lib/constants";
 
 const STEPS = [
-  "Isi form pemesanan di website — Kode Unik langsung muncul di halaman konfirmasi setelah submit. Catat atau screenshot kodenya (contoh: LELY-089).",
+  "Isi form pemesanan di website — kode transaksi langsung muncul di halaman konfirmasi setelah submit. Catat atau screenshot kodenya (contoh: TK-0089).",
   "Tulis kode itu dengan spidol besar di luar kardus/koper.",
   `Pesan Grab/Lalamove atau datang langsung ke Hub Suhat pada: 📍 Jam Drop-Off: ${JAM_DROP_OFF_MANDIRI} (di luar jam ini hub bisa sedang tidak ada pegawai).`,
   "Pegawai memotret kondisi barang saat diterima.",

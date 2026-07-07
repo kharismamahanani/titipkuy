@@ -20,6 +20,7 @@ import { tkInputClass, tkSelectTriggerClass } from "@/lib/form-style";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { TandaiLunasButton } from "@/components/admin/tandai-lunas-button";
 import { Pagination } from "@/components/admin/pagination";
+import { kodeTransaksi } from "@/lib/kode";
 import type { TransaksiSearchResult } from "@/types/transaksi";
 import type { Paket } from "@/types/paket";
 
@@ -33,8 +34,7 @@ const STATUS_FILTERS = [
 const LIMIT = 20;
 
 function getHub(t: TransaksiSearchResult) {
-  if (t.hub) return t.hub;
-  return t.nomorRef.split("-")[1] ?? "-";
+  return t.hub ?? "-";
 }
 
 interface Filters {
@@ -136,7 +136,7 @@ export default function AdminTransaksiPage() {
 
       <form onSubmit={handleSearchSubmit} className="mt-6 flex gap-2">
         <Input
-          placeholder="Cari nama pelanggan atau nomor ref..."
+          placeholder="Cari nama pelanggan atau kode TK-XXXX..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className={tkInputClass}
@@ -187,7 +187,7 @@ export default function AdminTransaksiPage() {
         <table className="w-full min-w-[1000px] border-collapse text-left text-sm">
           <thead className="bg-tk-charcoal text-tk-cream">
             <tr>
-              <th className="px-4 py-3 font-bold">Nomor Ref</th>
+              <th className="px-4 py-3 font-bold">Kode</th>
               <th className="px-4 py-3 font-bold">Nama</th>
               <th className="px-4 py-3 font-bold">Paket</th>
               <th className="px-4 py-3 font-bold">Hub</th>
@@ -214,7 +214,9 @@ export default function AdminTransaksiPage() {
                   index % 2 === 0 ? "bg-white" : "bg-tk-cream"
                 )}
               >
-                <td className="px-4 py-3 font-bold text-tk-charcoal">{t.nomorRef}</td>
+                <td className="px-4 py-3 font-bold text-tk-charcoal">
+                  {kodeTransaksi(t.nomorUrut)}
+                </td>
                 <td className="px-4 py-3 text-tk-charcoal">{t.pelanggan.nama}</td>
                 <td className="px-4 py-3 text-tk-charcoal">{t.paket.nama}</td>
                 <td className="px-4 py-3 capitalize text-tk-charcoal">{getHub(t)}</td>

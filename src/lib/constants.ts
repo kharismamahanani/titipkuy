@@ -1,6 +1,5 @@
 export const HUB_CONFIG = {
   suhat: {
-    kode: "B", // dipakai di kode label dan nomor referensi
     nama: "Hub Suhat",
     alamat: "Jl. Bunga Lely, Lowokwaru",
     deskripsi: "Dekat UB, UM, UIN",
@@ -8,7 +7,6 @@ export const HUB_CONFIG = {
     catatan: "",
   },
   tidar: {
-    kode: "C",
     nama: "Hub Tidar",
     alamat: "Perum Tidar View, Sukun",
     deskripsi: "Kawasan tenang 24 jam",
@@ -36,9 +34,3 @@ export const SLOT_SESI = {
   pagi: { label: "Sesi Pagi", jam: "08.00 – 11.00 WIB" },
   siang: { label: "Sesi Siang", jam: "13.00 – 16.00 WIB" },
 } as const;
-
-// Kode Unik ditulis pelanggan di luar kardus/koper, mis. "LELY-0089" —
-// "LELY" merujuk ke Jl. Bunga Lely (alamat Hub Suhat).
-export function generateKodeUnik(nomorUrut: number) {
-  return `LELY-${String(nomorUrut).padStart(4, "0")}`;
-}

@@ -14,7 +14,8 @@ import { PerjanjianPdfDocument } from "@/components/konfirmasi/perjanjian-pdf";
 import { cn, formatRupiah } from "@/lib/utils";
 import { ADMIN_NAME, formatWhatsAppDisplay, getWhatsAppUrl } from "@/constants/site";
 import { uploadToStorage } from "@/lib/supabase";
-import { HUB_CONFIG, JAM_DROP_OFF_MANDIRI, generateKodeUnik } from "@/lib/constants";
+import { HUB_CONFIG, JAM_DROP_OFF_MANDIRI } from "@/lib/constants";
+import { kodeTransaksi } from "@/lib/kode";
 import type { TransaksiDetail } from "@/types/transaksi";
 
 type FetchState = "loading" | "success" | "error";
@@ -65,7 +66,7 @@ export default function KonfirmasiPage({ params }: { params: { id: string } }) {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `Perjanjian-${transaksi.nomorRef}.pdf`;
+    link.download = `Perjanjian-${kodeTransaksi(transaksi.nomorUrut)}.pdf`;
     link.click();
     URL.revokeObjectURL(url);
     toast.success("PDF perjanjian berhasil diunduh");
@@ -98,12 +99,12 @@ export default function KonfirmasiPage({ params }: { params: { id: string } }) {
   }
 
   const { pelanggan, paket } = transaksi;
-  const waMessage = `Halo TitipKuy! Saya sudah bayar order ${transaksi.nomorRef} a.n ${pelanggan.nama}. Bukti terlampir.`;
-  const kodeUnik = generateKodeUnik(transaksi.nomorUrut);
+  const kode = kodeTransaksi(transaksi.nomorUrut);
+  const waMessage = `Halo TitipKuy! Saya sudah bayar order ${kode} a.n ${pelanggan.nama}. Bukti terlampir.`;
 
   function handleCopyKode() {
     navigator.clipboard
-      .writeText(kodeUnik)
+      .writeText(kode)
       .then(() => toast.success("Kode disalin!"))
       .catch(() => toast.error("Gagal menyalin kode"));
   }
@@ -111,10 +112,17 @@ export default function KonfirmasiPage({ params }: { params: { id: string } }) {
   return (
     <div className="min-h-screen bg-tk-cream px-4 py-12 sm:px-6">
       <div className="mx-auto max-w-xl space-y-6">
+        <div className="text-center">
+          <CheckCircle2 className="mx-auto text-tk-sage-dark" size={72} strokeWidth={1.5} />
+          <h1 className="mt-4 text-2xl font-extrabold text-tk-charcoal sm:text-3xl">
+            Pesanan Diterima! 🎉
+          </h1>
+        </div>
+
         <TkCard variant="orange" className="text-center">
-          <p className="text-[13px] font-bold text-tk-charcoal">Kode Unik Barangmu</p>
+          <p className="text-[13px] font-bold text-tk-charcoal">Kode Transaksimu</p>
           <p className="mt-2 text-[36px] font-extrabold leading-tight text-tk-charcoal">
-            {kodeUnik}
+            {kode}
           </p>
           <TkButton
             type="button"
@@ -135,7 +143,7 @@ export default function KonfirmasiPage({ params }: { params: { id: string } }) {
           <p className="font-extrabold">📦 Sebelum kirim barangmu:</p>
           <p>✓ Masukkan ke kardus dan tutup dengan lakban</p>
           <p>✓ ATAU bungkus bubble wrap minimal 2 lapis</p>
-          <p>✓ Tulis Kode Unik ({kodeUnik}) di luar kardus dengan spidol</p>
+          <p>✓ Tulis Kode ({kode}) di luar kardus dengan spidol</p>
           <p className="font-bold text-[#C0392B]">
             ✓ Barang tanpa kemasan tidak akan diterima di hub
           </p>
@@ -152,7 +160,7 @@ export default function KonfirmasiPage({ params }: { params: { id: string } }) {
             </p>
             <a
               href={getWhatsAppUrl(
-                `Halo TitipKuy! Saya sudah/akan kirim barang dengan Kode Unik ${kodeUnik} a.n ${pelanggan.nama}.`
+                `Halo TitipKuy! Saya sudah/akan kirim barang dengan Kode ${kode} a.n ${pelanggan.nama}.`
               )}
               target="_blank"
               rel="noopener noreferrer"
@@ -162,20 +170,6 @@ export default function KonfirmasiPage({ params }: { params: { id: string } }) {
             </a>
           </TkCard>
         )}
-
-        <div className="text-center">
-          <CheckCircle2 className="mx-auto text-tk-sage-dark" size={72} strokeWidth={1.5} />
-          <h1 className="mt-4 text-2xl font-extrabold text-tk-charcoal sm:text-3xl">
-            Pesanan Diterima! 🎉
-          </h1>
-        </div>
-
-        <div className="text-center">
-          <p className="text-sm text-tk-muted">Nomor Referensi</p>
-          <p className="text-3xl font-extrabold text-tk-orange sm:text-4xl">
-            {transaksi.nomorRef}
-          </p>
-        </div>
 
         <TkCard className="space-y-2 text-sm">
           <SummaryRow label="Nama" value={pelanggan.nama} />

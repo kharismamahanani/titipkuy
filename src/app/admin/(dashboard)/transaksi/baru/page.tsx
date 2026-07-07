@@ -31,6 +31,7 @@ import { ADMIN_NAME } from "@/constants/site";
 import { buildStoragePath, uploadToStorage } from "@/lib/supabase";
 import { AKTIF_HUB_KEYS, HUB_CONFIG } from "@/lib/constants";
 import { PenjemputanArmadaPicker } from "@/components/pesan/penjemputan-armada-picker";
+import { kodeTransaksi } from "@/lib/kode";
 import type { Paket } from "@/types/paket";
 import { EMPTY_PENJEMPUTAN, type Hub, type PenjemputanData } from "@/types/slot";
 
@@ -46,7 +47,7 @@ const WHATSAPP_REGEX = /^(\+?62|0)8\d{8,11}$/;
 
 interface SuccessData {
   id: string;
-  nomorRef: string;
+  nomorUrut: number;
   token: string;
 }
 
@@ -497,7 +498,10 @@ export default function AdminBuatOrderManualPage() {
 
           <div className="space-y-4">
             <p className="text-sm text-tk-muted">
-              Nomor referensi: <span className="font-bold text-tk-charcoal">{successData?.nomorRef}</span>
+              Kode transaksi:{" "}
+              <span className="font-bold text-tk-charcoal">
+                {successData ? kodeTransaksi(successData.nomorUrut) : ""}
+              </span>
             </p>
 
             <div>

@@ -29,7 +29,6 @@ export interface Foto {
 
 export interface TransaksiDetail {
   id: string;
-  nomorRef: string;
   nomorUrut: number;
   pelanggan: Pelanggan;
   paket: Paket;
@@ -73,5 +72,6 @@ export interface VerifikasiPublik {
   statusTransaksi: "AKTIF" | "SELESAI" | "DIBATALKAN";
   tanggalMasuk: string;
   tanggalJatuhTempo: string;
+  nomorUrut: number;
   kodeLabel: string[];
 }

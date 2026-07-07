@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { Prisma, StatusTransaksi } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { buildKodeSearchFilter } from "@/lib/kode-search";
 
 const VALID_STATUS: StatusTransaksi[] = ["AKTIF", "SELESAI", "DIBATALKAN"];
 const DEFAULT_LIMIT = 20;
@@ -15,14 +16,7 @@ export async function GET(request: Request) {
     const limit = Math.max(1, Number(searchParams.get("limit")) || DEFAULT_LIMIT);
 
     const where: Prisma.TransaksiWhereInput = {
-      ...(search
-        ? {
-            OR: [
-              { nomorRef: { contains: search, mode: "insensitive" } },
-              { pelanggan: { nama: { contains: search, mode: "insensitive" } } },
-            ],
-          }
-        : {}),
+      ...(search ? { OR: buildKodeSearchFilter(search) } : {}),
       ...(status && status !== "all" && VALID_STATUS.includes(status as StatusTransaksi)
         ? { statusTransaksi: status as StatusTransaksi }
         : {}),

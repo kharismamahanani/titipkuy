@@ -20,6 +20,7 @@ import { cn, dataUrlToFile, formatRupiah } from "@/lib/utils";
 import { uploadToStorage } from "@/lib/supabase";
 import { uploadViaApi } from "@/lib/upload-via-api";
 import { ADMIN_NAME, formatWhatsAppDisplay, getWhatsAppUrl } from "@/constants/site";
+import { kodeTransaksi } from "@/lib/kode";
 import type { ChecklistData } from "@/types/pesan";
 import type { TransaksiDetail, Foto } from "@/types/transaksi";
 
@@ -168,7 +169,7 @@ function KonfirmasiManualContent() {
     ...(paket.perluDeklarasi ? [DEKLARASI_ITEM] : []),
     ...(paket.kategori === "motor" ? [MOTOR_ITEM] : []),
   ];
-  const waMessage = `Halo TitipKuy! Saya sudah bayar order ${data.nomorRef} a.n ${pelanggan.nama}. Bukti terlampir.`;
+  const waMessage = `Halo TitipKuy! Saya sudah bayar order ${kodeTransaksi(data.nomorUrut)} a.n ${pelanggan.nama}. Bukti terlampir.`;
 
   if (isConfirmed) {
     return (
@@ -183,7 +184,9 @@ function KonfirmasiManualContent() {
 
           <div className="text-center">
             <p className="text-sm text-tk-muted">Nomor Referensi</p>
-            <p className="text-3xl font-extrabold text-tk-orange sm:text-4xl">{data.nomorRef}</p>
+            <p className="text-3xl font-extrabold text-tk-orange sm:text-4xl">
+              {kodeTransaksi(data.nomorUrut)}
+            </p>
           </div>
 
           <TkCard className="space-y-2 text-sm">
@@ -259,7 +262,7 @@ function KonfirmasiManualContent() {
         </div>
 
         <TkCard className="space-y-2 text-sm">
-          <SummaryRow label="Nomor Ref" value={data.nomorRef} />
+          <SummaryRow label="Kode Transaksi" value={kodeTransaksi(data.nomorUrut)} />
           <SummaryRow label="Nama" value={pelanggan.nama} />
           <SummaryRow label="Paket" value={paket.nama} />
           <SummaryRow label="Harga Paket" value={formatRupiah(paket.harga)} />
