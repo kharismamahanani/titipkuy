@@ -244,15 +244,16 @@ export default function AdminTransaksiPage() {
                     >
                       Detail
                     </Link>
-                    {t.statusBayar === "BELUM_BAYAR" && (
-                      <TandaiLunasButton id={t.id} onSuccess={() => fetchData()} />
-                    )}
-                    <Link
-                      href={`/admin/label?transaksiId=${t.id}`}
-                      className={tkButtonVariants({ variant: "secondary", size: "sm" })}
-                    >
-                      Print Label
-                    </Link>
+                    <TandaiLunasButton
+                      id={t.id}
+                      nomorUrut={t.nomorUrut}
+                      pelanggan={t.pelanggan}
+                      paket={t.paket}
+                      antarJemputHarga={t.antarJemputOption?.harga}
+                      tanggalJatuhTempo={t.tanggalJatuhTempo}
+                      statusBayar={t.statusBayar}
+                      onSuccess={() => fetchData()}
+                    />
                   </div>
                 </td>
               </tr>

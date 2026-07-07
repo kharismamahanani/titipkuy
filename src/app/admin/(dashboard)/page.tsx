@@ -40,7 +40,7 @@ async function getDashboardData() {
       prisma.transaksi.findMany({
         take: 10,
         orderBy: { createdAt: "desc" },
-        include: { pelanggan: true, paket: true },
+        include: { pelanggan: true, paket: true, antarJemputOption: true },
       }),
     ]);
 
@@ -174,14 +174,17 @@ export default async function AdminDashboardPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-2">
-                      {t.statusBayar === "BELUM_BAYAR" && (
-                        <TandaiLunasButton id={t.id} />
-                      )}
+                      <TandaiLunasButton
+                        id={t.id}
+                        nomorUrut={t.nomorUrut}
+                        pelanggan={t.pelanggan}
+                        paket={t.paket}
+                        antarJemputHarga={t.antarJemputOption?.harga}
+                        tanggalJatuhTempo={t.tanggalJatuhTempo}
+                        statusBayar={t.statusBayar}
+                      />
                       <Link href={`/admin/transaksi/${t.id}`} className={linkButtonClass}>
                         Lihat Detail
-                      </Link>
-                      <Link href={`/admin/label?transaksiId=${t.id}`} className={linkButtonClass}>
-                        Print Label
                       </Link>
                     </div>
                   </td>

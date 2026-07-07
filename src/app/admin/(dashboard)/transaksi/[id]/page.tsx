@@ -7,10 +7,14 @@ import { formatRupiah } from "@/lib/utils";
 import { kodeTransaksi } from "@/lib/kode";
 import { TkCard } from "@/components/ui/tk-card";
 import { FotoMasukUploader } from "@/components/admin/foto-masuk-uploader";
+import { KirimKonfirmasiMasukButton } from "@/components/admin/kirim-konfirmasi-masuk-button";
+import { LabelSection } from "@/components/admin/label-section";
 import { PengambilanBarangSection } from "@/components/admin/pengambilan-barang-section";
 import { TandaiBarangTibaButton } from "@/components/admin/tandai-barang-tiba-button";
+import { TandaiLunasButton } from "@/components/admin/tandai-lunas-button";
 import { BatalkanTransaksiButton } from "@/components/admin/batalkan-transaksi-button";
 import { GeneratePdfButton } from "@/components/admin/generate-pdf-button";
+import type { TransaksiDetail } from "@/types/transaksi";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +27,7 @@ async function getTransaksi(id: string) {
       fotoMasuk: true,
       fotoKeluar: true,
       antarJemputOption: true,
+      barangLabel: true,
     },
   });
 }
@@ -63,6 +68,35 @@ export default async function AdminTransaksiDetailPage({
     ...f,
     uploadedAt: f.uploadedAt.toISOString(),
   }));
+  const barangLabel = transaksi.barangLabel.map((b) => ({
+    ...b,
+    createdAt: b.createdAt.toISOString(),
+  }));
+  const transaksiDetail: TransaksiDetail = {
+    id: transaksi.id,
+    nomorUrut: transaksi.nomorUrut,
+    pelanggan: { ...pelanggan, createdAt: pelanggan.createdAt.toISOString() },
+    paket: { ...paket, createdAt: paket.createdAt.toISOString(), updatedAt: paket.updatedAt.toISOString() },
+    nilaiDeklarasi: transaksi.nilaiDeklarasi,
+    deskripsiDeklarasi: transaksi.deskripsiDeklarasi,
+    buktiKepemilikanUrl: transaksi.buktiKepemilikanUrl,
+    tierGantiRugi: transaksi.tierGantiRugi,
+    premiGantiRugi: transaksi.premiGantiRugi,
+    ktpUrl: transaksi.ktpUrl,
+    stnkUrl: transaksi.stnkUrl,
+    bpkbUrl: transaksi.bpkbUrl,
+    tanggalMasuk: transaksi.tanggalMasuk.toISOString(),
+    tanggalJatuhTempo: transaksi.tanggalJatuhTempo.toISOString(),
+    statusBayar: transaksi.statusBayar,
+    statusTransaksi: transaksi.statusTransaksi,
+    hub: transaksi.hub,
+    metodePengiriman: transaksi.metodePengiriman as "armada" | "mandiri" | null,
+    barangTibaMandiri: transaksi.barangTibaMandiri,
+    antarJemputOption: transaksi.antarJemputOption,
+    tandaTanganUrl: transaksi.tandaTanganUrl,
+    pdfUrl: transaksi.pdfUrl,
+    createdAt: transaksi.createdAt.toISOString(),
+  };
 
   return (
     <div className="space-y-8 px-4 py-6 sm:px-6 lg:px-8">
@@ -136,6 +170,22 @@ export default async function AdminTransaksiDetailPage({
         <h2 className="font-extrabold text-tk-charcoal">Foto Saat Masuk</h2>
         <p className="text-sm text-tk-muted">Upload foto kondisi barang saat tiba di hub.</p>
         <FotoMasukUploader transaksiId={transaksi.id} fotoMasuk={fotoMasuk} />
+        <KirimKonfirmasiMasukButton
+          nomorUrut={transaksi.nomorUrut}
+          pelanggan={pelanggan}
+          paket={paket}
+          tanggalMasuk={transaksi.tanggalMasuk}
+          tanggalJatuhTempo={transaksi.tanggalJatuhTempo}
+          jumlahFotoMasuk={transaksi.fotoMasuk.length}
+        />
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="font-extrabold text-tk-charcoal">Label Barang</h2>
+        <p className="text-sm text-tk-muted">
+          Tambahkan barang dan cetak label langsung dari sini.
+        </p>
+        <LabelSection transaksi={transaksiDetail} barangLabel={barangLabel} />
       </section>
 
       <PengambilanBarangSection
@@ -175,6 +225,15 @@ export default async function AdminTransaksiDetailPage({
       )}
 
       <div className="flex flex-wrap gap-3">
+        <TandaiLunasButton
+          id={transaksi.id}
+          nomorUrut={transaksi.nomorUrut}
+          pelanggan={pelanggan}
+          paket={paket}
+          antarJemputHarga={transaksi.antarJemputOption?.harga}
+          tanggalJatuhTempo={transaksi.tanggalJatuhTempo}
+          statusBayar={transaksi.statusBayar}
+        />
         <GeneratePdfButton transaksiId={transaksi.id} pdfUrl={transaksi.pdfUrl} />
         <BatalkanTransaksiButton
           transaksiId={transaksi.id}
