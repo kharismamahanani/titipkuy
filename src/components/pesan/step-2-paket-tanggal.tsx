@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { addDays, format } from "date-fns";
+import { addDays, differenceInCalendarDays, format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -23,12 +23,15 @@ import type { AntarJemputOption } from "@/types/antar-jemput";
 
 const MAX_UPLOAD_SIZE = 5 * 1024 * 1024; // 5MB
 
-// Armada TitipKuy! hanya bisa dipesan minimal H-1 (24 jam sebelumnya) dan
-// tidak beroperasi di hari Minggu.
+// Armada TitipKuy! hanya bisa dipesan minimal H+1 (besok atau lebih) dan
+// tidak beroperasi di hari Minggu. Dibandingkan per hari kalender (bukan
+// selisih 24 jam mentah), supaya "besok" tetap valid dipesan kapan pun hari
+// ini dipilih — sebelumnya selisih jam dihitung dari tengah malam tanggal
+// tujuan, yang membuat H+1 nyaris selalu gagal lolos ambang 24 jam.
 function isTanggalValidUntukArmada(tanggal: Date) {
-  const diffHours = (tanggal.getTime() - Date.now()) / (1000 * 60 * 60);
   const isSunday = tanggal.getDay() === 0;
-  return diffHours >= 24 && !isSunday;
+  const diffDays = differenceInCalendarDays(tanggal, new Date());
+  return diffDays >= 1 && !isSunday;
 }
 
 interface Step2Props {

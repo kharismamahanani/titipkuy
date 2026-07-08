@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { format } from "date-fns";
+import { differenceInCalendarDays, format } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { TkButton } from "@/components/ui/tk-button";
 import { Calendar } from "@/components/ui/calendar";
@@ -28,8 +28,6 @@ const ARMADA_TIPE_LABEL: Record<ArmadaTipe, string> = {
   motor: "Motor",
   mobil: "Mobil",
 };
-
-const H1_MS = 24 * 60 * 60 * 1000;
 
 interface PenjemputanArmadaPickerProps {
   penjemputan: PenjemputanData;
@@ -99,11 +97,11 @@ export function PenjemputanArmadaPicker({
     if (config.tanggalMerah.includes(iso)) return true;
 
     if (config.lockH1) {
-      // Sesi siang (13:00) adalah sesi terakhir di hari itu — kalau sesi ini
-      // saja sudah kurang dari 24 jam lagi, seluruh tanggal otomatis terkunci.
-      const sesiSiangTerakhir = new Date(date);
-      sesiSiangTerakhir.setHours(13, 0, 0, 0);
-      if (sesiSiangTerakhir.getTime() - Date.now() < H1_MS) return true;
+      // Kunci berdasarkan hari kalender (H-1), bukan jam sesi terakhir —
+      // sebelumnya dibandingkan ke sesi siang jam 13:00, jadi H+1 ikut
+      // terkunci begitu jam sekarang lewat 13:00 padahal seharusnya H+1
+      // tetap bisa dipesan sepanjang hari ini (sampai 23:59).
+      if (differenceInCalendarDays(date, new Date()) < 1) return true;
     }
 
     return false;
