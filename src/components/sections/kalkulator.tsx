@@ -76,7 +76,8 @@ interface KalkulatorProps {
 
 export function Kalkulator({ mode, onModeChange }: KalkulatorProps) {
   const [jenisHarian, setJenisHarian] = useState(JENIS_HARIAN[0].value);
-  const [durasiHari, setDurasiHari] = useState(1);
+  const [durasiHariInput, setDurasiHariInput] = useState("1");
+  const durasiHari = Number(durasiHariInput) || 0;
   const [jenisBulanan, setJenisBulanan] = useState(JENIS_BULANAN[0].value);
   const [jumlah, setJumlah] = useState(1);
   const [durasiBulanan, setDurasiBulanan] = useState(DURASI_BULANAN[0].value);
@@ -183,9 +184,10 @@ export function Kalkulator({ mode, onModeChange }: KalkulatorProps) {
                     type="number"
                     min={1}
                     max={30}
-                    value={durasiHari}
-                    onChange={(e) =>
-                      setDurasiHari(Math.min(30, Math.max(1, Number(e.target.value) || 1)))
+                    value={durasiHariInput}
+                    onChange={(e) => setDurasiHariInput(e.target.value)}
+                    onBlur={() =>
+                      setDurasiHariInput(String(Math.min(30, Math.max(1, durasiHari || 1))))
                     }
                     className={inputClass}
                   />
