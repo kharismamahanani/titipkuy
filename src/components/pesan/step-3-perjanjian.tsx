@@ -17,6 +17,7 @@ import { tkErrorClass } from "@/lib/form-style";
 import { formatRupiah } from "@/lib/utils";
 import { CHECKLIST_ITEMS, DEKLARASI_ITEM, MOTOR_ITEM } from "@/lib/checklist-items";
 import { hitungPremi, tentukanTier } from "@/lib/ganti-rugi";
+import { hargaAntarJemput, labelLayananAntarJemput } from "@/types/antar-jemput";
 import type { ChecklistData, PesanFormData } from "@/types/pesan";
 
 interface Step3Props {
@@ -106,11 +107,20 @@ export function Step3Perjanjian({
             <span className="font-bold text-tk-charcoal">{formatRupiah(premi)}</span>
           </div>
         )}
-        {formData.antarJemputOption && (
+        {formData.antarJemputSelection && (
           <div className="flex justify-between">
-            <span className="text-tk-muted">Antar-jemput</span>
+            <span className="text-tk-muted">
+              {formData.antarJemputSelection.option.label} —{" "}
+              {labelLayananAntarJemput(formData.antarJemputSelection.layanan)}
+            </span>
             <span className="font-bold text-tk-charcoal">
-              {formData.antarJemputOption.label} — +{formatRupiah(formData.antarJemputOption.harga)}
+              +
+              {formatRupiah(
+                hargaAntarJemput(
+                  formData.antarJemputSelection.option,
+                  formData.antarJemputSelection.layanan
+                )
+              )}
             </span>
           </div>
         )}
@@ -118,7 +128,14 @@ export function Step3Perjanjian({
           <span className="font-extrabold text-tk-charcoal">TOTAL</span>
           <span className="text-lg font-extrabold text-tk-orange">
             {formatRupiah(
-              (paket?.harga ?? 0) + premi + (formData.antarJemputOption?.harga ?? 0)
+              (paket?.harga ?? 0) +
+                premi +
+                (formData.antarJemputSelection
+                  ? hargaAntarJemput(
+                      formData.antarJemputSelection.option,
+                      formData.antarJemputSelection.layanan
+                    )
+                  : 0)
             )}
           </span>
         </div>

@@ -79,7 +79,9 @@ export function AntarJemputManager({ initialOptions }: AntarJemputManagerProps) 
               <th className="px-4 py-3 font-bold">Tipe</th>
               <th className="px-4 py-3 font-bold">Radius</th>
               <th className="px-4 py-3 font-bold">Kapasitas</th>
-              <th className="px-4 py-3 font-bold">Harga</th>
+              <th className="px-4 py-3 font-bold">Jemput Saja</th>
+              <th className="px-4 py-3 font-bold">Antar Saja</th>
+              <th className="px-4 py-3 font-bold">Jemput + Antar</th>
               <th className="px-4 py-3 font-bold">Status Aktif</th>
               <th className="px-4 py-3 font-bold">Aksi</th>
             </tr>
@@ -87,7 +89,7 @@ export function AntarJemputManager({ initialOptions }: AntarJemputManagerProps) 
           <tbody>
             {initialOptions.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-6 text-center text-tk-muted">
+                <td colSpan={9} className="px-4 py-6 text-center text-tk-muted">
                   Belum ada opsi antar-jemput. Klik &quot;Tambah Opsi&quot; untuk mulai.
                 </td>
               </tr>
@@ -104,7 +106,9 @@ export function AntarJemputManager({ initialOptions }: AntarJemputManagerProps) 
                 <td className="px-4 py-3 capitalize text-tk-charcoal">{option.tipe}</td>
                 <td className="px-4 py-3 text-tk-charcoal">{option.radiusLabel}</td>
                 <td className="px-4 py-3 text-tk-muted">{option.kapasitasLabel ?? "-"}</td>
-                <td className="px-4 py-3 text-tk-charcoal">{formatRupiah(option.harga)}</td>
+                <td className="px-4 py-3 text-tk-charcoal">{formatRupiah(option.hargaJemputSaja)}</td>
+                <td className="px-4 py-3 text-tk-charcoal">{formatRupiah(option.hargaAntarSaja)}</td>
+                <td className="px-4 py-3 text-tk-charcoal">{formatRupiah(option.hargaJemputDanAntar)}</td>
                 <td className="px-4 py-3">
                   <Switch
                     checked={option.aktif}

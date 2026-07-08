@@ -1,9 +1,11 @@
-import { addDays } from "date-fns";
+import { addDays, format } from "date-fns";
+import { id as localeId } from "date-fns/locale";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { incrementSlotUsage } from "@/lib/slot";
+import { cariSesiTersedia, incrementSlotUsage } from "@/lib/slot";
 import { bookingRatelimit, getClientIp } from "@/lib/rate-limit";
 import { toUtcMidnightFromLocalDate } from "@/lib/date-utils";
+import { AKTIF_HUB_KEYS } from "@/lib/constants";
 import { TransaksiSchema } from "@/lib/schemas";
 
 export async function POST(request: Request) {
@@ -48,6 +50,8 @@ export async function POST(request: Request) {
       penjemputan,
       metodePengiriman,
       antarJemputId,
+      layananJemput: layananJemputInput,
+      layananAntar: layananAntarInput,
     } = parsed.data;
 
     const paket = await prisma.paket.findUnique({ where: { id: paketId } });
@@ -83,7 +87,16 @@ export async function POST(request: Request) {
       );
     }
 
+    const tanggalMasukDate = new Date(tanggalMasuk);
+    const tanggalJatuhTempo = addDays(tanggalMasukDate, paket.durasiHari ?? 1);
+    const ipAddress = request.headers.get("x-forwarded-for") ?? undefined;
+    const userAgent = request.headers.get("user-agent") ?? undefined;
+
     let armadaTersediaId: string | null = null;
+    let layananJemput = false;
+    let layananAntar = false;
+    let jemputSlot: { armadaId: string; sesiWaktu: string; tanggal: Date } | null = null;
+    let antarSlot: { armadaId: string; sesiWaktu: string; tanggal: Date } | null = null;
 
     if (antarJemputId) {
       const antarJemputOption = await prisma.antarJemputOption.findUnique({
@@ -96,14 +109,57 @@ export async function POST(request: Request) {
         );
       }
 
+      // Default ke Jemput Saja untuk kompatibilitas dengan klien lama yang
+      // hanya mengirim antarJemputId tanpa flag layanan.
+      layananJemput = layananJemputInput ?? !layananAntarInput;
+      layananAntar = layananAntarInput ?? false;
+
       // AntarJemputOption menyimpan harga & pilihan untuk pelanggan, tapi
-      // ketersediaan armadanya tetap dikelola lewat tabel Armada (tipeArmada
-      // mencocokkan AntarJemputOption.tipeArmada dengan Armada.tipe).
-      if (antarJemputOption.tipeArmada) {
-        const armadaTersedia = await prisma.armada.findFirst({
-          where: { tipe: antarJemputOption.tipeArmada, aktif: true },
-        });
-        if (!armadaTersedia) {
+      // ketersediaan armadanya tetap dikelola lewat tabel Armada + SlotArmada
+      // (tipeArmada mencocokkan AntarJemputOption.tipeArmada dengan
+      // Armada.tipe). Hub belum dipilih pelanggan di alur ini, jadi dicek
+      // terhadap hub aktif (saat ini hanya satu hub yang beroperasi).
+      const hubUntukCekSlot = AKTIF_HUB_KEYS[0];
+      const tipeArmada = antarJemputOption.tipeArmada as "motor" | "mobil" | null;
+
+      if (tipeArmada && hubUntukCekSlot) {
+        if (layananJemput) {
+          const found = await cariSesiTersedia(
+            format(tanggalMasukDate, "yyyy-MM-dd"),
+            hubUntukCekSlot,
+            tipeArmada
+          );
+          if (!found) {
+            return NextResponse.json(
+              {
+                error: `Armada penuh untuk tanggal penjemputan (${format(tanggalMasukDate, "d MMMM yyyy", { locale: localeId })}). Pilih armada lain atau ambil sendiri ke Hub.`,
+              },
+              { status: 409 }
+            );
+          }
+          jemputSlot = { ...found, tanggal: tanggalMasukDate };
+          armadaTersediaId = found.armadaId;
+        }
+
+        if (layananAntar) {
+          const found = await cariSesiTersedia(
+            format(tanggalJatuhTempo, "yyyy-MM-dd"),
+            hubUntukCekSlot,
+            tipeArmada
+          );
+          if (!found) {
+            return NextResponse.json(
+              {
+                error: `Armada penuh untuk tanggal pengantaran (${format(tanggalJatuhTempo, "d MMMM yyyy", { locale: localeId })}). Pilih armada lain atau ambil sendiri ke Hub.`,
+              },
+              { status: 409 }
+            );
+          }
+          antarSlot = { ...found, tanggal: tanggalJatuhTempo };
+          armadaTersediaId = armadaTersediaId ?? found.armadaId;
+        }
+
+        if (!jemputSlot && !antarSlot) {
           return NextResponse.json(
             {
               error:
@@ -112,17 +168,8 @@ export async function POST(request: Request) {
             { status: 409 }
           );
         }
-        // Dipakai untuk Rekap Jadwal Perjalanan di panel admin — flow
-        // pelanggan tidak memilih sesi spesifik, jadi sesiPenjemputan
-        // dibiarkan null dan tanggalPenjemputan mengikuti tanggalMasuk.
-        armadaTersediaId = armadaTersedia.id;
       }
     }
-
-    const tanggalMasukDate = new Date(tanggalMasuk);
-    const tanggalJatuhTempo = addDays(tanggalMasukDate, paket.durasiHari ?? 1);
-    const ipAddress = request.headers.get("x-forwarded-for") ?? undefined;
-    const userAgent = request.headers.get("user-agent") ?? undefined;
 
     const transaksi = await prisma.$transaction(async (tx) => {
       const created = await tx.transaksi.create({
@@ -152,6 +199,8 @@ export async function POST(request: Request) {
           tanggalMasuk: tanggalMasukDate,
           tanggalJatuhTempo,
           metodePengiriman: metodePengiriman ?? null,
+          layananJemput,
+          layananAntar,
           antarJemputOption: antarJemputId
             ? { connect: { id: antarJemputId } }
             : undefined,
@@ -160,12 +209,12 @@ export async function POST(request: Request) {
             : penjemputan
               ? { connect: { id: penjemputan.armadaId } }
               : undefined,
-          tanggalPenjemputan: armadaTersediaId
-            ? toUtcMidnightFromLocalDate(tanggalMasukDate)
-            : penjemputan
-              ? new Date(penjemputan.tanggal)
+          tanggalPenjemputan: penjemputan
+            ? new Date(penjemputan.tanggal)
+            : jemputSlot
+              ? toUtcMidnightFromLocalDate(tanggalMasukDate)
               : null,
-          sesiPenjemputan: penjemputan ? penjemputan.sesiWaktu : null,
+          sesiPenjemputan: penjemputan ? penjemputan.sesiWaktu : jemputSlot?.sesiWaktu ?? null,
           perjanjianDisetujui: true,
           waktuPersetujuan: new Date(),
           ipAddress,
@@ -187,6 +236,24 @@ export async function POST(request: Request) {
           tanggal: penjemputan.tanggal,
           sesiWaktu: penjemputan.sesiWaktu,
           hub: penjemputan.hub,
+        });
+      }
+
+      const hubUntukSlot = AKTIF_HUB_KEYS[0];
+      if (jemputSlot && hubUntukSlot) {
+        await incrementSlotUsage(tx, {
+          armadaId: jemputSlot.armadaId,
+          tanggal: format(jemputSlot.tanggal, "yyyy-MM-dd"),
+          sesiWaktu: jemputSlot.sesiWaktu,
+          hub: hubUntukSlot,
+        });
+      }
+      if (antarSlot && hubUntukSlot) {
+        await incrementSlotUsage(tx, {
+          armadaId: antarSlot.armadaId,
+          tanggal: format(antarSlot.tanggal, "yyyy-MM-dd"),
+          sesiWaktu: antarSlot.sesiWaktu,
+          hub: hubUntukSlot,
         });
       }
 

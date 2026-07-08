@@ -19,7 +19,7 @@ import { armadaYangBisa } from "@/lib/armada-rules";
 import { HUB_CONFIG, JAM_DROP_OFF_MANDIRI } from "@/lib/constants";
 import type { Paket } from "@/types/paket";
 import type { DeklarasiData, DokumenMotorData, MetodePengiriman } from "@/types/pesan";
-import type { AntarJemputOption } from "@/types/antar-jemput";
+import type { AntarJemputSelection } from "@/types/antar-jemput";
 
 const MAX_UPLOAD_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -41,7 +41,7 @@ interface Step2Props {
   deklarasi: DeklarasiData;
   dokumenMotor: DokumenMotorData;
   metodePengiriman: MetodePengiriman;
-  antarJemputOption: AntarJemputOption | null;
+  antarJemputSelection: AntarJemputSelection | null;
   preselectedPaketId?: string;
   preselectedMode?: "harian" | "bulanan";
   onPaketChange: (paket: Paket) => void;
@@ -49,7 +49,7 @@ interface Step2Props {
   onDeklarasiChange: (data: DeklarasiData) => void;
   onDokumenMotorChange: (data: DokumenMotorData) => void;
   onMetodePengirimanChange: (metode: MetodePengiriman) => void;
-  onAntarJemputOptionChange: (option: AntarJemputOption | null) => void;
+  onAntarJemputSelectionChange: (selection: AntarJemputSelection | null) => void;
 }
 
 export function Step2PaketTanggal({
@@ -59,7 +59,7 @@ export function Step2PaketTanggal({
   deklarasi,
   dokumenMotor,
   metodePengiriman,
-  antarJemputOption,
+  antarJemputSelection,
   preselectedPaketId,
   preselectedMode,
   onPaketChange,
@@ -67,7 +67,7 @@ export function Step2PaketTanggal({
   onDeklarasiChange,
   onDokumenMotorChange,
   onMetodePengirimanChange,
-  onAntarJemputOptionChange,
+  onAntarJemputSelectionChange,
 }: Step2Props) {
   const [paketList, setPaketList] = useState<Paket[]>([]);
   const [state, setState] = useState<"loading" | "success" | "error">("loading");
@@ -152,7 +152,7 @@ export function Step2PaketTanggal({
   useEffect(() => {
     if (tanggalMasuk && !armadaValid && metodePengiriman === "armada") {
       onMetodePengirimanChange("mandiri");
-      onAntarJemputOptionChange(null);
+      onAntarJemputSelectionChange(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tanggalMasuk, armadaValid]);
@@ -433,7 +433,7 @@ export function Step2PaketTanggal({
               type="button"
               onClick={() => {
                 onMetodePengirimanChange("mandiri");
-                onAntarJemputOptionChange(null);
+                onAntarJemputSelectionChange(null);
               }}
               className={cn(
                 "w-full rounded-lg border-2 border-tk-charcoal px-4 py-3 text-left text-sm transition-colors",
@@ -459,13 +459,13 @@ export function Step2PaketTanggal({
 
           {metodePengiriman === "armada" ? (
             <AntarJemputPicker
-              value={antarJemputOption}
-              onChange={onAntarJemputOptionChange}
+              value={antarJemputSelection}
+              onChange={onAntarJemputSelectionChange}
               hideMandiriOption
               allowedArmada={armadaBisa}
               onOutOfRange={() => {
                 onMetodePengirimanChange("mandiri");
-                onAntarJemputOptionChange(null);
+                onAntarJemputSelectionChange(null);
               }}
             />
           ) : (

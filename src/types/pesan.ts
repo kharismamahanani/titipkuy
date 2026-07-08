@@ -1,5 +1,5 @@
 import type { Paket } from "@/types/paket";
-import type { AntarJemputOption } from "@/types/antar-jemput";
+import type { AntarJemputSelection } from "@/types/antar-jemput";
 
 export const KAMPUS_OPTIONS = ["UB", "UM", "UIN", "Lainnya"] as const;
 export type Kampus = (typeof KAMPUS_OPTIONS)[number];
@@ -45,7 +45,7 @@ export interface PesanFormData {
   deklarasi: DeklarasiData;
   dokumenMotor: DokumenMotorData;
   metodePengiriman: MetodePengiriman;
-  antarJemputOption: AntarJemputOption | null;
+  antarJemputSelection: AntarJemputSelection | null;
   checklist: ChecklistData;
   tandaTanganDataUrl: string | null;
 }
@@ -69,7 +69,7 @@ export const INITIAL_FORM_DATA: PesanFormData = {
     bpkbUrl: null,
   },
   metodePengiriman: "armada",
-  antarJemputOption: null,
+  antarJemputSelection: null,
   checklist: {
     limitGantiRugi: false,
     barangTerlarang: false,

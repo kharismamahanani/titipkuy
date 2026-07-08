@@ -3,6 +3,8 @@ import { format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import { formatRupiah } from "@/lib/utils";
 import { kodeTransaksi } from "@/lib/kode";
+import { hargaAntarJemputTransaksi } from "@/lib/harga-antar-jemput";
+import { labelLayananAntarJemput } from "@/types/antar-jemput";
 import {
   PERJANJIAN_STANDAR,
   ADENDUM_BARANG_BERNILAI_TINGGI,
@@ -80,9 +82,16 @@ interface PerjanjianPdfDocumentProps {
 
 export function PerjanjianPdfDocument({ transaksi }: PerjanjianPdfDocumentProps) {
   const { pelanggan, paket, antarJemputOption } = transaksi;
-  const totalAkhir = paket.harga + (antarJemputOption?.harga ?? 0);
+  const hargaAntarJemputDipilih = hargaAntarJemputTransaksi(transaksi);
+  const totalAkhir = paket.harga + hargaAntarJemputDipilih;
   const kode = kodeTransaksi(transaksi.nomorUrut);
   const tanggalDibuat = formatTanggal(transaksi.createdAt);
+  const layananLabel =
+    transaksi.layananJemput && transaksi.layananAntar
+      ? "jemput-dan-antar"
+      : transaksi.layananAntar
+        ? "antar-saja"
+        : "jemput-saja";
 
   return (
     <Document title={`Pernyataan Kesediaan ${kode}`}>
@@ -101,7 +110,7 @@ export function PerjanjianPdfDocument({ transaksi }: PerjanjianPdfDocumentProps)
             label="Antar-Jemput"
             value={
               antarJemputOption
-                ? `${antarJemputOption.label} (+${formatRupiah(antarJemputOption.harga)})`
+                ? `${antarJemputOption.label} — ${labelLayananAntarJemput(layananLabel)} (+${formatRupiah(hargaAntarJemputDipilih)})`
                 : "Mandiri (Grab/Lalamove)"
             }
           />

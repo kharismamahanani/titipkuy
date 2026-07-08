@@ -11,6 +11,7 @@ import { TandaiLunasButton } from "@/components/admin/tandai-lunas-button";
 import { tkButtonVariants } from "@/components/ui/tk-button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { cn } from "@/lib/utils";
+import { hargaAntarJemputTransaksi } from "@/lib/harga-antar-jemput";
 
 // Data berubah tiap ada transaksi baru/dibayar — jangan biarkan Next.js
 // menyimpannya sebagai halaman statis, selalu render ulang dari database.
@@ -179,7 +180,7 @@ export default async function AdminDashboardPage() {
                         nomorUrut={t.nomorUrut}
                         pelanggan={t.pelanggan}
                         paket={t.paket}
-                        antarJemputHarga={t.antarJemputOption?.harga}
+                        antarJemputHarga={hargaAntarJemputTransaksi(t)}
                         tanggalJatuhTempo={t.tanggalJatuhTempo}
                         statusBayar={t.statusBayar}
                       />

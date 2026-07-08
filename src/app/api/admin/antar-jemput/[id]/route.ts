@@ -7,12 +7,29 @@ export async function PUT(
 ) {
   try {
     const body = await request.json();
-    const { label, tipe, radiusLabel, harga, kapasitasLabel, tipeArmada, aktif, urutan } =
-      body ?? {};
+    const {
+      label,
+      tipe,
+      radiusLabel,
+      hargaJemputSaja,
+      hargaAntarSaja,
+      hargaJemputDanAntar,
+      kapasitasLabel,
+      tipeArmada,
+      aktif,
+      urutan,
+    } = body ?? {};
 
-    if (!label || !tipe || !radiusLabel || harga == null) {
+    if (
+      !label ||
+      !tipe ||
+      !radiusLabel ||
+      hargaJemputSaja == null ||
+      hargaAntarSaja == null ||
+      hargaJemputDanAntar == null
+    ) {
       return NextResponse.json(
-        { error: "Label, tipe, radius, dan harga wajib diisi" },
+        { error: "Label, tipe, radius, dan ketiga harga layanan wajib diisi" },
         { status: 400 }
       );
     }
@@ -23,7 +40,10 @@ export async function PUT(
         label,
         tipe,
         radiusLabel,
-        harga: Number(harga),
+        harga: Number(hargaJemputSaja),
+        hargaJemputSaja: Number(hargaJemputSaja),
+        hargaAntarSaja: Number(hargaAntarSaja),
+        hargaJemputDanAntar: Number(hargaJemputDanAntar),
         kapasitasLabel: kapasitasLabel || null,
         tipeArmada: tipeArmada || tipe,
         aktif: !!aktif,

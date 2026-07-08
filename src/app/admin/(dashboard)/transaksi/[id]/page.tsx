@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { format } from "date-fns";
@@ -14,6 +15,7 @@ import { TandaiBarangTibaButton } from "@/components/admin/tandai-barang-tiba-bu
 import { TandaiLunasButton } from "@/components/admin/tandai-lunas-button";
 import { BatalkanTransaksiButton } from "@/components/admin/batalkan-transaksi-button";
 import { GeneratePdfButton } from "@/components/admin/generate-pdf-button";
+import { hargaAntarJemputTransaksi } from "@/lib/harga-antar-jemput";
 import type { TransaksiDetail } from "@/types/transaksi";
 
 export const dynamic = "force-dynamic";
@@ -27,6 +29,7 @@ async function getTransaksi(id: string) {
       fotoMasuk: true,
       fotoKeluar: true,
       antarJemputOption: true,
+      armada: true,
       barangLabel: true,
     },
   });
@@ -92,7 +95,10 @@ export default async function AdminTransaksiDetailPage({
     hub: transaksi.hub,
     metodePengiriman: transaksi.metodePengiriman as "armada" | "mandiri" | null,
     barangTibaMandiri: transaksi.barangTibaMandiri,
+    layananJemput: transaksi.layananJemput,
+    layananAntar: transaksi.layananAntar,
     antarJemputOption: transaksi.antarJemputOption,
+    armada: transaksi.armada,
     tandaTanganUrl: transaksi.tandaTanganUrl,
     pdfUrl: transaksi.pdfUrl,
     createdAt: transaksi.createdAt.toISOString(),
@@ -118,11 +124,14 @@ export default async function AdminTransaksiDetailPage({
         <Row
           label="Metode Pengiriman"
           value={
-            transaksi.metodePengiriman === "armada"
-              ? `🛵 Dijemput armada${transaksi.antarJemputOption ? ` — ${transaksi.antarJemputOption.label}` : ""} (${format(transaksi.tanggalMasuk, "d MMM yyyy", { locale: localeId })})`
-              : transaksi.metodePengiriman === "mandiri"
-                ? "📦 Kirim mandiri"
-                : "-"
+            <MetodePengirimanValue
+              layananJemput={transaksi.layananJemput}
+              layananAntar={transaksi.layananAntar}
+              armadaNama={transaksi.armada?.nama ?? null}
+              tanggalMasuk={transaksi.tanggalMasuk}
+              tanggalJatuhTempo={transaksi.tanggalJatuhTempo}
+              metodePengiriman={transaksiDetail.metodePengiriman}
+            />
           }
         />
         <Row
@@ -230,7 +239,7 @@ export default async function AdminTransaksiDetailPage({
           nomorUrut={transaksi.nomorUrut}
           pelanggan={pelanggan}
           paket={paket}
-          antarJemputHarga={transaksi.antarJemputOption?.harga}
+          antarJemputHarga={hargaAntarJemputTransaksi(transaksiDetail)}
           tanggalJatuhTempo={transaksi.tanggalJatuhTempo}
           statusBayar={transaksi.statusBayar}
         />
@@ -246,11 +255,49 @@ export default async function AdminTransaksiDetailPage({
   );
 }
 
-function Row({ label, value }: { label: string; value: string }) {
+function Row({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="flex justify-between border-b border-[#D6CEC4] py-1 last:border-0">
       <span className="text-tk-muted">{label}</span>
       <span className="font-bold text-tk-charcoal">{value}</span>
+    </div>
+  );
+}
+
+function MetodePengirimanValue({
+  layananJemput,
+  layananAntar,
+  armadaNama,
+  tanggalMasuk,
+  tanggalJatuhTempo,
+  metodePengiriman,
+}: {
+  layananJemput: boolean;
+  layananAntar: boolean;
+  armadaNama: string | null;
+  tanggalMasuk: Date;
+  tanggalJatuhTempo: Date;
+  metodePengiriman: "armada" | "mandiri" | null;
+}) {
+  if (!layananJemput && !layananAntar) {
+    return <>{metodePengiriman === "mandiri" ? "📦 Kirim mandiri" : "-"}</>;
+  }
+
+  const fmt = (d: Date) => format(d, "d MMM yyyy", { locale: localeId });
+  const armadaSuffix = armadaNama ? ` (Armada ${armadaNama})` : "";
+
+  return (
+    <div className="space-y-0.5 text-right">
+      {layananJemput ? (
+        <p>{layananAntar ? "🔄" : "🛵"} Jemput: {fmt(tanggalMasuk)}{armadaSuffix}</p>
+      ) : (
+        <p>Pengantaran barang: Datang sendiri ke Hub</p>
+      )}
+      {layananAntar ? (
+        <p>📦 Antar: {fmt(tanggalJatuhTempo)}{armadaSuffix}</p>
+      ) : (
+        <p>Pengambilan: Datang sendiri ke Hub</p>
+      )}
     </div>
   );
 }

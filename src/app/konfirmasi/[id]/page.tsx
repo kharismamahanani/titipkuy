@@ -16,6 +16,7 @@ import { ADMIN_NAME, formatWhatsAppDisplay, getWhatsAppUrl } from "@/constants/s
 import { uploadToStorage } from "@/lib/supabase";
 import { HUB_CONFIG, JAM_DROP_OFF_MANDIRI } from "@/lib/constants";
 import { kodeTransaksi } from "@/lib/kode";
+import { hargaAntarJemputTransaksi } from "@/lib/harga-antar-jemput";
 import type { TransaksiDetail } from "@/types/transaksi";
 
 type FetchState = "loading" | "success" | "error";
@@ -178,6 +179,30 @@ export default function KonfirmasiPage({ params }: { params: { id: string } }) {
           </TkCard>
         )}
 
+        {(transaksi.layananJemput || transaksi.layananAntar) && (
+          <TkCard className="space-y-1 text-sm text-tk-charcoal">
+            <p className="font-extrabold">🚚 Jadwal Antar-Jemput</p>
+            {transaksi.layananJemput ? (
+              <p>
+                {transaksi.layananAntar ? "🔄" : "🛵"} Jemput:{" "}
+                {format(new Date(transaksi.tanggalMasuk), "d MMMM yyyy", { locale: localeId })}
+                {transaksi.armada ? ` (Armada ${transaksi.armada.nama})` : ""}
+              </p>
+            ) : (
+              <p>Pengantaran barang: Datang sendiri ke Hub</p>
+            )}
+            {transaksi.layananAntar ? (
+              <p>
+                📦 Antar:{" "}
+                {format(new Date(transaksi.tanggalJatuhTempo), "d MMMM yyyy", { locale: localeId })}
+                {transaksi.armada ? ` (Armada ${transaksi.armada.nama})` : ""}
+              </p>
+            ) : (
+              <p>Pengambilan: Datang sendiri ke Hub</p>
+            )}
+          </TkCard>
+        )}
+
         <TkCard className="space-y-2 text-sm">
           <SummaryRow label="Nama" value={pelanggan.nama} />
           <SummaryRow label="Paket" value={paket.nama} />
@@ -191,15 +216,13 @@ export default function KonfirmasiPage({ params }: { params: { id: string } }) {
           {transaksi.antarJemputOption && (
             <SummaryRow
               label="Antar-Jemput"
-              value={`+${formatRupiah(transaksi.antarJemputOption.harga)}`}
+              value={`+${formatRupiah(hargaAntarJemputTransaksi(transaksi))}`}
             />
           )}
           <SummaryRow
             label="TOTAL"
             value={formatRupiah(
-              paket.harga +
-                (transaksi.premiGantiRugi ?? 0) +
-                (transaksi.antarJemputOption?.harga ?? 0)
+              paket.harga + (transaksi.premiGantiRugi ?? 0) + hargaAntarJemputTransaksi(transaksi)
             )}
           />
           <SummaryRow

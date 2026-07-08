@@ -8,14 +8,38 @@ import { cn, formatRupiah } from "@/lib/utils";
 import { tkButtonVariants } from "@/components/ui/tk-button";
 import { JAM_DROP_OFF_MANDIRI, JAM_OPERASIONAL_HUB_SUHAT } from "@/lib/constants";
 import { useDeteksiLokasi } from "@/hooks/use-deteksi-lokasi";
-import type { AntarJemputOption } from "@/types/antar-jemput";
+import {
+  hargaAntarJemput,
+  labelLayananAntarJemput,
+  type AntarJemputOption,
+  type AntarJemputSelection,
+  type LayananAntarJemput,
+} from "@/types/antar-jemput";
 import type { TipeArmada } from "@/lib/armada-rules";
 
 type RadiusLabel = "<3km" | "3-6km";
 
+const LAYANAN_LIST: { value: LayananAntarJemput; icon: string; deskripsi: string }[] = [
+  {
+    value: "jemput-saja",
+    icon: "🛵",
+    deskripsi: "Kami jemput barang, kamu ambil sendiri ke Hub saat masa titip selesai",
+  },
+  {
+    value: "antar-saja",
+    icon: "📦",
+    deskripsi: "Kamu antar barang sendiri ke Hub, kami antarkan balik saat selesai",
+  },
+  {
+    value: "jemput-dan-antar",
+    icon: "🔄",
+    deskripsi: "Paling praktis — kami jemput di awal, kami antar saat selesai",
+  },
+];
+
 interface AntarJemputPickerProps {
-  value: AntarJemputOption | null;
-  onChange: (option: AntarJemputOption | null) => void;
+  value: AntarJemputSelection | null;
+  onChange: (selection: AntarJemputSelection | null) => void;
   hideMandiriOption?: boolean;
   allowedArmada?: TipeArmada;
   onOutOfRange?: () => void;
@@ -31,6 +55,7 @@ export function AntarJemputPicker({
   const [options, setOptions] = useState<AntarJemputOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [manualRadius, setManualRadius] = useState<RadiusLabel | null>(null);
+  const [pendingOption, setPendingOption] = useState<AntarJemputOption | null>(null);
   const { detect, isDetecting, result, error, isPermissionDenied, reset } = useDeteksiLokasi();
 
   useEffect(() => {
@@ -68,6 +93,8 @@ export function AntarJemputPicker({
   const visibleOptions = options
     .filter((o) => (allowedArmada === "mobil" ? o.tipe !== "motor" : true))
     .filter((o) => o.radiusLabel === effectiveRadius);
+
+  const selectedOption = value?.option ?? pendingOption;
 
   if (isLoading) {
     return (
@@ -215,7 +242,10 @@ export function AntarJemputPicker({
           {!hideMandiriOption && (
             <button
               type="button"
-              onClick={() => onChange(null)}
+              onClick={() => {
+                setPendingOption(null);
+                onChange(null);
+              }}
               className={cn(
                 "w-full rounded-lg border-2 border-tk-charcoal px-4 py-2.5 text-left text-sm transition-colors",
                 value === null
@@ -228,12 +258,15 @@ export function AntarJemputPicker({
           )}
 
           {visibleOptions.map((option) => {
-            const isSelected = value?.id === option.id;
+            const isSelected = selectedOption?.id === option.id;
             return (
               <button
                 key={option.id}
                 type="button"
-                onClick={() => onChange(option)}
+                onClick={() => {
+                  setPendingOption(option);
+                  if (value?.option.id !== option.id) onChange(null);
+                }}
                 className={cn(
                   "w-full rounded-lg border-2 border-tk-charcoal px-4 py-2.5 text-left text-sm transition-colors",
                   isSelected
@@ -243,7 +276,7 @@ export function AntarJemputPicker({
               >
                 <span className="flex items-center justify-between">
                   <span>{option.label}</span>
-                  <span className="font-bold">+{formatRupiah(option.harga)}</span>
+                  <span className="font-bold">mulai {formatRupiah(option.hargaJemputSaja)}</span>
                 </span>
                 {option.kapasitasLabel && (
                   <span
@@ -265,6 +298,58 @@ export function AntarJemputPicker({
               dengan admin via WhatsApp.
             </p>
           )}
+        </div>
+      )}
+
+      {selectedOption && (
+        <div className="space-y-2">
+          <Label className={tkLabelClass}>Pilih jenis layanan</Label>
+          {LAYANAN_LIST.map((layananItem) => {
+            const isSelected = value?.option.id === selectedOption.id && value?.layanan === layananItem.value;
+            const harga = hargaAntarJemput(selectedOption, layananItem.value);
+            const hemat =
+              layananItem.value === "jemput-dan-antar"
+                ? Math.max(
+                    0,
+                    selectedOption.hargaJemputSaja + selectedOption.hargaAntarSaja - selectedOption.hargaJemputDanAntar
+                  )
+                : 0;
+            return (
+              <button
+                key={layananItem.value}
+                type="button"
+                onClick={() => onChange({ option: selectedOption, layanan: layananItem.value })}
+                className={cn(
+                  "w-full rounded-lg border-2 border-tk-charcoal px-4 py-2.5 text-left text-sm transition-colors",
+                  isSelected
+                    ? "bg-tk-charcoal text-tk-cream"
+                    : "bg-white text-tk-charcoal hover:bg-tk-cream-alt"
+                )}
+              >
+                <span className="flex items-center justify-between">
+                  <span>
+                    {layananItem.icon} {labelLayananAntarJemput(layananItem.value)}
+                  </span>
+                  <span className="font-bold">+{formatRupiah(harga)}</span>
+                </span>
+                <span
+                  className={cn("mt-1 block text-xs", isSelected ? "text-tk-cream/80" : "text-tk-muted")}
+                >
+                  {layananItem.deskripsi}
+                </span>
+                {hemat > 0 && (
+                  <span
+                    className={cn(
+                      "mt-1 block text-xs font-bold",
+                      isSelected ? "text-tk-cream" : "text-tk-sage-dark"
+                    )}
+                  >
+                    Hemat {formatRupiah(hemat)}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       )}
 

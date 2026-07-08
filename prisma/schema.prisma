@@ -66,7 +66,12 @@ model Transaksi {
   metodePengiriman String?
   // Dicentang admin setelah barang kiriman mandiri benar-benar tiba di hub
   barangTibaMandiri Boolean  @default(false)
-  // Layanan antar-jemput (add-on opsional, bukan paket terpisah)
+  // Layanan antar-jemput (add-on opsional, bukan paket terpisah). Jemput
+  // dan Antar dipilih independen — pelanggan bisa pilih salah satu atau
+  // keduanya (harga bundling di AntarJemputOption.hargaJemputDanAntar).
+  // Armada yang sama dipakai untuk kedua arah, lihat armadaId di bawah.
+  layananJemput     Boolean  @default(false)
+  layananAntar      Boolean  @default(false)
   antarJemputOption AntarJemputOption? @relation(fields:[antarJemputId], references:[id])
   antarJemputId     String?
   // Booking armada penjemputan (diisi saat incrementSlotUsage dipanggil di
@@ -187,7 +192,13 @@ model AntarJemputOption {
   label          String   // "Motor - Radius <3km", "Mobil - Radius 3-6km"
   tipe           String   // "motor" | "mobil"
   radiusLabel    String   // "<3km" | "3-6km"
-  harga          Int
+  // Harga per varian layanan — Jemput Saja, Antar Saja, dan Jemput+Antar
+  // (bundle, biasanya didiskon dari jumlah keduanya). `harga` lama tetap
+  // disimpan sinkron dengan hargaJemputSaja untuk kompatibilitas data lama.
+  harga               Int
+  hargaJemputSaja     Int      @default(0)
+  hargaAntarSaja      Int      @default(0)
+  hargaJemputDanAntar Int      @default(0)
   kapasitasLabel String?  // "Maks. 2 Box S atau 1 Koper Kabin"
   // Referensi opsional ke Armada.tipe ("motor" | "mobil") — dipakai untuk
   // mencocokkan opsi ini dengan kapasitas slot Armada saat booking, tanpa

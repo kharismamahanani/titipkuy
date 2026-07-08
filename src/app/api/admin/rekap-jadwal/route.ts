@@ -4,6 +4,8 @@ import { id as localeId } from "date-fns/locale";
 import { prisma } from "@/lib/prisma";
 import { toUtcMidnightFromLocalDate } from "@/lib/date-utils";
 
+type JenisLayanan = "jemput" | "antar";
+
 // range=hari (default, hari ini) | minggu (minggu ini) | semua (tanpa filter tanggal)
 export async function GET(request: Request) {
   try {
@@ -24,20 +26,79 @@ export async function GET(request: Request) {
     }
     // range === "semua" -> tanggalFilter tetap undefined, tidak difilter tanggal
 
-    const bookings = await prisma.transaksi.findMany({
+    // Jemput dicek di tanggalMasuk, Antar dicek di tanggalJatuhTempo — satu
+    // transaksi bisa punya salah satu atau kedua entry, jadi filter tanggal
+    // di-OR-kan di kedua kolom lalu dipilah lagi per baris di bawah.
+    const transaksiList = await prisma.transaksi.findMany({
       where: {
         armadaId: { not: null },
-        ...(tanggalFilter ? { tanggalPenjemputan: tanggalFilter } : {}),
+        OR: [{ layananJemput: true }, { layananAntar: true }],
+        ...(tanggalFilter
+          ? {
+              OR: [
+                { layananJemput: true, tanggalMasuk: tanggalFilter },
+                { layananAntar: true, tanggalJatuhTempo: tanggalFilter },
+              ],
+            }
+          : {}),
       },
       include: {
         pelanggan: true,
         armada: true,
         antarJemputOption: true,
       },
-      orderBy: [{ tanggalPenjemputan: "asc" }, { sesiPenjemputan: "asc" }],
+      orderBy: [{ tanggalMasuk: "asc" }],
     });
 
-    return NextResponse.json({ data: bookings });
+    const data = transaksiList.flatMap((t) => {
+      const rows: {
+        id: string;
+        jenisLayanan: JenisLayanan;
+        tanggal: Date;
+        sesiWaktu: string | null;
+        statusTransaksi: typeof t.statusTransaksi;
+        pelanggan: { nama: string };
+        armada: { nama: string } | null;
+        antarJemputOption: { radiusLabel: string; label: string } | null;
+      }[] = [];
+
+      const dalamRange = (tanggal: Date) =>
+        !tanggalFilter || (tanggal >= tanggalFilter.gte && tanggal <= tanggalFilter.lte);
+
+      if (t.layananJemput && dalamRange(t.tanggalMasuk)) {
+        rows.push({
+          id: `${t.id}-jemput`,
+          jenisLayanan: "jemput",
+          tanggal: t.tanggalMasuk,
+          sesiWaktu: t.sesiPenjemputan,
+          statusTransaksi: t.statusTransaksi,
+          pelanggan: t.pelanggan,
+          armada: t.armada,
+          antarJemputOption: t.antarJemputOption,
+        });
+      }
+
+      if (t.layananAntar && dalamRange(t.tanggalJatuhTempo)) {
+        rows.push({
+          id: `${t.id}-antar`,
+          jenisLayanan: "antar",
+          tanggal: t.tanggalJatuhTempo,
+          // Antar tidak punya kolom sesi tersendiri — armada yang sama
+          // dipakai kedua arah, jadwal presisi dikoordinasikan admin.
+          sesiWaktu: null,
+          statusTransaksi: t.statusTransaksi,
+          pelanggan: t.pelanggan,
+          armada: t.armada,
+          antarJemputOption: t.antarJemputOption,
+        });
+      }
+
+      return rows;
+    });
+
+    data.sort((a, b) => a.tanggal.getTime() - b.tanggal.getTime());
+
+    return NextResponse.json({ data });
   } catch (error) {
     console.error("[GET /api/admin/rekap-jadwal]", error);
     return NextResponse.json({ error: "Gagal mengambil rekap jadwal" }, { status: 500 });

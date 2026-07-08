@@ -109,7 +109,15 @@ function PesanForm() {
           tandaTanganUrl,
           checklist: formData.checklist,
           metodePengiriman: formData.metodePengiriman,
-          antarJemputId: formData.antarJemputOption?.id || undefined,
+          antarJemputId: formData.antarJemputSelection?.option.id || undefined,
+          layananJemput:
+            formData.antarJemputSelection?.layanan === "jemput-saja" ||
+            formData.antarJemputSelection?.layanan === "jemput-dan-antar" ||
+            undefined,
+          layananAntar:
+            formData.antarJemputSelection?.layanan === "antar-saja" ||
+            formData.antarJemputSelection?.layanan === "jemput-dan-antar" ||
+            undefined,
         }),
       });
 
@@ -149,7 +157,7 @@ function PesanForm() {
               deklarasi={formData.deklarasi}
               dokumenMotor={formData.dokumenMotor}
               metodePengiriman={formData.metodePengiriman}
-              antarJemputOption={formData.antarJemputOption}
+              antarJemputSelection={formData.antarJemputSelection}
               preselectedPaketId={preselectedPaketId}
               preselectedMode={preselectedMode}
               onPaketChange={(paket) => setFormData((prev) => ({ ...prev, paket }))}
@@ -165,8 +173,8 @@ function PesanForm() {
               onMetodePengirimanChange={(metodePengiriman) =>
                 setFormData((prev) => ({ ...prev, metodePengiriman }))
               }
-              onAntarJemputOptionChange={(antarJemputOption) =>
-                setFormData((prev) => ({ ...prev, antarJemputOption }))
+              onAntarJemputSelectionChange={(antarJemputSelection) =>
+                setFormData((prev) => ({ ...prev, antarJemputSelection }))
               }
             />
           )}

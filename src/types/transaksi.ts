@@ -47,7 +47,10 @@ export interface TransaksiDetail {
   hub: string | null;
   metodePengiriman: "armada" | "mandiri" | null;
   barangTibaMandiri: boolean;
+  layananJemput: boolean;
+  layananAntar: boolean;
   antarJemputOption: AntarJemputOption | null;
+  armada: { id: string; nama: string; tipe: string } | null;
   tandaTanganUrl: string | null;
   pdfUrl: string | null;
   createdAt: string;

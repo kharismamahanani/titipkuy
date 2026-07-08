@@ -92,6 +92,30 @@ export async function getSlotAvailability(tanggal: string, hub: string) {
   };
 }
 
+// Dipakai alur add-on Antar-Jemput (customer tidak memilih sesi spesifik) —
+// cari sesi pertama pada tanggal & tipe armada yang diminta yang masih
+// punya sisa slot, supaya kapasitas harian armada tetap dijaga meski
+// pemesanan tidak melalui PenjemputanArmadaPicker.
+export async function cariSesiTersedia(
+  tanggal: string,
+  hub: string,
+  tipeArmada: "motor" | "mobil"
+): Promise<{ armadaId: string; sesiWaktu: string } | null> {
+  const availability = await getSlotAvailability(tanggal, hub);
+  if (availability.liburLocked) return null;
+
+  for (const sesiWaktu of Object.keys(availability.sesi)) {
+    const sesiInfo = availability.sesi[sesiWaktu as keyof typeof availability.sesi];
+    if (sesiInfo.locked) continue;
+    const info = sesiInfo[tipeArmada];
+    if (info.sisa > 0 && info.armadaId) {
+      return { armadaId: info.armadaId, sesiWaktu };
+    }
+  }
+
+  return null;
+}
+
 type PrismaClientOrTx = typeof prisma | Prisma.TransactionClient;
 
 export async function incrementSlotUsage(

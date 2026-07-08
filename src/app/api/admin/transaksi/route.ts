@@ -26,7 +26,7 @@ export async function GET(request: Request) {
     const [data, total] = await Promise.all([
       prisma.transaksi.findMany({
         where,
-        include: { pelanggan: true, paket: true, barangLabel: true },
+        include: { pelanggan: true, paket: true, barangLabel: true, antarJemputOption: true, armada: true },
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * limit,
         take: limit,

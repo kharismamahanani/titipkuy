@@ -12,33 +12,39 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { cn } from "@/lib/utils";
 import { tkSelectTriggerClass } from "@/lib/form-style";
 import { SLOT_SESI } from "@/lib/constants";
 
 type RangeFilter = "hari" | "minggu" | "semua";
 
-interface RekapBooking {
+interface RekapRow {
   id: string;
-  nomorUrut: number;
-  tanggalPenjemputan: string;
-  sesiPenjemputan: string | null;
+  jenisLayanan: "jemput" | "antar";
+  tanggal: string;
+  sesiWaktu: string | null;
   statusTransaksi: "AKTIF" | "SELESAI" | "DIBATALKAN";
   pelanggan: { nama: string };
   armada: { nama: string } | null;
   antarJemputOption: { radiusLabel: string; label: string } | null;
 }
 
+const JENIS_LAYANAN_LABEL: Record<RekapRow["jenisLayanan"], string> = {
+  jemput: "🛵 Jemput",
+  antar: "📦 Antar",
+};
+
 export function RekapJadwalArmada() {
   const [range, setRange] = useState<RangeFilter>("hari");
-  const [bookings, setBookings] = useState<RekapBooking[]>([]);
+  const [rows, setRows] = useState<RekapRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     setIsLoading(true);
     fetch(`/api/admin/rekap-jadwal?range=${range}`)
       .then((res) => res.json())
-      .then((result: { data: RekapBooking[] }) => setBookings(result.data ?? []))
-      .catch(() => setBookings([]))
+      .then((result: { data: RekapRow[] }) => setRows(result.data ?? []))
+      .catch(() => setRows([]))
       .finally(() => setIsLoading(false));
   }, [range]);
 
@@ -63,14 +69,15 @@ export function RekapJadwalArmada() {
         <p className="flex items-center gap-2 text-sm text-tk-muted">
           <Loader2 className="animate-spin" size={16} /> Memuat rekap...
         </p>
-      ) : bookings.length === 0 ? (
-        <p className="text-sm text-tk-light">Belum ada jadwal penjemputan di rentang ini.</p>
+      ) : rows.length === 0 ? (
+        <p className="text-sm text-tk-light">Belum ada jadwal antar-jemput di rentang ini.</p>
       ) : (
         <div className="overflow-x-auto rounded-lg border-2 border-tk-charcoal bg-white">
-          <table className="w-full min-w-[720px] text-left text-sm">
+          <table className="w-full min-w-[760px] text-left text-sm">
             <thead>
               <tr className="border-b-2 border-tk-charcoal bg-tk-cream-alt text-xs font-bold uppercase text-tk-muted">
                 <th className="px-4 py-3">Tanggal</th>
+                <th className="px-4 py-3">Jenis Layanan</th>
                 <th className="px-4 py-3">Sesi</th>
                 <th className="px-4 py-3">Armada</th>
                 <th className="px-4 py-3">Nama Customer</th>
@@ -79,26 +86,33 @@ export function RekapJadwalArmada() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#D6CEC4]">
-              {bookings.map((b) => (
-                <tr key={b.id}>
+              {rows.map((r) => (
+                <tr key={r.id}>
                   <td className="px-4 py-3 font-semibold text-tk-charcoal">
-                    {format(new Date(b.tanggalPenjemputan), "d MMM yyyy", { locale: localeId })}
+                    {format(new Date(r.tanggal), "d MMM yyyy", { locale: localeId })}
+                  </td>
+                  <td
+                    className={cn(
+                      "px-4 py-3 font-bold",
+                      r.jenisLayanan === "jemput" ? "text-tk-orange-dark" : "text-tk-sage-dark"
+                    )}
+                  >
+                    {JENIS_LAYANAN_LABEL[r.jenisLayanan]}
                   </td>
                   <td className="px-4 py-3 text-tk-muted">
-                    {b.sesiPenjemputan
-                      ? SLOT_SESI[b.sesiPenjemputan as keyof typeof SLOT_SESI]?.label ??
-                        b.sesiPenjemputan
+                    {r.sesiWaktu
+                      ? SLOT_SESI[r.sesiWaktu as keyof typeof SLOT_SESI]?.label ?? r.sesiWaktu
                       : "-"}
                   </td>
-                  <td className="px-4 py-3 text-tk-muted">{b.armada?.nama ?? "-"}</td>
+                  <td className="px-4 py-3 text-tk-muted">{r.armada?.nama ?? "-"}</td>
                   <td className="px-4 py-3 font-semibold text-tk-charcoal">
-                    {b.pelanggan.nama}
+                    {r.pelanggan.nama}
                   </td>
                   <td className="px-4 py-3 text-tk-muted">
-                    {b.antarJemputOption?.radiusLabel ?? "-"}
+                    {r.antarJemputOption?.radiusLabel ?? "-"}
                   </td>
                   <td className="px-4 py-3">
-                    <StatusBadge status={b.statusTransaksi}>{b.statusTransaksi}</StatusBadge>
+                    <StatusBadge status={r.statusTransaksi}>{r.statusTransaksi}</StatusBadge>
                   </td>
                 </tr>
               ))}

@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { tkInputClass, tkLabelClass, tkSelectTriggerClass } from "@/lib/form-style";
+import { formatRupiah } from "@/lib/utils";
 import type { AntarJemputOption } from "@/types/antar-jemput";
 
 const TIPE_OPTIONS = [
@@ -38,7 +39,9 @@ const EMPTY_FORM = {
   label: "",
   tipe: "motor",
   radiusLabel: "<3km",
-  harga: "",
+  hargaJemputSaja: "",
+  hargaAntarSaja: "",
+  hargaJemputDanAntar: "",
   kapasitasLabel: "",
   aktif: true,
 };
@@ -60,7 +63,9 @@ export function AntarJemputFormDialog({ open, onOpenChange, option }: AntarJempu
         label: option.label,
         tipe: option.tipe,
         radiusLabel: option.radiusLabel,
-        harga: String(option.harga),
+        hargaJemputSaja: String(option.hargaJemputSaja),
+        hargaAntarSaja: String(option.hargaAntarSaja),
+        hargaJemputDanAntar: String(option.hargaJemputDanAntar),
         kapasitasLabel: option.kapasitasLabel ?? "",
         aktif: option.aktif,
       });
@@ -72,8 +77,13 @@ export function AntarJemputFormDialog({ open, onOpenChange, option }: AntarJempu
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!form.label.trim() || !form.harga.trim()) {
-      toast.error("Label dan harga wajib diisi");
+    if (
+      !form.label.trim() ||
+      !form.hargaJemputSaja.trim() ||
+      !form.hargaAntarSaja.trim() ||
+      !form.hargaJemputDanAntar.trim()
+    ) {
+      toast.error("Label dan ketiga harga layanan wajib diisi");
       return;
     }
 
@@ -83,7 +93,9 @@ export function AntarJemputFormDialog({ open, onOpenChange, option }: AntarJempu
         label: form.label,
         tipe: form.tipe,
         radiusLabel: form.radiusLabel,
-        harga: Number(form.harga),
+        hargaJemputSaja: Number(form.hargaJemputSaja),
+        hargaAntarSaja: Number(form.hargaAntarSaja),
+        hargaJemputDanAntar: Number(form.hargaJemputDanAntar),
         kapasitasLabel: form.kapasitasLabel || undefined,
         aktif: form.aktif,
       };
@@ -178,18 +190,62 @@ export function AntarJemputFormDialog({ open, onOpenChange, option }: AntarJempu
           </div>
 
           <div>
-            <Label htmlFor="harga" className={tkLabelClass}>
-              Harga (Rp)
+            <Label htmlFor="hargaJemputSaja" className={tkLabelClass}>
+              Harga Jemput Saja (Rp)
             </Label>
             <Input
-              id="harga"
+              id="hargaJemputSaja"
               type="number"
               min={0}
-              value={form.harga}
-              onChange={(e) => setForm({ ...form, harga: e.target.value })}
+              value={form.hargaJemputSaja}
+              onChange={(e) => setForm({ ...form, hargaJemputSaja: e.target.value })}
               required
               className={tkInputClass}
             />
+          </div>
+
+          <div>
+            <Label htmlFor="hargaAntarSaja" className={tkLabelClass}>
+              Harga Antar Saja (Rp)
+            </Label>
+            <Input
+              id="hargaAntarSaja"
+              type="number"
+              min={0}
+              value={form.hargaAntarSaja}
+              onChange={(e) => setForm({ ...form, hargaAntarSaja: e.target.value })}
+              required
+              className={tkInputClass}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="hargaJemputDanAntar" className={tkLabelClass}>
+              Harga Jemput + Antar (Rp)
+            </Label>
+            <Input
+              id="hargaJemputDanAntar"
+              type="number"
+              min={0}
+              value={form.hargaJemputDanAntar}
+              onChange={(e) => setForm({ ...form, hargaJemputDanAntar: e.target.value })}
+              required
+              className={tkInputClass}
+            />
+            {!!Number(form.hargaJemputSaja) && !!Number(form.hargaAntarSaja) && !!Number(form.hargaJemputDanAntar) && (
+              <p className="mt-1 text-xs text-tk-muted">
+                Hemat{" "}
+                {formatRupiah(
+                  Math.max(
+                    0,
+                    Number(form.hargaJemputSaja) +
+                      Number(form.hargaAntarSaja) -
+                      Number(form.hargaJemputDanAntar)
+                  )
+                )}{" "}
+                dibanding beli terpisah
+              </p>
+            )}
           </div>
 
           <div>

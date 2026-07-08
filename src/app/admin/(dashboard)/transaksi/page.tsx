@@ -21,6 +21,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { TandaiLunasButton } from "@/components/admin/tandai-lunas-button";
 import { Pagination } from "@/components/admin/pagination";
 import { kodeTransaksi } from "@/lib/kode";
+import { hargaAntarJemputTransaksi } from "@/lib/harga-antar-jemput";
 import type { TransaksiSearchResult } from "@/types/transaksi";
 import type { Paket } from "@/types/paket";
 
@@ -249,7 +250,7 @@ export default function AdminTransaksiPage() {
                       nomorUrut={t.nomorUrut}
                       pelanggan={t.pelanggan}
                       paket={t.paket}
-                      antarJemputHarga={t.antarJemputOption?.harga}
+                      antarJemputHarga={hargaAntarJemputTransaksi(t)}
                       tanggalJatuhTempo={t.tanggalJatuhTempo}
                       statusBayar={t.statusBayar}
                       onSuccess={() => fetchData()}

@@ -49,6 +49,10 @@ export const TransaksiSchema = z.object({
   penjemputan: PenjemputanSchema.optional().nullable(),
   metodePengiriman: z.enum(["armada", "mandiri"]).optional().nullable(),
   antarJemputId: z.string().cuid().optional().nullable(),
+  // Jemput dan Antar independen — pelanggan bisa pilih salah satu atau
+  // keduanya (harga bundling ditentukan lewat AntarJemputOption).
+  layananJemput: z.boolean().optional(),
+  layananAntar: z.boolean().optional(),
 });
 
 // POST /api/admin/paket

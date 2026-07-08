@@ -16,7 +16,7 @@ export async function POST(
   try {
     const transaksi = await prisma.transaksi.findUnique({
       where: { id: params.id },
-      include: { pelanggan: true, paket: true, antarJemputOption: true },
+      include: { pelanggan: true, paket: true, antarJemputOption: true, armada: true },
     });
 
     if (!transaksi) {
@@ -50,7 +50,10 @@ export async function POST(
       hub: transaksi.hub,
       metodePengiriman: transaksi.metodePengiriman as "armada" | "mandiri" | null,
       barangTibaMandiri: transaksi.barangTibaMandiri,
+      layananJemput: transaksi.layananJemput,
+      layananAntar: transaksi.layananAntar,
       antarJemputOption: transaksi.antarJemputOption,
+      armada: transaksi.armada,
       tandaTanganUrl: transaksi.tandaTanganUrl,
       pdfUrl: transaksi.pdfUrl,
       createdAt: transaksi.createdAt.toISOString(),
