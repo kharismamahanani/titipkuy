@@ -7,6 +7,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { formatRupiah } from "@/lib/utils";
+import {
+  GANTI_RUGI_STANDAR,
+  GANTI_RUGI_DEKLARASI_MAKS,
+  GANTI_RUGI_TINGGI_MAKS,
+} from "@/lib/ganti-rugi";
 
 export function PerjanjianDialog() {
   return (
@@ -45,12 +51,12 @@ export function PerjanjianDialog() {
             2. Ganti Rugi
           </h3>
           <p>
-            Tanpa deklarasi nilai, ganti rugi maksimal Rp300.000 per barang
-            (tier Standar). Dengan deklarasi nilai barang di awal pemesanan,
-            ganti rugi mengikuti nilai deklarasi tersebut — maksimal
-            Rp5.000.000 (tier Deklarasi Mandiri, premi 1%/bulan) atau
-            maksimal Rp20.000.000 untuk barang bernilai tinggi (premi
-            2%/bulan). Ganti rugi hanya berlaku untuk kehilangan atau
+            Tanpa deklarasi nilai, ganti rugi maksimal {formatRupiah(GANTI_RUGI_STANDAR)} per
+            barang (tier Standar). Dengan deklarasi nilai barang di awal pemesanan,
+            ganti rugi mengikuti nilai deklarasi tersebut — maksimal{" "}
+            {formatRupiah(GANTI_RUGI_DEKLARASI_MAKS)} (tier Deklarasi Mandiri, premi
+            1%/bulan) atau maksimal {formatRupiah(GANTI_RUGI_TINGGI_MAKS)} untuk barang
+            bernilai tinggi (premi 2%/bulan). Ganti rugi hanya berlaku untuk kehilangan atau
             kerusakan akibat kelalaian TitipKuy! yang dibuktikan dengan foto
             kondisi barang saat masuk vs saat keluar. Klaim wajib diajukan
             saat pengambilan barang di hub.

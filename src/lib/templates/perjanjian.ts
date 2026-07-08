@@ -1,3 +1,11 @@
+import {
+  GANTI_RUGI_STANDAR,
+  GANTI_RUGI_DEKLARASI_MAKS,
+  GANTI_RUGI_TINGGI_MAKS,
+} from "@/lib/ganti-rugi";
+
+const fmt = (n: number) => `Rp${n.toLocaleString("id-ID")}`;
+
 export const PERJANJIAN_STANDAR = `PERNYATAAN KESEDIAAN PENITIPAN BARANG TITIPKUY!
 
 Saya yang bertanda tangan di bawah ini menyatakan bahwa:
@@ -9,7 +17,12 @@ Saya yang bertanda tangan di bawah ini menyatakan bahwa:
 Saya memahami semua barang WAJIB dikemas dalam kardus tertutup atau dibungkus bubble wrap minimal 2 lapis sebelum dititipkan. TitipKuy! berhak menolak barang yang tidak terkemas sesuai ketentuan ini.
 
 2. GANTI RUGI
-Saya menyetujui ketentuan ganti rugi: tanpa deklarasi nilai, maksimal Rp500.000 (lima ratus ribu rupiah) per kardus/barang; dengan deklarasi nilai resmi di awal pemesanan, ganti rugi mengikuti nilai deklarasi tersebut, maksimal sesuai bukti kepemilikan yang dilampirkan. Ganti rugi hanya berlaku untuk kerusakan atau kehilangan akibat kelalaian TitipKuy! yang dibuktikan dengan foto kondisi barang.
+Saya menyetujui ketentuan ganti rugi TitipKuy!:
+- Tanpa deklarasi: maksimal ${fmt(GANTI_RUGI_STANDAR)} per barang (gratis, otomatis)
+- Dengan deklarasi mandiri: sesuai nilai yang dinyatakan, maksimal ${fmt(GANTI_RUGI_DEKLARASI_MAKS)} (dikenakan premi 1% per bulan dari nilai barang)
+- Barang bernilai tinggi (di atas ${fmt(GANTI_RUGI_DEKLARASI_MAKS)}): maksimal ${fmt(GANTI_RUGI_TINGGI_MAKS)} (premi 2% per bulan, wajib melampirkan foto nota pembelian/nomor seri)
+
+Ganti rugi hanya berlaku untuk kerusakan atau kehilangan yang terbukti akibat kelalaian TitipKuy! dan didukung dokumentasi foto kondisi barang.
 
 3. BARANG TERLARANG
 Saya menyatakan barang yang dititipkan bukan narkotika, bahan berbahaya/mudah terbakar, makanan/minuman mudah busuk, hewan hidup, senjata, atau barang ilegal lainnya. Pelanggaran ketentuan ini menyebabkan pernyataan kesediaan ini batal tanpa pengembalian biaya, dan TitipKuy! berhak menolak atau mengeluarkan barang tersebut.

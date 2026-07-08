@@ -1,22 +1,28 @@
+// Nilai plafon mentah — dipakai saat butuh angka tanpa melalui objek
+// GANTI_RUGI di bawah (mis. interpolasi teks template statis).
+export const GANTI_RUGI_STANDAR = 300_000;
+export const GANTI_RUGI_DEKLARASI_MAKS = 5_000_000;
+export const GANTI_RUGI_TINGGI_MAKS = 20_000_000;
+
 export const GANTI_RUGI = {
   standar: {
     label: "Standar",
-    plafonRupiah: 300_000,
+    plafonRupiah: GANTI_RUGI_STANDAR,
     premiPersen: 0,
-    deskripsi: "Ganti rugi maks. Rp300.000 per barang. Otomatis tanpa biaya tambahan.",
+    deskripsi: `Ganti rugi maks. Rp${GANTI_RUGI_STANDAR.toLocaleString("id-ID")} per barang. Otomatis tanpa biaya tambahan.`,
   },
   deklarasi: {
     label: "Deklarasi Mandiri",
-    plafonMaksRupiah: 5_000_000,
+    plafonMaksRupiah: GANTI_RUGI_DEKLARASI_MAKS,
     premiPersenPerBulan: 1,
-    deskripsi: "Ganti rugi sesuai deklarasi, maks. Rp5.000.000. Premi 1%/bulan.",
+    deskripsi: `Ganti rugi sesuai deklarasi, maks. Rp${GANTI_RUGI_DEKLARASI_MAKS.toLocaleString("id-ID")}. Premi 1%/bulan.`,
   },
   bernilaiTinggi: {
     label: "Barang Bernilai Tinggi",
-    plafonMaksRupiah: 20_000_000,
+    plafonMaksRupiah: GANTI_RUGI_TINGGI_MAKS,
     premiPersenPerBulan: 2,
-    syaratMinRupiah: 5_000_001,
-    deskripsi: "Ganti rugi sesuai deklarasi, maks. Rp20.000.000. Premi 2%/bulan.",
+    syaratMinRupiah: GANTI_RUGI_DEKLARASI_MAKS + 1,
+    deskripsi: `Ganti rugi sesuai deklarasi, maks. Rp${GANTI_RUGI_TINGGI_MAKS.toLocaleString("id-ID")}. Premi 2%/bulan.`,
   },
 } as const;
 
