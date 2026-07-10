@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { Loader2, Trash2 } from "lucide-react";
+import { Loader2, Trash2, Download } from "lucide-react";
 import { toast } from "sonner";
+import { pdf } from "@react-pdf/renderer";
+import QRCode from "qrcode";
 import { TkButton } from "@/components/ui/tk-button";
 import { tkCardVariants } from "@/components/ui/tk-card";
 import { Input } from "@/components/ui/input";
@@ -17,11 +19,18 @@ import {
 } from "@/components/ui/select";
 import { PrintableLabel } from "@/components/admin/printable-label";
 import { ThermalLabel } from "@/components/admin/thermal-label";
+import { ThermalLabelPdf, PrintableLabelPdf } from "@/components/admin/label-pdf";
 import { tkInputClass, tkLabelClass, tkSelectTriggerClass } from "@/lib/form-style";
 import { cn } from "@/lib/utils";
 import type { BarangLabel, TransaksiDetail } from "@/types/transaksi";
 
 type PrintMode = "a4" | "thermal" | null;
+
+const THERMAL_PAPER_PRESETS = [
+  { value: "78x100", label: "78 × 100 mm", width: 78, height: 100 },
+  { value: "58x40", label: "58 × 40 mm", width: 58, height: 40 },
+  { value: "80x50", label: "80 × 50 mm", width: 80, height: 50 },
+];
 
 const KATEGORI_BARANG_OPTIONS = [
   { value: "kardus", label: "Kardus" },
@@ -46,6 +55,9 @@ export function LabelSection({ transaksi, barangLabel: initialBarangLabel }: Lab
   const [isAdding, setIsAdding] = useState(false);
   const [printMode, setPrintMode] = useState<PrintMode>(null);
   const [origin, setOrigin] = useState("");
+  const [thermalPaper, setThermalPaper] = useState(THERMAL_PAPER_PRESETS[0].value);
+  const [isDownloadingThermal, setIsDownloadingThermal] = useState(false);
+  const [isDownloadingA4, setIsDownloadingA4] = useState(false);
 
   useEffect(() => {
     setOrigin(window.location.origin);
@@ -103,6 +115,71 @@ export function LabelSection({ transaksi, barangLabel: initialBarangLabel }: Lab
   function handlePrintThermal() {
     if (barangLabel.length === 0) return;
     setPrintMode("thermal");
+  }
+
+  async function buildQrDataUrls(verifyUrl: string) {
+    const entries = await Promise.all(
+      barangLabel.map(async (barang) => [barang.id, await QRCode.toDataURL(verifyUrl)] as const)
+    );
+    return Object.fromEntries(entries);
+  }
+
+  function downloadBlob(blob: Blob, filename: string) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function handleDownloadThermalPdf() {
+    if (barangLabel.length === 0) return;
+    setIsDownloadingThermal(true);
+    try {
+      const verifyUrl = `${origin}/transaksi/${transaksi.id}`;
+      const qrDataUrls = await buildQrDataUrls(verifyUrl);
+      const preset = THERMAL_PAPER_PRESETS.find((p) => p.value === thermalPaper)!;
+      const blob = await pdf(
+        <ThermalLabelPdf
+          items={barangLabel}
+          transaksi={transaksi}
+          verifyUrl={verifyUrl}
+          qrDataUrls={qrDataUrls}
+          paperSize={{ width: preset.width, height: preset.height }}
+        />
+      ).toBlob();
+      downloadBlob(blob, `label-thermal-${preset.value}mm-${transaksi.id}.pdf`);
+    } catch (error) {
+      console.error("[handleDownloadThermalPdf]", error);
+      toast.error("Gagal membuat PDF label thermal");
+    } finally {
+      setIsDownloadingThermal(false);
+    }
+  }
+
+  async function handleDownloadA4Pdf() {
+    if (barangLabel.length === 0) return;
+    setIsDownloadingA4(true);
+    try {
+      const verifyUrl = `${origin}/transaksi/${transaksi.id}`;
+      const qrDataUrls = await buildQrDataUrls(verifyUrl);
+      const blob = await pdf(
+        <PrintableLabelPdf
+          items={barangLabel}
+          transaksi={transaksi}
+          verifyUrl={verifyUrl}
+          qrDataUrls={qrDataUrls}
+          paperSize={{ width: 210, height: 297 }}
+        />
+      ).toBlob();
+      downloadBlob(blob, `label-a4-${transaksi.id}.pdf`);
+    } catch (error) {
+      console.error("[handleDownloadA4Pdf]", error);
+      toast.error("Gagal membuat PDF label A4");
+    } finally {
+      setIsDownloadingA4(false);
+    }
   }
 
   async function handleDeleteBarang(barangId: string) {
@@ -170,30 +247,77 @@ export function LabelSection({ transaksi, barangLabel: initialBarangLabel }: Lab
           <p className="font-extrabold text-tk-charcoal">
             Daftar Barang ({barangLabel.length})
           </p>
-          <TkButton
-            type="button"
-            variant="primary"
-            disabled={barangLabel.length === 0}
-            onClick={handlePrint}
-          >
-            🖨️ Print Label A4
-          </TkButton>
+          <div className="flex gap-2">
+            <TkButton
+              type="button"
+              variant="secondary"
+              disabled={barangLabel.length === 0 || isDownloadingA4}
+              onClick={handleDownloadA4Pdf}
+            >
+              {isDownloadingA4 ? (
+                <Loader2 className="mr-1.5 animate-spin" size={14} />
+              ) : (
+                <Download className="mr-1.5" size={14} />
+              )}
+              Unduh PDF A4
+            </TkButton>
+            <TkButton
+              type="button"
+              variant="primary"
+              disabled={barangLabel.length === 0}
+              onClick={handlePrint}
+            >
+              🖨️ Print Label A4
+            </TkButton>
+          </div>
         </div>
 
         <div className="flex flex-col items-end gap-2 rounded-lg border-2 border-dashed border-tk-charcoal/40 bg-tk-cream-alt p-3">
           <p className="text-right text-[11px] leading-snug text-tk-muted">
-            Pengaturan printer: Xprinter XP-420B | Ukuran: 78×100mm | Margin: None |
-            Skala: 100% | Hilangkan header/footer
+            Punya masalah hasil print tidak terbaca (blok/garis acak)? Unduh PDF-nya lalu print
+            sendiri lewat dialog print — pilih printer &amp; ukuran kertas sesuai driver di
+            perangkat Anda.
           </p>
-          <TkButton
-            type="button"
-            variant="secondary"
-            size="sm"
-            disabled={barangLabel.length === 0}
-            onClick={handlePrintThermal}
-          >
-            🖨️ Print Thermal 78×100mm
-          </TkButton>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <Label htmlFor="thermalPaper" className="sr-only">
+              Ukuran kertas thermal
+            </Label>
+            <Select value={thermalPaper} onValueChange={(value) => value && setThermalPaper(value)}>
+              <SelectTrigger id="thermalPaper" className={cn(tkSelectTriggerClass, "w-[140px]")}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {THERMAL_PAPER_PRESETS.map((preset) => (
+                  <SelectItem key={preset.value} value={preset.value}>
+                    {preset.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <TkButton
+              type="button"
+              variant="secondary"
+              size="sm"
+              disabled={barangLabel.length === 0 || isDownloadingThermal}
+              onClick={handleDownloadThermalPdf}
+            >
+              {isDownloadingThermal ? (
+                <Loader2 className="mr-1.5 animate-spin" size={14} />
+              ) : (
+                <Download className="mr-1.5" size={14} />
+              )}
+              Unduh PDF Thermal
+            </TkButton>
+            <TkButton
+              type="button"
+              variant="secondary"
+              size="sm"
+              disabled={barangLabel.length === 0}
+              onClick={handlePrintThermal}
+            >
+              🖨️ Print Thermal 78×100mm
+            </TkButton>
+          </div>
         </div>
 
         {barangLabel.length === 0 ? (
