@@ -67,14 +67,13 @@ const thermalStyles = StyleSheet.create({
 interface LabelPdfProps {
   items: BarangLabel[];
   transaksi: TransaksiDetail;
-  verifyUrl: string;
   qrDataUrls: Record<string, string>;
   paperSize: { width: number; height: number };
 }
 
 // Dokumen PDF label thermal — ukuran halaman mengikuti `paperSize` (mm) yang
 // dipilih admin, supaya cocok dengan setting printer fisik mereka sendiri.
-export function ThermalLabelPdf({ items, transaksi, verifyUrl, qrDataUrls, paperSize }: LabelPdfProps) {
+export function ThermalLabelPdf({ items, transaksi, qrDataUrls, paperSize }: LabelPdfProps) {
   return (
     <Document>
       {items.map((barang) => (
@@ -86,6 +85,7 @@ export function ThermalLabelPdf({ items, transaksi, verifyUrl, qrDataUrls, paper
           <Text style={thermalStyles.header}>TitipKuy! · {namaHub(transaksi.hub)}</Text>
 
           <View style={thermalStyles.qrWrap}>
+            {/* eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image has no alt prop */}
             <Image style={thermalStyles.qr} src={qrDataUrls[barang.id]} />
           </View>
 
@@ -136,7 +136,7 @@ const a4Styles = StyleSheet.create({
 
 // Dokumen PDF label A4 — beberapa label per halaman, ukuran kertas tetap A4
 // standar (tidak bergantung pada printer thermal).
-export function PrintableLabelPdf({ items, transaksi, verifyUrl, qrDataUrls }: LabelPdfProps) {
+export function PrintableLabelPdf({ items, transaksi, qrDataUrls }: LabelPdfProps) {
   return (
     <Document>
       <Page size="A4" style={a4Styles.page}>
@@ -156,6 +156,7 @@ export function PrintableLabelPdf({ items, transaksi, verifyUrl, qrDataUrls }: L
                 </Text>
                 <Text style={a4Styles.infoRow}>{barang.deskripsi}</Text>
               </View>
+              {/* eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image has no alt prop */}
               <Image style={a4Styles.qr} src={qrDataUrls[barang.id]} />
             </View>
           </View>

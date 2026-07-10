@@ -144,7 +144,6 @@ export function LabelSection({ transaksi, barangLabel: initialBarangLabel }: Lab
         <ThermalLabelPdf
           items={barangLabel}
           transaksi={transaksi}
-          verifyUrl={verifyUrl}
           qrDataUrls={qrDataUrls}
           paperSize={{ width: preset.width, height: preset.height }}
         />
@@ -168,7 +167,6 @@ export function LabelSection({ transaksi, barangLabel: initialBarangLabel }: Lab
         <PrintableLabelPdf
           items={barangLabel}
           transaksi={transaksi}
-          verifyUrl={verifyUrl}
           qrDataUrls={qrDataUrls}
           paperSize={{ width: 210, height: 297 }}
         />
