@@ -87,7 +87,12 @@ export async function POST(request: Request) {
       );
     }
 
-    const tanggalMasukDate = new Date(tanggalMasuk);
+    // Normalisasi ke UTC midnight dari tanggal kalender WIB yang dipilih
+    // pelanggan (lihat komentar di date-utils.ts) — tanpa ini, instant yang
+    // tersimpan bisa jatuh sehari lebih awal saat diformat di server yang
+    // berjalan di UTC (mis. Vercel), padahal benar saat diformat di browser
+    // WIB. Konsisten dengan tanggalPenjemputan yang sudah dinormalisasi.
+    const tanggalMasukDate = toUtcMidnightFromLocalDate(new Date(tanggalMasuk));
     const tanggalJatuhTempo = addDays(tanggalMasukDate, paket.durasiHari ?? 1);
     const ipAddress = request.headers.get("x-forwarded-for") ?? undefined;
     const userAgent = request.headers.get("user-agent") ?? undefined;

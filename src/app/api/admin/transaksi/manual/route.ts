@@ -3,6 +3,7 @@ import { addDays } from "date-fns";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { incrementSlotUsage } from "@/lib/slot";
+import { toUtcMidnightFromLocalDate } from "@/lib/date-utils";
 import { TransaksiManualSchema } from "@/lib/schemas";
 
 const TOKEN_VALID_MS = 24 * 60 * 60 * 1000;
@@ -57,9 +58,13 @@ export async function POST(request: Request) {
       );
     }
 
-    const tanggalMasukDate = new Date(tanggalMasuk);
+    // Normalisasi ke UTC midnight — lihat komentar di date-utils.ts dan
+    // /api/transaksi/route.ts. Tanpa ini, format tanggal di halaman admin
+    // (server, biasanya UTC) bisa mundur sehari dibanding tanggal kalender
+    // WIB yang sebenarnya dipilih.
+    const tanggalMasukDate = toUtcMidnightFromLocalDate(new Date(tanggalMasuk));
     const tanggalJatuhTempoDate = tanggalJatuhTempo
-      ? new Date(tanggalJatuhTempo)
+      ? toUtcMidnightFromLocalDate(new Date(tanggalJatuhTempo))
       : addDays(tanggalMasukDate, paket.durasiHari ?? 1);
 
     const existingPelanggan = await prisma.pelanggan.findFirst({
