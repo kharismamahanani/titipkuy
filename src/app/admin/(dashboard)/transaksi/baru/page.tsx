@@ -26,7 +26,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { tkInputClass, tkLabelClass, tkSelectTriggerClass } from "@/lib/form-style";
-import { cn, normalizeWhatsAppNumber } from "@/lib/utils";
+import { cn, normalizeWhatsAppNumber, formatRupiah } from "@/lib/utils";
+import { hitungHargaPaketTertagih } from "@/lib/harga-paket";
 import { ADMIN_NAME } from "@/constants/site";
 import { buildStoragePath, uploadToStorage } from "@/lib/supabase";
 import { AKTIF_HUB_KEYS, HUB_CONFIG } from "@/lib/constants";
@@ -93,6 +94,11 @@ export default function AdminBuatOrderManualPage() {
   }, []);
 
   const paket = paketList.find((p) => p.id === paketId) ?? null;
+
+  const hargaPaketTertagih =
+    paket && tanggalMasuk && tanggalJatuhTempo
+      ? hitungHargaPaketTertagih(paket, tanggalMasuk, tanggalJatuhTempo)
+      : null;
 
   useEffect(() => {
     if (paket && tanggalMasuk) {
@@ -342,6 +348,22 @@ export default function AdminBuatOrderManualPage() {
               )}
             </div>
           </div>
+
+          {hargaPaketTertagih != null && paket && (
+            <div className="rounded-lg border-2 border-tk-orange bg-tk-orange/10 px-4 py-3 text-sm">
+              <span className="text-tk-charcoal">
+                Harga tertagih:{" "}
+                <span className="font-extrabold">{formatRupiah(hargaPaketTertagih)}</span>
+                {paket.kategori === "harian" && paket.durasiHari === null && (
+                  <span className="text-tk-muted">
+                    {" "}
+                    ({formatRupiah(paket.harga)}/hari ×{" "}
+                    {Math.round(hargaPaketTertagih / paket.harga)} hari)
+                  </span>
+                )}
+              </span>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label className={tkLabelClass}>Hub Penyimpanan *</Label>

@@ -35,6 +35,7 @@ export async function POST(
         createdAt: transaksi.paket.createdAt.toISOString(),
         updatedAt: transaksi.paket.updatedAt.toISOString(),
       },
+      hargaPaketTertagih: transaksi.hargaPaketTertagih,
       nilaiDeklarasi: transaksi.nilaiDeklarasi,
       deskripsiDeklarasi: transaksi.deskripsiDeklarasi,
       buktiKepemilikanUrl: transaksi.buktiKepemilikanUrl,

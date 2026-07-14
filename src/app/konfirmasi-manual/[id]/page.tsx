@@ -199,7 +199,7 @@ function KonfirmasiManualContent() {
           <TkCard className="space-y-2 text-sm">
             <SummaryRow label="Nama" value={pelanggan.nama} />
             <SummaryRow label="Paket" value={paket.nama} />
-            <SummaryRow label="Harga Paket" value={formatRupiah(paket.harga)} />
+            <SummaryRow label="Harga Paket" value={formatRupiah(data.hargaPaketTertagih)} />
             {data.antarJemputOption && (
               <SummaryRow
                 label="Antar-Jemput"
@@ -208,7 +208,7 @@ function KonfirmasiManualContent() {
             )}
             <SummaryRow
               label="TOTAL"
-              value={formatRupiah(paket.harga + (data.antarJemputOption?.harga ?? 0))}
+              value={formatRupiah(data.hargaPaketTertagih + (data.antarJemputOption?.harga ?? 0))}
             />
             <SummaryRow
               label="Masuk"
@@ -280,7 +280,7 @@ function KonfirmasiManualContent() {
           <SummaryRow label="Kode Transaksi" value={kodeTransaksi(data.nomorUrut)} />
           <SummaryRow label="Nama" value={pelanggan.nama} />
           <SummaryRow label="Paket" value={paket.nama} />
-          <SummaryRow label="Harga Paket" value={formatRupiah(paket.harga)} />
+          <SummaryRow label="Harga Paket" value={formatRupiah(data.hargaPaketTertagih)} />
           {data.antarJemputOption && (
             <SummaryRow
               label="Antar-Jemput"
@@ -289,7 +289,7 @@ function KonfirmasiManualContent() {
           )}
           <SummaryRow
             label="TOTAL"
-            value={formatRupiah(paket.harga + (data.antarJemputOption?.harga ?? 0))}
+            value={formatRupiah(data.hargaPaketTertagih + (data.antarJemputOption?.harga ?? 0))}
           />
           <SummaryRow
             label="Masuk"

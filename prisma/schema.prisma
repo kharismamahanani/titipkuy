@@ -41,6 +41,13 @@ model Transaksi {
   pelangganId      String
   paket            Paket       @relation(fields:[paketId], references:[id])
   paketId          String
+  // Harga paket yang benar-benar tertagih — untuk kategori "harian" murni
+  // (Paket.durasiHari null), ini = Paket.harga x jumlah hari kalender
+  // (tanggalJatuhTempo - tanggalMasuk). Untuk paket berdurasi tetap
+  // (bulanan/magang/motor/promo N-hari), sama dengan Paket.harga. Dihitung
+  // & disimpan saat transaksi dibuat (lihat src/lib/harga-paket.ts) supaya
+  // tetap akurat walau harga Paket berubah di kemudian hari.
+  hargaPaketTertagih Int         @default(0)
   nilaiDeklarasi   Int?        // diisi jika perluDeklarasi = true
   deskripsiDeklarasi String?   // merek, model, no seri barang bernilai tinggi
   buktiKepemilikanUrl String?  // URL bukti kepemilikan (STNK/BPKB/nota) di Supabase Storage

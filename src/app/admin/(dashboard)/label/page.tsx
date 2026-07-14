@@ -130,7 +130,7 @@ function AdminLabelPageContent() {
             <div className="flex justify-between">
               <span className="text-tk-muted">Paket</span>
               <span className="font-bold text-tk-charcoal">
-                {selected.paket.nama} &middot; {formatRupiah(selected.paket.harga)}
+                {selected.paket.nama} &middot; {formatRupiah(selected.hargaPaketTertagih)}
               </span>
             </div>
             <div className="flex justify-between">

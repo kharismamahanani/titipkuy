@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { incrementSlotUsage } from "@/lib/slot";
 import { toUtcMidnightFromLocalDate } from "@/lib/date-utils";
+import { hitungHargaPaketTertagih } from "@/lib/harga-paket";
 import { TransaksiManualSchema } from "@/lib/schemas";
 
 const TOKEN_VALID_MS = 24 * 60 * 60 * 1000;
@@ -95,6 +96,7 @@ export async function POST(request: Request) {
           buktiKepemilikanUrl: paket.perluDeklarasi ? buktiKepemilikanUrl : null,
           tanggalMasuk: tanggalMasukDate,
           tanggalJatuhTempo: tanggalJatuhTempoDate,
+          hargaPaketTertagih: hitungHargaPaketTertagih(paket, tanggalMasukDate, tanggalJatuhTempoDate),
           hub,
           zonaRak: zonaRak || null,
           catatanAdmin: catatanAdmin || null,

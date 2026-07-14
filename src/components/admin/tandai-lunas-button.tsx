@@ -14,7 +14,7 @@ interface TandaiLunasButtonProps {
   id: string;
   nomorUrut: number;
   pelanggan: { nama: string; whatsapp: string };
-  paket: { harga: number };
+  hargaPaketTertagih: number;
   antarJemputHarga?: number | null;
   tanggalJatuhTempo: string | Date;
   statusBayar: "BELUM_BAYAR" | "LUNAS";
@@ -25,7 +25,7 @@ export function TandaiLunasButton({
   id,
   nomorUrut,
   pelanggan,
-  paket,
+  hargaPaketTertagih,
   antarJemputHarga,
   tanggalJatuhTempo,
   statusBayar,
@@ -60,7 +60,7 @@ export function TandaiLunasButton({
     const noWA = normalizeWhatsAppNumber(pelanggan.whatsapp);
     const kode = kodeTransaksi(nomorUrut);
     const namaDepan = pelanggan.nama.trim().split(/\s+/)[0];
-    const totalBiaya = paket.harga + (antarJemputHarga ?? 0);
+    const totalBiaya = hargaPaketTertagih + (antarJemputHarga ?? 0);
     const tanggal = format(new Date(tanggalJatuhTempo), "d MMM yyyy", { locale: localeId });
 
     const pesan = encodeURIComponent(

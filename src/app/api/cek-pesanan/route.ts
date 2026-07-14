@@ -44,7 +44,8 @@ export async function POST(request: Request) {
         statusBayar: true,
         tanggalMasuk: true,
         tanggalJatuhTempo: true,
-        paket: { select: { nama: true, harga: true } },
+        hargaPaketTertagih: true,
+        paket: { select: { nama: true } },
         pelanggan: { select: { nama: true, whatsapp: true } },
         barangLabel: { select: { kodeLabel: true } },
       },
@@ -57,7 +58,7 @@ export async function POST(request: Request) {
     const result: CekPesananResult = {
       nama: transaksi.pelanggan.nama,
       paketNama: transaksi.paket.nama,
-      hargaPaket: transaksi.paket.harga,
+      hargaPaket: transaksi.hargaPaketTertagih,
       statusTransaksi: transaksi.statusTransaksi,
       statusBayar: transaksi.statusBayar,
       tanggalMasuk: transaksi.tanggalMasuk.toISOString(),

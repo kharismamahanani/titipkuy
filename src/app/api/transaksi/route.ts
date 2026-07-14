@@ -6,6 +6,7 @@ import { cariSesiTersedia, incrementSlotUsage } from "@/lib/slot";
 import { bookingRatelimit, getClientIp } from "@/lib/rate-limit";
 import { toUtcMidnightFromLocalDate } from "@/lib/date-utils";
 import { AKTIF_HUB_KEYS } from "@/lib/constants";
+import { hitungHargaPaketTertagih } from "@/lib/harga-paket";
 import { TransaksiSchema } from "@/lib/schemas";
 
 export async function POST(request: Request) {
@@ -203,6 +204,7 @@ export async function POST(request: Request) {
           bpkbUrl: isMotor ? bpkbUrl || null : null,
           tanggalMasuk: tanggalMasukDate,
           tanggalJatuhTempo,
+          hargaPaketTertagih: hitungHargaPaketTertagih(paket, tanggalMasukDate, tanggalJatuhTempo),
           metodePengiriman: metodePengiriman ?? null,
           layananJemput,
           layananAntar,

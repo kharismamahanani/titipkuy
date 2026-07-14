@@ -249,7 +249,7 @@ export default function AdminTransaksiPage() {
                       id={t.id}
                       nomorUrut={t.nomorUrut}
                       pelanggan={t.pelanggan}
-                      paket={t.paket}
+                      hargaPaketTertagih={t.hargaPaketTertagih}
                       antarJemputHarga={hargaAntarJemputTransaksi(t)}
                       tanggalJatuhTempo={t.tanggalJatuhTempo}
                       statusBayar={t.statusBayar}

@@ -80,6 +80,7 @@ export default async function AdminTransaksiDetailPage({
     nomorUrut: transaksi.nomorUrut,
     pelanggan: { ...pelanggan, createdAt: pelanggan.createdAt.toISOString() },
     paket: { ...paket, createdAt: paket.createdAt.toISOString(), updatedAt: paket.updatedAt.toISOString() },
+    hargaPaketTertagih: transaksi.hargaPaketTertagih,
     nilaiDeklarasi: transaksi.nilaiDeklarasi,
     deskripsiDeklarasi: transaksi.deskripsiDeklarasi,
     buktiKepemilikanUrl: transaksi.buktiKepemilikanUrl,
@@ -120,7 +121,7 @@ export default async function AdminTransaksiDetailPage({
         <Row label="No. WhatsApp" value={pelanggan.whatsapp} />
         <Row label="Alamat Kos" value={pelanggan.alamatKos} />
         <Row label="Kampus" value={pelanggan.kampus ?? "-"} />
-        <Row label="Paket" value={`${paket.nama} · ${formatRupiah(paket.harga)}`} />
+        <Row label="Paket" value={`${paket.nama} · ${formatRupiah(transaksi.hargaPaketTertagih)}`} />
         <Row
           label="Metode Pengiriman"
           value={
@@ -238,7 +239,7 @@ export default async function AdminTransaksiDetailPage({
           id={transaksi.id}
           nomorUrut={transaksi.nomorUrut}
           pelanggan={pelanggan}
-          paket={paket}
+          hargaPaketTertagih={transaksi.hargaPaketTertagih}
           antarJemputHarga={hargaAntarJemputTransaksi(transaksiDetail)}
           tanggalJatuhTempo={transaksi.tanggalJatuhTempo}
           statusBayar={transaksi.statusBayar}

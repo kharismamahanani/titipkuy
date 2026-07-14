@@ -45,7 +45,7 @@ async function getDashboardData() {
       }),
     ]);
 
-  const omzetBulanIni = omzetTransaksi.reduce((sum, t) => sum + t.paket.harga, 0);
+  const omzetBulanIni = omzetTransaksi.reduce((sum, t) => sum + t.hargaPaketTertagih, 0);
 
   return {
     transaksiAktif,
@@ -179,7 +179,7 @@ export default async function AdminDashboardPage() {
                         id={t.id}
                         nomorUrut={t.nomorUrut}
                         pelanggan={t.pelanggan}
-                        paket={t.paket}
+                        hargaPaketTertagih={t.hargaPaketTertagih}
                         antarJemputHarga={hargaAntarJemputTransaksi(t)}
                         tanggalJatuhTempo={t.tanggalJatuhTempo}
                         statusBayar={t.statusBayar}

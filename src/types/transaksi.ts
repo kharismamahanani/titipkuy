@@ -32,6 +32,7 @@ export interface TransaksiDetail {
   nomorUrut: number;
   pelanggan: Pelanggan;
   paket: Paket;
+  hargaPaketTertagih: number;
   nilaiDeklarasi: number | null;
   deskripsiDeklarasi: string | null;
   buktiKepemilikanUrl: string | null;

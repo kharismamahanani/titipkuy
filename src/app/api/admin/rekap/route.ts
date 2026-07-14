@@ -25,14 +25,14 @@ export async function GET(request: Request) {
     const lunas = transaksiBulan.filter((t) => t.statusBayar === "LUNAS");
     const belumBayar = transaksiBulan.filter((t) => t.statusBayar === "BELUM_BAYAR");
 
-    const omzetBulanIni = lunas.reduce((sum, t) => sum + t.paket.harga, 0);
+    const omzetBulanIni = lunas.reduce((sum, t) => sum + t.hargaPaketTertagih, 0);
     const jumlahTransaksi = transaksiBulan.length;
     const rataRataPerTransaksi = jumlahTransaksi > 0 ? omzetBulanIni / jumlahTransaksi : 0;
-    const totalBelumDibayar = belumBayar.reduce((sum, t) => sum + t.paket.harga, 0);
+    const totalBelumDibayar = belumBayar.reduce((sum, t) => sum + t.hargaPaketTertagih, 0);
 
     const breakdownMap = new Map<string, number>();
     for (const t of lunas) {
-      breakdownMap.set(t.paket.nama, (breakdownMap.get(t.paket.nama) ?? 0) + t.paket.harga);
+      breakdownMap.set(t.paket.nama, (breakdownMap.get(t.paket.nama) ?? 0) + t.hargaPaketTertagih);
     }
     const breakdownPaket = Array.from(breakdownMap, ([nama, omzet]) => ({ nama, omzet }));
 
@@ -64,7 +64,7 @@ export async function GET(request: Request) {
     for (const t of trendTransaksi) {
       const key = format(t.tanggalMasuk, "yyyy-MM");
       if (trendMap.has(key)) {
-        trendMap.set(key, (trendMap.get(key) ?? 0) + t.paket.harga);
+        trendMap.set(key, (trendMap.get(key) ?? 0) + t.hargaPaketTertagih);
       }
     }
     const tren6Bulan = Array.from(trendMap, ([bulan, omzet]) => ({ bulan, omzet }));
@@ -102,7 +102,7 @@ export async function GET(request: Request) {
       prisma.konfigurasiKeuangan.findFirst(),
     ]);
 
-    const omzetSepanjangWaktu = semuaTransaksiLunas.reduce((sum, t) => sum + t.paket.harga, 0);
+    const omzetSepanjangWaktu = semuaTransaksiLunas.reduce((sum, t) => sum + t.hargaPaketTertagih, 0);
     const pengeluaranSepanjangWaktu = semuaPengeluaran.reduce((sum, p) => sum + p.jumlah, 0);
     const labaKumulatif = omzetSepanjangWaktu - pengeluaranSepanjangWaktu;
 
