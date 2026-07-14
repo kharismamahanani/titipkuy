@@ -38,6 +38,7 @@ export async function POST(request: Request) {
       pelanggan,
       paketId,
       tanggalMasuk,
+      jumlahHari,
       nilaiDeklarasi,
       deskripsiDeklarasi,
       buktiKepemilikanUrl,
@@ -94,7 +95,12 @@ export async function POST(request: Request) {
     // berjalan di UTC (mis. Vercel), padahal benar saat diformat di browser
     // WIB. Konsisten dengan tanggalPenjemputan yang sudah dinormalisasi.
     const tanggalMasukDate = toUtcMidnightFromLocalDate(new Date(tanggalMasuk));
-    const tanggalJatuhTempo = addDays(tanggalMasukDate, paket.durasiHari ?? 1);
+    // Paket "harian" murni (durasiHari null) adalah tarif per-hari — jumlah
+    // hari ditentukan pelanggan lewat jumlahHari, bukan fixed 1 hari.
+    // Diabaikan untuk paket berdurasi tetap (bulanan/magang/motor/promo).
+    const isHarianFleksibel = paket.kategori === "harian" && paket.durasiHari === null;
+    const jumlahHariEfektif = isHarianFleksibel ? jumlahHari ?? 1 : paket.durasiHari ?? 1;
+    const tanggalJatuhTempo = addDays(tanggalMasukDate, jumlahHariEfektif);
     const ipAddress = request.headers.get("x-forwarded-for") ?? undefined;
     const userAgent = request.headers.get("user-agent") ?? undefined;
 

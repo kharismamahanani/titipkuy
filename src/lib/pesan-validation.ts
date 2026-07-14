@@ -27,7 +27,8 @@ export function validateStep2(
   paket: Paket | null,
   tanggalMasuk: Date | null,
   deklarasi: DeklarasiData,
-  dokumenMotor: DokumenMotorData
+  dokumenMotor: DokumenMotorData,
+  jumlahHariHarian: number = 1
 ) {
   const errors: string[] = [];
 
@@ -38,7 +39,10 @@ export function validateStep2(
     errors.push("Hub tutup di hari Minggu. Silakan pilih hari lain.");
   }
 
-  if (tanggalMasuk?.getDay() === 6 && paket?.durasiHari === 1) {
+  const isHarianFleksibel = paket?.kategori === "harian" && paket?.durasiHari == null;
+  const durasiEfektif = isHarianFleksibel ? jumlahHariHarian : paket?.durasiHari;
+
+  if (tanggalMasuk?.getDay() === 6 && durasiEfektif === 1) {
     errors.push(
       "Titip 1 hari di hari Sabtu tidak tersedia karena hub tutup di hari Minggu. Pilih durasi minimal 2 hari, atau pilih hari lain."
     );

@@ -41,9 +41,15 @@ export function Step3Perjanjian({
   const isMotor = paket?.kategori === "motor";
   const nilaiDeklarasiNum = Number(formData.deklarasi.nilaiDeklarasi) || 0;
   const tierGantiRugi = tentukanTier(nilaiDeklarasiNum);
-  const durasiHari = paket?.durasiHari ?? 1;
+  const isHarianFleksibel = paket?.kategori === "harian" && paket?.durasiHari == null;
+  const durasiHari = isHarianFleksibel ? formData.jumlahHariHarian : paket?.durasiHari ?? 1;
   const premi =
     tierGantiRugi === "standar" ? 0 : hitungPremi(nilaiDeklarasiNum, durasiHari);
+  const hargaPaketTertagih = paket
+    ? isHarianFleksibel
+      ? paket.harga * Math.max(1, formData.jumlahHariHarian)
+      : paket.harga
+    : 0;
 
   const items = [
     ...CHECKLIST_ITEMS,
@@ -96,7 +102,8 @@ export function Step3Perjanjian({
         <div className="flex justify-between">
           <span className="text-tk-muted">Paket</span>
           <span className="font-bold text-tk-charcoal">
-            {paket?.nama} {paket ? `— ${formatRupiah(paket.harga)}` : ""}
+            {paket?.nama} {paket ? `— ${formatRupiah(hargaPaketTertagih)}` : ""}
+            {isHarianFleksibel && ` (${durasiHari} hari)`}
           </span>
         </div>
         {premi > 0 && (
@@ -128,7 +135,7 @@ export function Step3Perjanjian({
           <span className="font-extrabold text-tk-charcoal">TOTAL</span>
           <span className="text-lg font-extrabold text-tk-orange">
             {formatRupiah(
-              (paket?.harga ?? 0) +
+              hargaPaketTertagih +
                 premi +
                 (formData.antarJemputSelection
                   ? hargaAntarJemput(

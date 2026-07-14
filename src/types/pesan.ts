@@ -46,6 +46,10 @@ export interface PesanFormData {
   dokumenMotor: DokumenMotorData;
   metodePengiriman: MetodePengiriman;
   antarJemputSelection: AntarJemputSelection | null;
+  // Durasi titip (hari) untuk paket "harian" murni (Paket.durasiHari null) —
+  // tarif per hari, jumlahnya ditentukan pelanggan. Diabaikan server untuk
+  // paket berdurasi tetap (bulanan/magang/motor/promo N-hari).
+  jumlahHariHarian: number;
   checklist: ChecklistData;
   tandaTanganDataUrl: string | null;
 }
@@ -70,6 +74,7 @@ export const INITIAL_FORM_DATA: PesanFormData = {
   },
   metodePengiriman: "armada",
   antarJemputSelection: null,
+  jumlahHariHarian: 1,
   checklist: {
     limitGantiRugi: false,
     barangTerlarang: false,

@@ -55,7 +55,8 @@ function PesanForm() {
         formData.paket,
         formData.tanggalMasuk,
         formData.deklarasi,
-        formData.dokumenMotor
+        formData.dokumenMotor,
+        formData.jumlahHariHarian
       );
       if (errors.length > 0) {
         toast.error(errors[0]);
@@ -88,7 +89,11 @@ function PesanForm() {
       const signatureBlob = await signatureBlobRes.blob();
       const tandaTanganUrl = await uploadViaApi(signatureBlob, "ttd", "ttd", transactionId);
 
-      const durasiHari = formData.paket.durasiHari ?? 1;
+      const isHarianFleksibel =
+        formData.paket.kategori === "harian" && formData.paket.durasiHari == null;
+      const durasiHari = isHarianFleksibel
+        ? formData.jumlahHariHarian
+        : formData.paket.durasiHari ?? 1;
       const premiGantiRugi =
         tierGantiRugi === "standar" ? 0 : hitungPremi(nilaiDeklarasiNum, durasiHari);
 
@@ -100,6 +105,7 @@ function PesanForm() {
           pelanggan: formData.pelanggan,
           paketId: formData.paket.id,
           tanggalMasuk: formData.tanggalMasuk,
+          jumlahHari: isHarianFleksibel ? formData.jumlahHariHarian : undefined,
           nilaiDeklarasi: tierGantiRugi === "standar" ? undefined : nilaiDeklarasiNum,
           tierGantiRugi,
           premiGantiRugi,
@@ -158,9 +164,12 @@ function PesanForm() {
               dokumenMotor={formData.dokumenMotor}
               metodePengiriman={formData.metodePengiriman}
               antarJemputSelection={formData.antarJemputSelection}
+              jumlahHariHarian={formData.jumlahHariHarian}
               preselectedPaketId={preselectedPaketId}
               preselectedMode={preselectedMode}
-              onPaketChange={(paket) => setFormData((prev) => ({ ...prev, paket }))}
+              onPaketChange={(paket) =>
+                setFormData((prev) => ({ ...prev, paket, jumlahHariHarian: 1 }))
+              }
               onTanggalChange={(tanggalMasuk) =>
                 setFormData((prev) => ({ ...prev, tanggalMasuk }))
               }
@@ -175,6 +184,9 @@ function PesanForm() {
               }
               onAntarJemputSelectionChange={(antarJemputSelection) =>
                 setFormData((prev) => ({ ...prev, antarJemputSelection }))
+              }
+              onJumlahHariHarianChange={(jumlahHariHarian) =>
+                setFormData((prev) => ({ ...prev, jumlahHariHarian }))
               }
             />
           )}

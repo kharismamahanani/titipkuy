@@ -42,6 +42,7 @@ interface Step2Props {
   dokumenMotor: DokumenMotorData;
   metodePengiriman: MetodePengiriman;
   antarJemputSelection: AntarJemputSelection | null;
+  jumlahHariHarian: number;
   preselectedPaketId?: string;
   preselectedMode?: "harian" | "bulanan";
   onPaketChange: (paket: Paket) => void;
@@ -50,7 +51,10 @@ interface Step2Props {
   onDokumenMotorChange: (data: DokumenMotorData) => void;
   onMetodePengirimanChange: (metode: MetodePengiriman) => void;
   onAntarJemputSelectionChange: (selection: AntarJemputSelection | null) => void;
+  onJumlahHariHarianChange: (jumlah: number) => void;
 }
+
+const MAX_HARI_HARIAN = 30;
 
 export function Step2PaketTanggal({
   transactionId,
@@ -60,6 +64,7 @@ export function Step2PaketTanggal({
   dokumenMotor,
   metodePengiriman,
   antarJemputSelection,
+  jumlahHariHarian,
   preselectedPaketId,
   preselectedMode,
   onPaketChange,
@@ -68,11 +73,13 @@ export function Step2PaketTanggal({
   onDokumenMotorChange,
   onMetodePengirimanChange,
   onAntarJemputSelectionChange,
+  onJumlahHariHarianChange,
 }: Step2Props) {
   const [paketList, setPaketList] = useState<Paket[]>([]);
   const [state, setState] = useState<"loading" | "success" | "error">("loading");
   const [tab, setTab] = useState<"harian" | "bulanan">(preselectedMode ?? "harian");
   const [pilihDeklarasi, setPilihDeklarasi] = useState(!!deklarasi.nilaiDeklarasi);
+  const [jumlahHariInput, setJumlahHariInput] = useState(String(jumlahHariHarian));
   const [uploadingDokumen, setUploadingDokumen] = useState<
     Record<"ktp" | "stnk" | "bpkb", boolean>
   >({ ktp: false, stnk: false, bpkb: false });
@@ -128,10 +135,15 @@ export function Step2PaketTanggal({
     }
   }
 
+  // Paket "harian" murni (durasiHari null) adalah tarif per-hari — jumlah
+  // hari ditentukan pelanggan sendiri, bukan fixed 1 hari (lihat
+  // hitungHargaPaketTertagih di src/lib/harga-paket.ts untuk perhitungan
+  // harga yang sama persis di sisi server).
+  const isHarianFleksibel = paket?.kategori === "harian" && paket?.durasiHari == null;
+  const jumlahHariEfektif = isHarianFleksibel ? jumlahHariHarian : paket?.durasiHari ?? 1;
+
   const tanggalJatuhTempo =
-    tanggalMasuk && paket
-      ? addDays(tanggalMasuk, paket.durasiHari ?? 1)
-      : null;
+    tanggalMasuk && paket ? addDays(tanggalMasuk, jumlahHariEfektif) : null;
 
   const filteredPaketList = paketList.filter((item) =>
     tab === "harian" ? item.kategori === "harian" : item.kategori !== "harian"
@@ -140,14 +152,19 @@ export function Step2PaketTanggal({
   const isSunday = tanggalMasuk ? tanggalMasuk.getDay() === 0 : false;
   const isSaturday = tanggalMasuk ? tanggalMasuk.getDay() === 6 : false;
   const armadaValid = tanggalMasuk ? isTanggalValidUntukArmada(tanggalMasuk) : true;
-  const saturdaySatuHariConflict = isSaturday && paket?.durasiHari === 1;
+  const saturdaySatuHariConflict = isSaturday && jumlahHariEfektif === 1;
   const isMotor = paket?.kategori === "motor";
   const armadaBisa = paket ? armadaYangBisa(paket) : "semua";
 
   const nilaiDeklarasiNum = Number(deklarasi.nilaiDeklarasi) || 0;
   const tierGantiRugi = tentukanTier(nilaiDeklarasiNum);
-  const durasiHari = paket?.durasiHari ?? 1;
-  const premi = tierGantiRugi === "standar" ? 0 : hitungPremi(nilaiDeklarasiNum, durasiHari);
+  const premi =
+    tierGantiRugi === "standar" ? 0 : hitungPremi(nilaiDeklarasiNum, jumlahHariEfektif);
+  const hargaPaketTertagih = paket
+    ? paket.kategori === "harian" && paket.durasiHari == null
+      ? paket.harga * Math.max(1, jumlahHariEfektif)
+      : paket.harga
+    : 0;
 
   useEffect(() => {
     if (tanggalMasuk && !armadaValid && metodePengiriman === "armada") {
@@ -156,6 +173,25 @@ export function Step2PaketTanggal({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tanggalMasuk, armadaValid]);
+
+  useEffect(() => {
+    setJumlahHariInput(String(jumlahHariHarian));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paket?.id]);
+
+  function handleJumlahHariChange(value: string) {
+    setJumlahHariInput(value);
+    const parsed = Number(value);
+    if (value.trim() !== "" && Number.isFinite(parsed) && parsed > 0) {
+      onJumlahHariHarianChange(Math.min(MAX_HARI_HARIAN, Math.floor(parsed)));
+    }
+  }
+
+  function handleJumlahHariBlur() {
+    const clamped = Math.min(MAX_HARI_HARIAN, Math.max(1, Number(jumlahHariInput) || 1));
+    setJumlahHariInput(String(clamped));
+    onJumlahHariHarianChange(clamped);
+  }
 
   function handleTanggalChange(date: Date) {
     if (date.getDay() === 0) {
@@ -249,6 +285,24 @@ export function Step2PaketTanggal({
             </div>
           )}
 
+          {isHarianFleksibel && (
+            <div>
+              <Label htmlFor="jumlahHari" className={tkLabelClass}>
+                Durasi Titip (hari)
+              </Label>
+              <Input
+                id="jumlahHari"
+                type="number"
+                min={1}
+                max={MAX_HARI_HARIAN}
+                value={jumlahHariInput}
+                onChange={(e) => handleJumlahHariChange(e.target.value)}
+                onBlur={handleJumlahHariBlur}
+                className={cn(tkInputClass, "max-w-[120px]")}
+              />
+            </div>
+          )}
+
           {tanggalMasuk && tanggalJatuhTempo && (
             <p className="text-sm text-tk-muted">
               Masuk{" "}
@@ -259,6 +313,16 @@ export function Step2PaketTanggal({
               <span className="font-bold text-tk-charcoal">
                 {format(tanggalJatuhTempo, "d MMMM yyyy", { locale: localeId })}
               </span>
+              {isHarianFleksibel && (
+                <>
+                  {" "}
+                  &middot;{" "}
+                  <span className="font-bold text-tk-orange">
+                    {formatRupiah(hargaPaketTertagih)}
+                  </span>{" "}
+                  ({formatRupiah(paket?.harga ?? 0)}/hari &times; {jumlahHariEfektif} hari)
+                </>
+              )}
             </p>
           )}
         </div>

@@ -5,8 +5,14 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  // Transaction-mode pooler (6543, pgbouncer) — dipakai runtime aplikasi.
+  // Session-mode pooler (5432) cuma punya pool_size 15, gampang habis
+  // kalau banyak koneksi serverless/dev bersamaan (ini penyebab menu
+  // admin gagal load — bukan bug kode, tapi kehabisan slot koneksi DB).
+  url       = env("DATABASE_URL")
+  // Migrasi/db push butuh koneksi langsung (bukan transaction pooler).
+  directUrl = env("DIRECT_URL")
 }
 
 model Pelanggan {

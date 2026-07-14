@@ -28,6 +28,9 @@ export const TransaksiSchema = z.object({
   pelanggan: PelangganSchema,
   paketId: z.string().cuid(),
   tanggalMasuk: z.string().datetime(),
+  // Durasi titip (hari) — cuma dipakai untuk paket "harian" murni
+  // (Paket.durasiHari null); diabaikan server untuk paket berdurasi tetap.
+  jumlahHari: z.number().int().min(1).max(30).optional(),
   nilaiDeklarasi: z.number().positive().optional().nullable(),
   deskripsiDeklarasi: z.string().optional().nullable(),
   buktiKepemilikanUrl: z.string().url().optional().nullable(),
