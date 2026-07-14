@@ -7,6 +7,7 @@ import { bookingRatelimit, getClientIp } from "@/lib/rate-limit";
 import { toUtcMidnightFromLocalDate } from "@/lib/date-utils";
 import { AKTIF_HUB_KEYS } from "@/lib/constants";
 import { hitungHargaPaketTertagih } from "@/lib/harga-paket";
+import { normalizeWhatsapp } from "@/lib/whatsapp";
 import { TransaksiSchema } from "@/lib/schemas";
 
 export async function POST(request: Request) {
@@ -183,19 +184,31 @@ export async function POST(request: Request) {
       }
     }
 
+    // Pakai ulang Pelanggan yang sudah ada (dicocokkan lewat No. WhatsApp)
+    // supaya pelanggan lama tidak dobel tercatat tiap pesan lagi — data
+    // terbaru (nama/alamat/kampus) tetap disinkronkan ke record lama itu.
+    const existingPelanggan = await prisma.pelanggan.findFirst({
+      where: { whatsapp: normalizeWhatsapp(pelanggan.whatsapp) },
+      orderBy: { createdAt: "desc" },
+    });
+
     const transaksi = await prisma.$transaction(async (tx) => {
       const created = await tx.transaksi.create({
         data: {
           id,
-          pelanggan: {
-            create: {
-              nama: pelanggan.nama,
-              whatsapp: pelanggan.whatsapp,
-              alamatKos: pelanggan.alamatKos,
-              kampus: pelanggan.kampus || null,
-              noKtpKtm: pelanggan.noKtpKtm || null,
-            },
-          },
+          pelanggan: existingPelanggan
+            ? {
+                connect: { id: existingPelanggan.id },
+              }
+            : {
+                create: {
+                  nama: pelanggan.nama,
+                  whatsapp: pelanggan.whatsapp,
+                  alamatKos: pelanggan.alamatKos,
+                  kampus: pelanggan.kampus || null,
+                  noKtpKtm: pelanggan.noKtpKtm || null,
+                },
+              },
           paket: {
             connect: { id: paket.id },
           },
@@ -242,6 +255,18 @@ export async function POST(request: Request) {
           // masuk di panel admin), bukan diupload pelanggan di sini.
         },
       });
+
+      if (existingPelanggan) {
+        await tx.pelanggan.update({
+          where: { id: existingPelanggan.id },
+          data: {
+            nama: pelanggan.nama,
+            alamatKos: pelanggan.alamatKos,
+            kampus: pelanggan.kampus || null,
+            noKtpKtm: pelanggan.noKtpKtm || null,
+          },
+        });
+      }
 
       if (penjemputan) {
         await incrementSlotUsage(tx, {

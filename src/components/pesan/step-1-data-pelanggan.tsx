@@ -1,5 +1,8 @@
 "use client";
 
+import { useState } from "react";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -12,6 +15,8 @@ import {
 import { tkErrorClass, tkInputClass, tkLabelClass, tkSelectTriggerClass } from "@/lib/form-style";
 import { KAMPUS_OPTIONS, type PelangganData } from "@/types/pesan";
 
+const WHATSAPP_REGEX = /^08\d{8,11}$/;
+
 interface Step1Props {
   data: PelangganData;
   errors: Partial<Record<keyof PelangganData, string>>;
@@ -19,8 +24,43 @@ interface Step1Props {
 }
 
 export function Step1DataPelanggan({ data, errors, onChange }: Step1Props) {
+  const [isLookingUp, setIsLookingUp] = useState(false);
+  const [alreadyLookedUp, setAlreadyLookedUp] = useState(false);
+
   function update<K extends keyof PelangganData>(key: K, value: PelangganData[K]) {
     onChange({ ...data, [key]: value });
+  }
+
+  async function handleWhatsappBlur() {
+    const whatsapp = data.whatsapp.trim();
+    if (!WHATSAPP_REGEX.test(whatsapp) || alreadyLookedUp) return;
+
+    setIsLookingUp(true);
+    setAlreadyLookedUp(true);
+    try {
+      const res = await fetch(`/api/pelanggan/cari?whatsapp=${encodeURIComponent(whatsapp)}`);
+      if (!res.ok) return;
+
+      const found: {
+        nama: string;
+        alamatKos: string;
+        kampus: string | null;
+        noKtpKtm: string | null;
+      } = await res.json();
+
+      onChange({
+        ...data,
+        nama: data.nama.trim() ? data.nama : found.nama,
+        alamatKos: data.alamatKos.trim() ? data.alamatKos : found.alamatKos,
+        kampus: data.kampus || ((found.kampus as PelangganData["kampus"]) ?? ""),
+        noKtpKtm: data.noKtpKtm.trim() ? data.noKtpKtm : found.noKtpKtm ?? "",
+      });
+      toast.success("Ketemu! Data pemesanan sebelumnya otomatis diisi.");
+    } catch {
+      // Diam-diam gagal — pelanggan baru tetap isi manual seperti biasa.
+    } finally {
+      setIsLookingUp(false);
+    }
   }
 
   return (
@@ -56,10 +96,20 @@ export function Step1DataPelanggan({ data, errors, onChange }: Step1Props) {
           placeholder="08xxxxxxxxxx"
           inputMode="numeric"
           value={data.whatsapp}
-          onChange={(e) => update("whatsapp", e.target.value)}
+          onChange={(e) => {
+            update("whatsapp", e.target.value);
+            setAlreadyLookedUp(false);
+          }}
+          onBlur={handleWhatsappBlur}
           aria-invalid={!!errors.whatsapp}
           className={tkInputClass}
         />
+        {isLookingUp && (
+          <p className="mt-1 flex items-center gap-1.5 text-xs text-tk-muted">
+            <Loader2 className="animate-spin" size={12} />
+            Mengecek data pemesanan sebelumnya...
+          </p>
+        )}
         {errors.whatsapp && <p className={tkErrorClass}>{errors.whatsapp}</p>}
       </div>
 
