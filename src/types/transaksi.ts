@@ -78,3 +78,18 @@ export interface VerifikasiPublik {
   nomorUrut: number;
   kodeLabel: string[];
 }
+
+// Data untuk halaman /cek-pesanan — pelanggan memverifikasi kepemilikan
+// lewat kecocokan No. WhatsApp, jadi boleh tampilkan nama lengkap & status
+// bayar (tapi tetap tanpa alamat/KTP/nilai deklarasi).
+export interface CekPesananResult {
+  nama: string;
+  paketNama: string;
+  hargaPaket: number;
+  statusTransaksi: "AKTIF" | "SELESAI" | "DIBATALKAN";
+  statusBayar: "BELUM_BAYAR" | "LUNAS";
+  tanggalMasuk: string;
+  tanggalJatuhTempo: string;
+  nomorUrut: number;
+  kodeLabel: string[];
+}

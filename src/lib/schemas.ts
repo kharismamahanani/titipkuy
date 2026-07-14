@@ -55,6 +55,12 @@ export const TransaksiSchema = z.object({
   layananAntar: z.boolean().optional(),
 });
 
+// POST /api/cek-pesanan — cek status pesanan publik (kode transaksi + WA)
+export const CekPesananSchema = z.object({
+  kodeTransaksi: z.string().min(1, "Kode transaksi wajib diisi"),
+  whatsapp: z.string().min(1, "No WhatsApp wajib diisi"),
+});
+
 // POST /api/admin/paket
 export const PaketSchema = z.object({
   nama: z.string().min(2).max(100),

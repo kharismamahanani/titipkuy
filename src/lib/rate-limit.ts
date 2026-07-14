@@ -24,6 +24,16 @@ export const bookingRatelimit = new Ratelimit({
   prefix: "titipkuy:booking",
 });
 
+// Cek pesanan publik (kode transaksi + no WhatsApp) — kode transaksi berbasis
+// nomor urut sekuensial jadi gampang ditebak; batasi supaya tidak dipakai
+// brute-force mencocokkan nomor WhatsApp ke kode transaksi orang lain.
+export const cekPesananRatelimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(10, "15 m"), // 10x per 15 menit
+  analytics: false,
+  prefix: "titipkuy:cek-pesanan",
+});
+
 /** Ambil IP klien dari header (dukung proxy/load balancer di depan Next.js). */
 export function getClientIp(request: Request): string {
   const forwardedFor = request.headers.get("x-forwarded-for");

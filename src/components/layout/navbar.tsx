@@ -12,6 +12,7 @@ const MENU_LINKS = [
   { label: "Hitung Biaya ⚡", href: "#kalkulator" },
   { label: "Lokasi & Jam", href: "#lokasi" },
   { label: "Cara Kerja", href: "#cara-kerja" },
+  { label: "Cek Pesanan 🔍", href: "/cek-pesanan" },
 ];
 
 export function Navbar() {
@@ -33,15 +34,19 @@ export function Navbar() {
         </Link>
 
         <div className="hidden items-center gap-8 md:flex">
-          {MENU_LINKS.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="text-sm font-bold text-tk-charcoal underline decoration-tk-orange decoration-2 underline-offset-4 decoration-transparent transition-colors hover:decoration-tk-orange"
-            >
-              {link.label}
-            </a>
-          ))}
+          {MENU_LINKS.map((link) => {
+            const className =
+              "text-sm font-bold text-tk-charcoal underline decoration-tk-orange decoration-2 underline-offset-4 decoration-transparent transition-colors hover:decoration-tk-orange";
+            return link.href.startsWith("#") ? (
+              <a key={link.href} href={link.href} className={className}>
+                {link.label}
+              </a>
+            ) : (
+              <Link key={link.href} href={link.href} className={className}>
+                {link.label}
+              </Link>
+            );
+          })}
         </div>
 
         <Link
@@ -71,16 +76,27 @@ export function Navbar() {
       >
         <div className="min-h-0 px-8 pb-6">
           <div className="flex flex-col gap-4 pt-4">
-            {MENU_LINKS.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                onClick={() => setIsOpen(false)}
-                className="text-sm font-bold text-tk-charcoal"
-              >
-                {link.label}
-              </a>
-            ))}
+            {MENU_LINKS.map((link) =>
+              link.href.startsWith("#") ? (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setIsOpen(false)}
+                  className="text-sm font-bold text-tk-charcoal"
+                >
+                  {link.label}
+                </a>
+              ) : (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setIsOpen(false)}
+                  className="text-sm font-bold text-tk-charcoal"
+                >
+                  {link.label}
+                </Link>
+              )
+            )}
             <Link
               href="/pesan"
               onClick={() => setIsOpen(false)}
