@@ -10,6 +10,7 @@ import { TkCard } from "@/components/ui/tk-card";
 import { Input } from "@/components/ui/input";
 import { tkInputClass } from "@/lib/form-style";
 import { FotoKeluarUploader } from "@/components/admin/foto-keluar-uploader";
+import { FotoLightboxGrid } from "@/components/admin/foto-lightbox-grid";
 import { TandaiSelesaiButton } from "@/components/admin/tandai-selesai-button";
 import type { Foto } from "@/types/transaksi";
 
@@ -38,8 +39,18 @@ export function PengambilanBarangSection({
   const [inputOtp, setInputOtp] = useState("");
   const [terverifikasi, setTerverifikasi] = useState(false);
 
+  // Setelah transaksi SELESAI/DIBATALKAN, alur OTP+upload tidak lagi
+  // relevan — tapi arsip foto keluar yang sudah pernah diupload tetap
+  // harus bisa dilihat, bukan ikut hilang dari tampilan.
   if (statusTransaksi !== "AKTIF") {
-    return null;
+    if (fotoKeluar.length === 0) return null;
+
+    return (
+      <section className="space-y-3">
+        <h2 className="font-extrabold text-tk-charcoal">📸 Arsip Foto Keluar</h2>
+        <FotoLightboxGrid fotos={fotoKeluar} emptyText="Belum ada foto keluar." />
+      </section>
+    );
   }
 
   async function handleKirimOtp() {
