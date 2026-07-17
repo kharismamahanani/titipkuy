@@ -5,7 +5,9 @@ export type StatusBadgeKind =
   | "SELESAI"
   | "DIBATALKAN"
   | "BELUM_BAYAR"
-  | "LUNAS";
+  | "LUNAS"
+  | "MENUNGGU_KIRIM"
+  | "SUDAH_TIBA";
 
 const STATUS_STYLES: Record<StatusBadgeKind, string> = {
   AKTIF: "border-tk-charcoal bg-tk-sage text-tk-cream",
@@ -13,6 +15,8 @@ const STATUS_STYLES: Record<StatusBadgeKind, string> = {
   DIBATALKAN: "border-[#C0392B] bg-tk-cream text-[#C0392B]",
   BELUM_BAYAR: "border-tk-charcoal bg-tk-orange text-tk-charcoal",
   LUNAS: "border-tk-charcoal bg-tk-sage text-tk-cream",
+  MENUNGGU_KIRIM: "border-tk-charcoal bg-tk-orange text-tk-charcoal",
+  SUDAH_TIBA: "border-tk-charcoal bg-tk-sage text-tk-cream",
 };
 
 interface StatusBadgeProps {

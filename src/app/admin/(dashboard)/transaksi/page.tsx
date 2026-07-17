@@ -196,13 +196,14 @@ export default function AdminTransaksiPage() {
               <th className="px-4 py-3 font-bold">Jatuh Tempo</th>
               <th className="px-4 py-3 font-bold">Status Bayar</th>
               <th className="px-4 py-3 font-bold">Status Transaksi</th>
+              <th className="px-4 py-3 font-bold">Status Kirim</th>
               <th className="px-4 py-3 font-bold">Aksi</th>
             </tr>
           </thead>
           <tbody>
             {!isLoading && data.length === 0 && (
               <tr>
-                <td colSpan={9} className="px-4 py-6 text-center text-tk-muted">
+                <td colSpan={10} className="px-4 py-6 text-center text-tk-muted">
                   Tidak ada transaksi ditemukan.
                 </td>
               </tr>
@@ -236,6 +237,15 @@ export default function AdminTransaksiPage() {
                   <StatusBadge status={t.statusTransaksi}>
                     {t.statusTransaksi.charAt(0) + t.statusTransaksi.slice(1).toLowerCase()}
                   </StatusBadge>
+                </td>
+                <td className="px-4 py-3">
+                  {t.metodePengiriman === "mandiri" ? (
+                    <StatusBadge status={t.barangTibaMandiri ? "SUDAH_TIBA" : "MENUNGGU_KIRIM"}>
+                      {t.barangTibaMandiri ? "Sudah Tiba" : "Belum Dikirim"}
+                    </StatusBadge>
+                  ) : (
+                    <span className="text-tk-muted">-</span>
+                  )}
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex flex-wrap gap-2">
