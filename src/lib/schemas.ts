@@ -56,6 +56,7 @@ export const TransaksiSchema = z.object({
   // keduanya (harga bundling ditentukan lewat AntarJemputOption).
   layananJemput: z.boolean().optional(),
   layananAntar: z.boolean().optional(),
+  kodeVoucher: z.string().optional().nullable(),
 });
 
 // POST /api/cek-pesanan — cek status pesanan publik (kode transaksi + WA)
@@ -76,6 +77,17 @@ export const PaketSchema = z.object({
   urutan: z.number().int().default(0),
 });
 
+// POST /api/admin/voucher
+export const VoucherSchema = z.object({
+  kode: z.string().min(3).max(30),
+  persenDiskon: z.number().int().min(1).max(100),
+  aktif: z.boolean().default(true),
+  berlakuMulai: z.string().datetime().optional().nullable(),
+  berlakuSampai: z.string().datetime().optional().nullable(),
+  kuota: z.number().int().positive().optional().nullable(),
+  deskripsi: z.string().max(200).optional().nullable(),
+});
+
 // POST /api/admin/transaksi/manual — order manual via WhatsApp oleh admin
 export const TransaksiManualSchema = z.object({
   id: z.string().uuid(),
@@ -91,6 +103,7 @@ export const TransaksiManualSchema = z.object({
   antarJemput: z.boolean().optional(),
   penjemputan: PenjemputanSchema.optional().nullable(),
   catatanAdmin: z.string().optional().nullable(),
+  kodeVoucher: z.string().optional().nullable(),
 });
 
 // POST /api/admin/pengeluaran

@@ -82,6 +82,13 @@ export default function AdminBuatOrderManualPage() {
   const [antarJemput, setAntarJemput] = useState(false);
   const [penjemputan, setPenjemputan] = useState<PenjemputanData>(EMPTY_PENJEMPUTAN);
 
+  const [kodeVoucherInput, setKodeVoucherInput] = useState("");
+  const [voucherState, setVoucherState] = useState<"idle" | "checking" | "valid" | "invalid">(
+    "idle"
+  );
+  const [voucherPersen, setVoucherPersen] = useState<number | null>(null);
+  const [voucherError, setVoucherError] = useState<string | null>(null);
+
   const [catatanAdmin, setCatatanAdmin] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successData, setSuccessData] = useState<SuccessData | null>(null);
@@ -95,10 +102,39 @@ export default function AdminBuatOrderManualPage() {
 
   const paket = paketList.find((p) => p.id === paketId) ?? null;
 
-  const hargaPaketTertagih =
+  const hargaSebelumDiskon =
     paket && tanggalMasuk && tanggalJatuhTempo
       ? hitungHargaPaketTertagih(paket, tanggalMasuk, tanggalJatuhTempo)
       : null;
+  const hargaPaketTertagih =
+    hargaSebelumDiskon != null && voucherState === "valid" && voucherPersen
+      ? Math.round(hargaSebelumDiskon * (1 - voucherPersen / 100))
+      : hargaSebelumDiskon;
+
+  async function handleCekVoucher() {
+    const kode = kodeVoucherInput.trim();
+    if (!kode) return;
+
+    setVoucherState("checking");
+    setVoucherError(null);
+    try {
+      const res = await fetch(`/api/voucher/validasi?kode=${encodeURIComponent(kode)}`);
+      const result = await res.json();
+
+      if (!res.ok) {
+        setVoucherState("invalid");
+        setVoucherPersen(null);
+        setVoucherError(result.error || "Kode voucher tidak valid");
+        return;
+      }
+
+      setVoucherState("valid");
+      setVoucherPersen(result.persenDiskon);
+    } catch {
+      setVoucherState("invalid");
+      setVoucherError("Gagal mengecek voucher, coba lagi");
+    }
+  }
 
   useEffect(() => {
     if (paket && tanggalMasuk) {
@@ -190,6 +226,7 @@ export default function AdminBuatOrderManualPage() {
               }
             : undefined,
           catatanAdmin: catatanAdmin || undefined,
+          kodeVoucher: voucherState === "valid" ? kodeVoucherInput.trim() : undefined,
         }),
       });
 
@@ -358,12 +395,55 @@ export default function AdminBuatOrderManualPage() {
                   <span className="text-tk-muted">
                     {" "}
                     ({formatRupiah(paket.harga)}/hari ×{" "}
-                    {Math.round(hargaPaketTertagih / paket.harga)} hari)
+                    {Math.round((hargaSebelumDiskon ?? hargaPaketTertagih) / paket.harga)} hari)
+                  </span>
+                )}
+                {voucherState === "valid" && voucherPersen && hargaSebelumDiskon != null && (
+                  <span className="ml-2 text-tk-muted line-through">
+                    {formatRupiah(hargaSebelumDiskon)}
                   </span>
                 )}
               </span>
             </div>
           )}
+
+          <div className="space-y-2">
+            <Label htmlFor="kodeVoucher" className={tkLabelClass}>
+              Kode Voucher (opsional)
+            </Label>
+            <div className="flex gap-2">
+              <Input
+                id="kodeVoucher"
+                value={kodeVoucherInput}
+                onChange={(e) => {
+                  setKodeVoucherInput(e.target.value.toUpperCase());
+                  if (voucherState !== "idle") {
+                    setVoucherState("idle");
+                    setVoucherPersen(null);
+                    setVoucherError(null);
+                  }
+                }}
+                placeholder="HEMAT10"
+                className={cn(tkInputClass, "max-w-[200px]")}
+              />
+              <button
+                type="button"
+                onClick={handleCekVoucher}
+                disabled={!kodeVoucherInput.trim() || voucherState === "checking"}
+                className="rounded-lg border-2 border-tk-charcoal bg-white px-4 py-2 text-sm font-bold text-tk-charcoal transition-colors hover:bg-tk-cream-alt disabled:opacity-40"
+              >
+                {voucherState === "checking" ? <Loader2 className="animate-spin" size={16} /> : "Cek"}
+              </button>
+            </div>
+            {voucherState === "valid" && voucherPersen && (
+              <p className="text-xs font-bold text-tk-sage-dark">
+                ✓ Voucher berlaku — diskon {voucherPersen}%
+              </p>
+            )}
+            {voucherState === "invalid" && voucherError && (
+              <p className="text-xs font-semibold text-[#C0392B]">✗ {voucherError}</p>
+            )}
+          </div>
 
           <div className="space-y-2">
             <Label className={tkLabelClass}>Hub Penyimpanan *</Label>

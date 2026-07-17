@@ -52,6 +52,10 @@ export interface PesanFormData {
   jumlahHariHarian: number;
   checklist: ChecklistData;
   tandaTanganDataUrl: string | null;
+  // Kode voucher opsional; hanya dikirim ke server jika sudah tervalidasi
+  // (lihat kodeVoucherValid di Step2PaketTanggal) supaya server tidak perlu
+  // menerima kode yang belum pernah dicek.
+  kodeVoucher: string;
 }
 
 export const INITIAL_FORM_DATA: PesanFormData = {
@@ -85,4 +89,5 @@ export const INITIAL_FORM_DATA: PesanFormData = {
     motorDeklarasiBenar: false,
   },
   tandaTanganDataUrl: null,
+  kodeVoucher: "",
 };

@@ -54,6 +54,14 @@ model Transaksi {
   // & disimpan saat transaksi dibuat (lihat src/lib/harga-paket.ts) supaya
   // tetap akurat walau harga Paket berubah di kemudian hari.
   hargaPaketTertagih Int         @default(0)
+  // Voucher diskon persen (opsional). hargaPaketTertagih di atas SUDAH
+  // memperhitungkan diskon (nilai final tertagih); dua field di bawah
+  // menyimpan snapshot harga asli & persen saat transaksi dibuat, supaya
+  // riwayat tidak berubah walau Voucher itu sendiri diedit kemudian.
+  voucher          Voucher?    @relation(fields:[voucherId], references:[id])
+  voucherId        String?
+  hargaSebelumDiskon   Int?
+  persenDiskonTerpakai Int?
   nilaiDeklarasi   Int?        // diisi jika perluDeklarasi = true
   deskripsiDeklarasi String?   // merek, model, no seri barang bernilai tinggi
   buktiKepemilikanUrl String?  // URL bukti kepemilikan (STNK/BPKB/nota) di Supabase Storage
@@ -116,6 +124,22 @@ model Transaksi {
   otpPengambilan OtpPengambilan[]
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
+}
+
+// Kode voucher diskon persen yang bisa dipakai pelanggan/admin saat membuat
+// transaksi untuk memotong hargaPaketTertagih (lihat src/lib/voucher.ts).
+model Voucher {
+  id            String    @id @default(cuid())
+  kode          String    @unique // e.g. "HEMAT10"
+  persenDiskon  Int       // 1-100
+  aktif         Boolean   @default(true)
+  berlakuMulai  DateTime?
+  berlakuSampai DateTime?
+  kuota         Int?      // null = tidak terbatas
+  terpakai      Int       @default(0)
+  deskripsi     String?
+  createdAt     DateTime  @default(now())
+  transaksi     Transaksi[]
 }
 
 // OTP 6 digit dikirim ke WA pelanggan terdaftar untuk verifikasi identitas

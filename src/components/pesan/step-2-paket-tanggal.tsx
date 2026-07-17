@@ -43,6 +43,7 @@ interface Step2Props {
   metodePengiriman: MetodePengiriman;
   antarJemputSelection: AntarJemputSelection | null;
   jumlahHariHarian: number;
+  kodeVoucher: string;
   preselectedPaketId?: string;
   preselectedMode?: "harian" | "bulanan";
   onPaketChange: (paket: Paket) => void;
@@ -52,6 +53,7 @@ interface Step2Props {
   onMetodePengirimanChange: (metode: MetodePengiriman) => void;
   onAntarJemputSelectionChange: (selection: AntarJemputSelection | null) => void;
   onJumlahHariHarianChange: (jumlah: number) => void;
+  onKodeVoucherChange: (kode: string) => void;
 }
 
 const MAX_HARI_HARIAN = 30;
@@ -65,6 +67,7 @@ export function Step2PaketTanggal({
   metodePengiriman,
   antarJemputSelection,
   jumlahHariHarian,
+  kodeVoucher,
   preselectedPaketId,
   preselectedMode,
   onPaketChange,
@@ -74,6 +77,7 @@ export function Step2PaketTanggal({
   onMetodePengirimanChange,
   onAntarJemputSelectionChange,
   onJumlahHariHarianChange,
+  onKodeVoucherChange,
 }: Step2Props) {
   const [paketList, setPaketList] = useState<Paket[]>([]);
   const [state, setState] = useState<"loading" | "success" | "error">("loading");
@@ -83,6 +87,12 @@ export function Step2PaketTanggal({
   const [uploadingDokumen, setUploadingDokumen] = useState<
     Record<"ktp" | "stnk" | "bpkb", boolean>
   >({ ktp: false, stnk: false, bpkb: false });
+  const [voucherInput, setVoucherInput] = useState(kodeVoucher);
+  const [voucherState, setVoucherState] = useState<"idle" | "checking" | "valid" | "invalid">(
+    kodeVoucher ? "valid" : "idle"
+  );
+  const [voucherPersen, setVoucherPersen] = useState<number | null>(null);
+  const [voucherError, setVoucherError] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -160,11 +170,15 @@ export function Step2PaketTanggal({
   const tierGantiRugi = tentukanTier(nilaiDeklarasiNum);
   const premi =
     tierGantiRugi === "standar" ? 0 : hitungPremi(nilaiDeklarasiNum, jumlahHariEfektif);
-  const hargaPaketTertagih = paket
+  const hargaSebelumDiskon = paket
     ? paket.kategori === "harian" && paket.durasiHari == null
       ? paket.harga * Math.max(1, jumlahHariEfektif)
       : paket.harga
     : 0;
+  const hargaPaketTertagih =
+    voucherState === "valid" && voucherPersen
+      ? Math.round(hargaSebelumDiskon * (1 - voucherPersen / 100))
+      : hargaSebelumDiskon;
 
   useEffect(() => {
     if (tanggalMasuk && !armadaValid && metodePengiriman === "armada") {
@@ -191,6 +205,34 @@ export function Step2PaketTanggal({
     const clamped = Math.min(MAX_HARI_HARIAN, Math.max(1, Number(jumlahHariInput) || 1));
     setJumlahHariInput(String(clamped));
     onJumlahHariHarianChange(clamped);
+  }
+
+  async function handleCekVoucher() {
+    const kode = voucherInput.trim();
+    if (!kode) return;
+
+    setVoucherState("checking");
+    setVoucherError(null);
+    try {
+      const res = await fetch(`/api/voucher/validasi?kode=${encodeURIComponent(kode)}`);
+      const result = await res.json();
+
+      if (!res.ok) {
+        setVoucherState("invalid");
+        setVoucherPersen(null);
+        setVoucherError(result.error || "Kode voucher tidak valid");
+        onKodeVoucherChange("");
+        return;
+      }
+
+      setVoucherState("valid");
+      setVoucherPersen(result.persenDiskon);
+      onKodeVoucherChange(kode.toUpperCase());
+    } catch {
+      setVoucherState("invalid");
+      setVoucherError("Gagal mengecek voucher, coba lagi");
+      onKodeVoucherChange("");
+    }
   }
 
   function handleTanggalChange(date: Date) {
@@ -324,6 +366,56 @@ export function Step2PaketTanggal({
                 </>
               )}
             </p>
+          )}
+
+          {paket && (
+            <div className="space-y-2">
+              <Label htmlFor="kodeVoucher" className={tkLabelClass}>
+                Kode Voucher (opsional)
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  id="kodeVoucher"
+                  value={voucherInput}
+                  onChange={(e) => {
+                    setVoucherInput(e.target.value.toUpperCase());
+                    if (voucherState !== "idle") {
+                      setVoucherState("idle");
+                      setVoucherPersen(null);
+                      setVoucherError(null);
+                      onKodeVoucherChange("");
+                    }
+                  }}
+                  placeholder="HEMAT10"
+                  className={cn(tkInputClass, "max-w-[200px]")}
+                />
+                <button
+                  type="button"
+                  onClick={handleCekVoucher}
+                  disabled={!voucherInput.trim() || voucherState === "checking"}
+                  className="rounded-lg border-2 border-tk-charcoal bg-white px-4 py-2 text-sm font-bold text-tk-charcoal transition-colors hover:bg-tk-cream-alt disabled:opacity-40"
+                >
+                  {voucherState === "checking" ? (
+                    <Loader2 className="animate-spin" size={16} />
+                  ) : (
+                    "Cek"
+                  )}
+                </button>
+              </div>
+
+              {voucherState === "valid" && voucherPersen && (
+                <p className="text-xs font-bold text-tk-sage-dark">
+                  ✓ Voucher berlaku — diskon {voucherPersen}%. Harga:{" "}
+                  <span className="text-tk-orange">{formatRupiah(hargaPaketTertagih)}</span>{" "}
+                  <span className="text-tk-muted line-through">
+                    {formatRupiah(hargaSebelumDiskon)}
+                  </span>
+                </p>
+              )}
+              {voucherState === "invalid" && voucherError && (
+                <p className="text-xs font-semibold text-[#C0392B]">✗ {voucherError}</p>
+              )}
+            </div>
           )}
         </div>
       )}

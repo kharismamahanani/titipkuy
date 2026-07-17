@@ -8,6 +8,7 @@ import { toUtcMidnightFromLocalDate } from "@/lib/date-utils";
 import { AKTIF_HUB_KEYS } from "@/lib/constants";
 import { hitungHargaPaketTertagih } from "@/lib/harga-paket";
 import { normalizeWhatsapp } from "@/lib/whatsapp";
+import { validasiVoucher, terapkanDiskon } from "@/lib/voucher";
 import { TransaksiSchema } from "@/lib/schemas";
 
 export async function POST(request: Request) {
@@ -55,11 +56,21 @@ export async function POST(request: Request) {
       antarJemputId,
       layananJemput: layananJemputInput,
       layananAntar: layananAntarInput,
+      kodeVoucher,
     } = parsed.data;
 
     const paket = await prisma.paket.findUnique({ where: { id: paketId } });
     if (!paket || !paket.aktif) {
       return NextResponse.json({ error: "Paket tidak ditemukan" }, { status: 400 });
+    }
+
+    let voucherValid: { id: string; kode: string; persenDiskon: number } | null = null;
+    if (kodeVoucher) {
+      const hasil = await validasiVoucher(kodeVoucher);
+      if (!hasil.ok) {
+        return NextResponse.json({ error: hasil.error }, { status: 400 });
+      }
+      voucherValid = hasil.voucher;
     }
 
     const isMotor = paket.kategori === "motor";
@@ -192,7 +203,25 @@ export async function POST(request: Request) {
       orderBy: { createdAt: "desc" },
     });
 
+    const hargaAsli = hitungHargaPaketTertagih(paket, tanggalMasukDate, tanggalJatuhTempo);
+    const hargaTertagih = voucherValid
+      ? terapkanDiskon(hargaAsli, voucherValid.persenDiskon)
+      : hargaAsli;
+
     const transaksi = await prisma.$transaction(async (tx) => {
+      // Kuota voucher dicek ulang & di-increment dalam transaksi DB yang sama
+      // supaya dua booking bersamaan tidak sama-sama lolos saat kuota tersisa 1.
+      if (voucherValid) {
+        const current = await tx.voucher.findUnique({ where: { id: voucherValid.id } });
+        if (!current || !current.aktif || (current.kuota !== null && current.terpakai >= current.kuota)) {
+          throw new Error("VOUCHER_KUOTA_HABIS");
+        }
+        await tx.voucher.update({
+          where: { id: voucherValid.id },
+          data: { terpakai: { increment: 1 } },
+        });
+      }
+
       const created = await tx.transaksi.create({
         data: {
           id,
@@ -223,7 +252,10 @@ export async function POST(request: Request) {
           bpkbUrl: isMotor ? bpkbUrl || null : null,
           tanggalMasuk: tanggalMasukDate,
           tanggalJatuhTempo,
-          hargaPaketTertagih: hitungHargaPaketTertagih(paket, tanggalMasukDate, tanggalJatuhTempo),
+          hargaPaketTertagih: hargaTertagih,
+          voucher: voucherValid ? { connect: { id: voucherValid.id } } : undefined,
+          hargaSebelumDiskon: voucherValid ? hargaAsli : null,
+          persenDiskonTerpakai: voucherValid ? voucherValid.persenDiskon : null,
           metodePengiriman: metodePengiriman ?? null,
           layananJemput,
           layananAntar,
@@ -303,6 +335,12 @@ export async function POST(request: Request) {
     if (error instanceof Error && error.message === "SLOT_PENUH") {
       return NextResponse.json(
         { error: "Slot yang kamu pilih baru saja penuh, silakan pilih jadwal lain." },
+        { status: 409 }
+      );
+    }
+    if (error instanceof Error && error.message === "VOUCHER_KUOTA_HABIS") {
+      return NextResponse.json(
+        { error: "Kuota kode voucher baru saja habis, silakan lanjutkan tanpa voucher." },
         { status: 409 }
       );
     }

@@ -124,6 +124,7 @@ function PesanForm() {
             formData.antarJemputSelection?.layanan === "antar-saja" ||
             formData.antarJemputSelection?.layanan === "jemput-dan-antar" ||
             undefined,
+          kodeVoucher: formData.kodeVoucher || undefined,
         }),
       });
 
@@ -165,6 +166,7 @@ function PesanForm() {
               metodePengiriman={formData.metodePengiriman}
               antarJemputSelection={formData.antarJemputSelection}
               jumlahHariHarian={formData.jumlahHariHarian}
+              kodeVoucher={formData.kodeVoucher}
               preselectedPaketId={preselectedPaketId}
               preselectedMode={preselectedMode}
               onPaketChange={(paket) =>
@@ -187,6 +189,9 @@ function PesanForm() {
               }
               onJumlahHariHarianChange={(jumlahHariHarian) =>
                 setFormData((prev) => ({ ...prev, jumlahHariHarian }))
+              }
+              onKodeVoucherChange={(kodeVoucher) =>
+                setFormData((prev) => ({ ...prev, kodeVoucher }))
               }
             />
           )}
