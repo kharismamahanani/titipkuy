@@ -46,6 +46,7 @@ export const TransaksiSchema = z.object({
     barangTerlarang: z.boolean(),
     jatuhTempo: z.boolean(),
     lepasSetelah30Hari: z.boolean(),
+    pembayaranTidakDirefund: z.boolean(),
     deklarasiBenar: z.boolean().optional(),
     motorDeklarasiBenar: z.boolean().optional(),
   }),

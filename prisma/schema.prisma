@@ -116,6 +116,7 @@ model Transaksi {
   klausulBarangTerlarang   Boolean   @default(false)
   klausulJatuhTempo        Boolean   @default(false)
   klausulDeklarasiNilai    Boolean   @default(false) // hanya jika perluDeklarasi
+  klausulPembayaranTidakDirefund Boolean @default(false)
   tandaTanganUrl           String?   // URL gambar TTD di Supabase Storage
   // Dokumentasi foto
   fotoMasuk     FotoBarang[]  @relation("FotoMasuk")

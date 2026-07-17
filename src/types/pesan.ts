@@ -32,6 +32,7 @@ export interface ChecklistData {
   jatuhTempo: boolean;
   lepasSetelah30Hari: boolean;
   pengemasanWajib: boolean;
+  pembayaranTidakDirefund: boolean;
   deklarasiBenar: boolean;
   motorDeklarasiBenar: boolean;
 }
@@ -85,6 +86,7 @@ export const INITIAL_FORM_DATA: PesanFormData = {
     jatuhTempo: false,
     lepasSetelah30Hari: false,
     pengemasanWajib: false,
+    pembayaranTidakDirefund: false,
     deklarasiBenar: false,
     motorDeklarasiBenar: false,
   },

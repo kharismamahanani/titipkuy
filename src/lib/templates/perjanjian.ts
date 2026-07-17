@@ -36,6 +36,9 @@ Saya paham barang yang tidak diambil dalam waktu lebih dari 30 (tiga puluh) hari
 6. DOKUMENTASI
 Saya menyetujui TitipKuy! mendokumentasikan kondisi barang melalui foto saat masuk dan keluar sebagai bukti kondisi, dan penggunaan foto tersebut sebagai bukti apabila terjadi perselisihan.
 
+7. KEBIJAKAN PEMBATALAN & PEMBAYARAN
+Saya memahami dan menyetujui bahwa pembayaran yang sudah dilakukan tidak dapat dibatalkan atau dikembalikan (non-refundable) atas alasan apapun, termasuk apabila pesanan dibatalkan.
+
 Dengan menandatangani pernyataan ini secara digital, saya menyatakan kesediaan saya untuk mematuhi seluruh ketentuan di atas dan menggunakan layanan TitipKuy! dengan itikad baik.`;
 
 export const ADENDUM_BARANG_BERNILAI_TINGGI = `ADENDUM — BARANG BERNILAI TINGGI

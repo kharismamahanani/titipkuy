@@ -38,6 +38,7 @@ const EMPTY_CHECKLIST: ChecklistData = {
   barangTerlarang: false,
   jatuhTempo: false,
   lepasSetelah30Hari: false,
+  pembayaranTidakDirefund: false,
   deklarasiBenar: false,
   motorDeklarasiBenar: false,
 };
@@ -97,6 +98,7 @@ function KonfirmasiManualContent() {
     "barangTerlarang",
     "jatuhTempo",
     "lepasSetelah30Hari",
+    "pembayaranTidakDirefund",
     ...(data?.paket.perluDeklarasi ? (["deklarasiBenar"] as const) : []),
     ...(data?.paket.kategori === "motor" ? (["motorDeklarasiBenar"] as const) : []),
   ];

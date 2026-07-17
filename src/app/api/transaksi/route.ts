@@ -81,6 +81,7 @@ export async function POST(request: Request) {
       "barangTerlarang",
       "jatuhTempo",
       "lepasSetelah30Hari",
+      "pembayaranTidakDirefund",
     ] as const;
     const checklistOk = requiredChecklist.every((key) => checklist?.[key] === true);
     const deklarasiChecklistOk =
@@ -282,6 +283,7 @@ export async function POST(request: Request) {
           klausulBarangTerlarang: true,
           klausulJatuhTempo: true,
           klausulDeklarasiNilai: tierGantiRugi !== "standar",
+          klausulPembayaranTidakDirefund: true,
           // Foto kondisi barang sekarang diambil admin saat barang
           // benar-benar tiba di hub (lihat FotoKeluarUploader/foto
           // masuk di panel admin), bukan diupload pelanggan di sini.

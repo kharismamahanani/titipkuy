@@ -21,6 +21,7 @@ const REQUIRED_CHECKS: (keyof ChecklistData)[] = [
   "barangTerlarang",
   "jatuhTempo",
   "lepasSetelah30Hari",
+  "pembayaranTidakDirefund",
 ];
 
 function PesanForm() {

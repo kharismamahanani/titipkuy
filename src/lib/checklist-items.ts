@@ -35,6 +35,12 @@ export const CHECKLIST_ITEMS: {
     label:
       "Saya paham barang yang tidak diambil lebih dari 30 hari bisa dilepas oleh TitipKuy!.",
   },
+  {
+    key: "pembayaranTidakDirefund",
+    icon: Ban,
+    label:
+      "Saya memahami dan menyetujui bahwa pembayaran yang sudah dilakukan tidak dapat dibatalkan atau dikembalikan (non-refundable) atas alasan apapun.",
+  },
 ];
 
 export const DEKLARASI_ITEM = {

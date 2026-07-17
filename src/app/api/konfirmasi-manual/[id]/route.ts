@@ -6,6 +6,7 @@ const REQUIRED_CHECKLIST = [
   "barangTerlarang",
   "jatuhTempo",
   "lepasSetelah30Hari",
+  "pembayaranTidakDirefund",
 ] as const;
 
 async function findValidTransaksi(id: string, token: string | null) {
@@ -102,6 +103,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
         klausulBarangTerlarang: true,
         klausulJatuhTempo: true,
         klausulDeklarasiNilai: transaksi.paket.perluDeklarasi,
+        klausulPembayaranTidakDirefund: true,
         // Foto kondisi barang sekarang diambil admin saat barang tiba di
         // hub (lihat FotoMasukUploader di panel admin), bukan diupload
         // pelanggan di halaman ini.
