@@ -26,12 +26,13 @@ const LAYANAN_LIST: { value: LayananAntarJemput; icon: string }[] = [
 interface AntarJemputPickerAdminProps {
   value: AntarJemputSelection | null;
   onChange: (selection: AntarJemputSelection | null) => void;
+  onLokasiChange?: (lat: number, lng: number) => void;
 }
 
 // Versi admin dari AntarJemputPicker (src/components/pesan/antar-jemput-picker.tsx)
 // untuk form order manual — bedanya sumber jarak dari LokasiPinMap (admin
 // menandai lokasi pelanggan di peta) alih-alih GPS device pelanggan sendiri.
-export function AntarJemputPickerAdmin({ value, onChange }: AntarJemputPickerAdminProps) {
+export function AntarJemputPickerAdmin({ value, onChange, onLokasiChange }: AntarJemputPickerAdminProps) {
   const [options, setOptions] = useState<AntarJemputOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [kategori, setKategori] = useState<KategoriJarak | null>(null);
@@ -44,8 +45,9 @@ export function AntarJemputPickerAdmin({ value, onChange }: AntarJemputPickerAdm
       .finally(() => setIsLoading(false));
   }, []);
 
-  function handleJarakChange(_jarak: number, kategoriBaru: KategoriJarak) {
+  function handleJarakChange(_jarak: number, kategoriBaru: KategoriJarak, lat: number, lng: number) {
     setKategori(kategoriBaru);
+    onLokasiChange?.(lat, lng);
   }
 
   const effectiveRadius: RadiusLabel | null =

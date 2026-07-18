@@ -20,7 +20,7 @@ function kategorikan(jarak: number): KategoriJarak {
 }
 
 interface LokasiPinMapProps {
-  onJarakChange: (jarak: number, kategori: KategoriJarak) => void;
+  onJarakChange: (jarak: number, kategori: KategoriJarak, lat: number, lng: number) => void;
 }
 
 // Peta ini khusus dipakai admin saat mengisi order manual (bukan pelanggan
@@ -62,7 +62,7 @@ export function LokasiPinMap({ onJarakChange }: LokasiPinMapProps) {
     setPosisi([lat, lng]);
     const jarakBaru = hitungJarak(lat, lng, HUB_LAT, HUB_LNG);
     setJarak(jarakBaru);
-    onJarakChange(jarakBaru, kategorikan(jarakBaru));
+    onJarakChange(jarakBaru, kategorikan(jarakBaru), lat, lng);
   }
 
   return (

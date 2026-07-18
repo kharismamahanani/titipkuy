@@ -52,6 +52,7 @@ interface Step2Props {
   onDokumenMotorChange: (data: DokumenMotorData) => void;
   onMetodePengirimanChange: (metode: MetodePengiriman) => void;
   onAntarJemputSelectionChange: (selection: AntarJemputSelection | null) => void;
+  onLokasiChange: (lat: number, lng: number) => void;
   onJumlahHariHarianChange: (jumlah: number) => void;
   onKodeVoucherChange: (kode: string) => void;
 }
@@ -78,6 +79,7 @@ export function Step2PaketTanggal({
   onAntarJemputSelectionChange,
   onJumlahHariHarianChange,
   onKodeVoucherChange,
+  onLokasiChange,
 }: Step2Props) {
   const [paketList, setPaketList] = useState<Paket[]>([]);
   const [state, setState] = useState<"loading" | "success" | "error">("loading");
@@ -623,6 +625,7 @@ export function Step2PaketTanggal({
                 onMetodePengirimanChange("mandiri");
                 onAntarJemputSelectionChange(null);
               }}
+              onLokasiChange={onLokasiChange}
             />
           ) : (
             <div className="rounded-lg border-2 border-tk-orange bg-tk-orange/10 p-3 text-xs text-tk-charcoal">

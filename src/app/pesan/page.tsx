@@ -126,6 +126,8 @@ function PesanForm() {
             formData.antarJemputSelection?.layanan === "jemput-dan-antar" ||
             undefined,
           kodeVoucher: formData.kodeVoucher || undefined,
+          lokasiLat: formData.lokasiLat ?? undefined,
+          lokasiLng: formData.lokasiLng ?? undefined,
         }),
       });
 
@@ -193,6 +195,9 @@ function PesanForm() {
               }
               onKodeVoucherChange={(kodeVoucher) =>
                 setFormData((prev) => ({ ...prev, kodeVoucher }))
+              }
+              onLokasiChange={(lokasiLat, lokasiLng) =>
+                setFormData((prev) => ({ ...prev, lokasiLat, lokasiLng }))
               }
             />
           )}

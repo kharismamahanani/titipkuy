@@ -86,6 +86,9 @@ export default function AdminBuatOrderManualPage() {
   const [antarJemputSelection, setAntarJemputSelection] = useState<AntarJemputSelection | null>(
     null
   );
+  const [lokasiPelanggan, setLokasiPelanggan] = useState<{ lat: number; lng: number } | null>(
+    null
+  );
 
   const [kodeVoucherInput, setKodeVoucherInput] = useState("");
   const [voucherState, setVoucherState] = useState<"idle" | "checking" | "valid" | "invalid">(
@@ -241,6 +244,8 @@ export default function AdminBuatOrderManualPage() {
             antarJemputSelection?.layanan === "antar-saja" ||
             antarJemputSelection?.layanan === "jemput-dan-antar" ||
             undefined,
+          lokasiLat: lokasiPelanggan?.lat,
+          lokasiLng: lokasiPelanggan?.lng,
         }),
       });
 
@@ -585,6 +590,7 @@ export default function AdminBuatOrderManualPage() {
               <AntarJemputPickerAdmin
                 value={antarJemputSelection}
                 onChange={setAntarJemputSelection}
+                onLokasiChange={(lat, lng) => setLokasiPelanggan({ lat, lng })}
               />
               <PenjemputanArmadaPicker
                 penjemputan={penjemputan}

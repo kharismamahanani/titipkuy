@@ -58,6 +58,8 @@ export const TransaksiSchema = z.object({
   layananJemput: z.boolean().optional(),
   layananAntar: z.boolean().optional(),
   kodeVoucher: z.string().optional().nullable(),
+  lokasiLat: z.number().optional().nullable(),
+  lokasiLng: z.number().optional().nullable(),
 });
 
 // POST /api/cek-pesanan — cek status pesanan publik (kode transaksi + WA)
@@ -108,6 +110,8 @@ export const TransaksiManualSchema = z.object({
   antarJemputId: z.string().cuid().optional().nullable(),
   layananJemput: z.boolean().optional(),
   layananAntar: z.boolean().optional(),
+  lokasiLat: z.number().optional().nullable(),
+  lokasiLng: z.number().optional().nullable(),
 });
 
 // POST /api/admin/pengeluaran

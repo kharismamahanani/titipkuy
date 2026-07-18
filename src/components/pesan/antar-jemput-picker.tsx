@@ -43,6 +43,9 @@ interface AntarJemputPickerProps {
   hideMandiriOption?: boolean;
   allowedArmada?: TipeArmada;
   onOutOfRange?: () => void;
+  // Titik lokasi hasil deteksi GPS — disimpan ke transaksi supaya tim
+  // jemput/antar armada punya link Google Maps di Rekap Jadwal Perjalanan.
+  onLokasiChange?: (lat: number, lng: number) => void;
 }
 
 export function AntarJemputPicker({
@@ -51,6 +54,7 @@ export function AntarJemputPicker({
   hideMandiriOption,
   allowedArmada = "semua",
   onOutOfRange,
+  onLokasiChange,
 }: AntarJemputPickerProps) {
   const [options, setOptions] = useState<AntarJemputOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -73,7 +77,7 @@ export function AntarJemputPicker({
 
   function handleDetect() {
     setManualRadius(null);
-    detect();
+    detect((hasil) => onLokasiChange?.(hasil.lat, hasil.lng));
   }
 
   function handleDeteksiUlang() {

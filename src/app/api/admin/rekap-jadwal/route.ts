@@ -57,9 +57,11 @@ export async function GET(request: Request) {
         tanggal: Date;
         sesiWaktu: string | null;
         statusTransaksi: typeof t.statusTransaksi;
-        pelanggan: { nama: string };
+        pelanggan: { nama: string; alamatKos: string };
         armada: { nama: string } | null;
         antarJemputOption: { radiusLabel: string; label: string } | null;
+        lokasiLat: number | null;
+        lokasiLng: number | null;
       }[] = [];
 
       const dalamRange = (tanggal: Date) =>
@@ -75,6 +77,8 @@ export async function GET(request: Request) {
           pelanggan: t.pelanggan,
           armada: t.armada,
           antarJemputOption: t.antarJemputOption,
+          lokasiLat: t.lokasiLat,
+          lokasiLng: t.lokasiLng,
         });
       }
 
@@ -90,6 +94,8 @@ export async function GET(request: Request) {
           pelanggan: t.pelanggan,
           armada: t.armada,
           antarJemputOption: t.antarJemputOption,
+          lokasiLat: t.lokasiLat,
+          lokasiLng: t.lokasiLng,
         });
       }
 

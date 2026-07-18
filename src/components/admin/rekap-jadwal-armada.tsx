@@ -24,9 +24,11 @@ interface RekapRow {
   tanggal: string;
   sesiWaktu: string | null;
   statusTransaksi: "AKTIF" | "SELESAI" | "DIBATALKAN";
-  pelanggan: { nama: string };
+  pelanggan: { nama: string; alamatKos: string };
   armada: { nama: string } | null;
   antarJemputOption: { radiusLabel: string; label: string } | null;
+  lokasiLat: number | null;
+  lokasiLng: number | null;
 }
 
 const JENIS_LAYANAN_LABEL: Record<RekapRow["jenisLayanan"], string> = {
@@ -82,6 +84,7 @@ export function RekapJadwalArmada() {
                 <th className="px-4 py-3">Armada</th>
                 <th className="px-4 py-3">Nama Customer</th>
                 <th className="px-4 py-3">Tujuan</th>
+                <th className="px-4 py-3">Lokasi</th>
                 <th className="px-4 py-3">Status</th>
               </tr>
             </thead>
@@ -110,6 +113,20 @@ export function RekapJadwalArmada() {
                   </td>
                   <td className="px-4 py-3 text-tk-muted">
                     {r.antarJemputOption?.radiusLabel ?? "-"}
+                  </td>
+                  <td className="px-4 py-3 text-tk-muted">
+                    {r.lokasiLat != null && r.lokasiLng != null ? (
+                      <a
+                        href={`https://www.google.com/maps?q=${r.lokasiLat},${r.lokasiLng}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-bold text-tk-orange-dark underline underline-offset-2"
+                      >
+                        📍 Buka Peta
+                      </a>
+                    ) : (
+                      r.pelanggan.alamatKos || "-"
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     <StatusBadge status={r.statusTransaksi}>{r.statusTransaksi}</StatusBadge>

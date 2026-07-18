@@ -57,6 +57,8 @@ export async function POST(request: Request) {
       layananJemput: layananJemputInput,
       layananAntar: layananAntarInput,
       kodeVoucher,
+      lokasiLat,
+      lokasiLng,
     } = parsed.data;
 
     const paket = await prisma.paket.findUnique({ where: { id: paketId } });
@@ -260,6 +262,8 @@ export async function POST(request: Request) {
           metodePengiriman: metodePengiriman ?? null,
           layananJemput,
           layananAntar,
+          lokasiLat: lokasiLat ?? null,
+          lokasiLng: lokasiLng ?? null,
           antarJemputOption: antarJemputId
             ? { connect: { id: antarJemputId } }
             : undefined,

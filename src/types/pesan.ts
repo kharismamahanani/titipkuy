@@ -57,6 +57,10 @@ export interface PesanFormData {
   // (lihat kodeVoucherValid di Step2PaketTanggal) supaya server tidak perlu
   // menerima kode yang belum pernah dicek.
   kodeVoucher: string;
+  // Titik lokasi hasil deteksi GPS (lihat AntarJemputPicker.onLokasiChange) —
+  // disimpan ke transaksi untuk link Google Maps di Rekap Jadwal Perjalanan.
+  lokasiLat: number | null;
+  lokasiLng: number | null;
 }
 
 export const INITIAL_FORM_DATA: PesanFormData = {
@@ -79,6 +83,8 @@ export const INITIAL_FORM_DATA: PesanFormData = {
   },
   metodePengiriman: "armada",
   antarJemputSelection: null,
+  lokasiLat: null,
+  lokasiLng: null,
   jumlahHariHarian: 1,
   checklist: {
     limitGantiRugi: false,

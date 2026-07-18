@@ -102,6 +102,11 @@ model Transaksi {
   armadaId           String?
   tanggalPenjemputan DateTime? @db.Date
   sesiPenjemputan    String?   // "pagi" | "siang"
+  // Titik lokasi pelanggan (dari GPS device pelanggan di /pesan, atau pin
+  // yang ditandai admin di peta saat order manual) — dipakai tim jemput/
+  // antar armada lewat link Google Maps di Rekap Jadwal Perjalanan.
+  lokasiLat          Float?
+  lokasiLng          Float?
   // Order manual via WhatsApp (dibuat admin) — link konfirmasi berbasis token
   konfirmasiToken          String?   @unique
   konfirmasiTokenExpiresAt DateTime?

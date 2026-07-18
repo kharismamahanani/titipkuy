@@ -8,6 +8,8 @@ export type KategoriJarak = "dekat" | "sedang" | "jauh";
 export interface DeteksiLokasiResult {
   jarak: number;
   kategori: KategoriJarak;
+  lat: number;
+  lng: number;
 }
 
 function kategorikan(jarak: number): KategoriJarak {
@@ -41,7 +43,12 @@ export function useDeteksiLokasi() {
           HUB_LAT,
           HUB_LNG
         );
-        const next = { jarak, kategori: kategorikan(jarak) };
+        const next = {
+          jarak,
+          kategori: kategorikan(jarak),
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
         setResult(next);
         setIsDetecting(false);
         onResult?.(next);
