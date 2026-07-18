@@ -17,6 +17,11 @@ interface EditTanggalButtonProps {
   statusTransaksi: "AKTIF" | "SELESAI" | "DIBATALKAN";
   tanggalMasuk: string | Date;
   tanggalJatuhTempo: string | Date;
+  // Dipakai untuk menampilkan peringatan jika transaksi ini punya jadwal
+  // armada — mengubah tanggal di sini TIDAK ikut memindahkan jadwal
+  // jemput/antar armada (tanggalPenjemputan/slot armada tetap di tanggal
+  // lama), karena itu perlu dicek ulang ketersediaan slot secara manual.
+  punyaJadwalArmada: boolean;
 }
 
 export function EditTanggalButton({
@@ -24,6 +29,7 @@ export function EditTanggalButton({
   statusTransaksi,
   tanggalMasuk,
   tanggalJatuhTempo,
+  punyaJadwalArmada,
 }: EditTanggalButtonProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -88,6 +94,15 @@ export function EditTanggalButton({
               Harga tertagih akan dihitung ulang otomatis mengikuti tanggal baru (untuk paket
               harian) dan diskon voucher (jika ada) tetap dipertahankan.
             </p>
+
+            {punyaJadwalArmada && (
+              <div className="rounded-lg border-2 border-tk-orange bg-tk-orange/10 p-3 text-xs font-semibold text-tk-charcoal">
+                ⚠️ Transaksi ini punya jadwal jemput/antar armada. Mengubah tanggal di sini{" "}
+                <span className="font-extrabold">tidak ikut memindahkan</span> jadwal armada —
+                sesuaikan jadwal penjemputan/pengantaran secara manual (hubungi pelanggan &
+                atur ulang armada) setelah menyimpan.
+              </div>
+            )}
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">

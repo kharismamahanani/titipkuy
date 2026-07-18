@@ -251,6 +251,10 @@ export default async function AdminTransaksiDetailPage({
           statusTransaksi={transaksi.statusTransaksi}
           tanggalMasuk={transaksi.tanggalMasuk}
           tanggalJatuhTempo={transaksi.tanggalJatuhTempo}
+          punyaJadwalArmada={
+            transaksi.metodePengiriman === "armada" &&
+            (transaksi.layananJemput || transaksi.layananAntar)
+          }
         />
         <BatalkanTransaksiButton
           transaksiId={transaksi.id}
