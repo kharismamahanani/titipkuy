@@ -11,7 +11,7 @@ import { TandaiLunasButton } from "@/components/admin/tandai-lunas-button";
 import { tkButtonVariants } from "@/components/ui/tk-button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { cn } from "@/lib/utils";
-import { hargaAntarJemputTransaksi } from "@/lib/harga-antar-jemput";
+import { hargaAntarJemputTransaksi, omzetTransaksi } from "@/lib/harga-antar-jemput";
 
 // Data berubah tiap ada transaksi baru/dibayar — jangan biarkan Next.js
 // menyimpannya sebagai halaman statis, selalu render ulang dari database.
@@ -21,8 +21,9 @@ async function getDashboardData() {
   const now = new Date();
   const in3Days = addDays(now, 3);
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
-  const [transaksiAktif, jatuhTempoSoon, belumLunas, omzetTransaksi, recentTransaksi] =
+  const [transaksiAktif, jatuhTempoSoon, belumLunas, transaksiOmzetBulanIni, recentTransaksi] =
     await Promise.all([
       prisma.transaksi.count({ where: { statusTransaksi: "AKTIF" } }),
       prisma.transaksi.findMany({
@@ -34,9 +35,12 @@ async function getDashboardData() {
         orderBy: { tanggalJatuhTempo: "asc" },
       }),
       prisma.transaksi.count({ where: { statusBayar: "BELUM_BAYAR" } }),
+      // Sama persis dengan filter & rumus /api/admin/rekap (bulan berjalan,
+      // hanya yang LUNAS, hargaPaketTertagih + premi + biaya antar-jemput)
+      // supaya angka omzet di Dashboard dan Rekap Keuangan selalu konsisten.
       prisma.transaksi.findMany({
-        where: { createdAt: { gte: startOfMonth } },
-        include: { paket: true },
+        where: { tanggalMasuk: { gte: startOfMonth, lt: startOfNextMonth }, statusBayar: "LUNAS" },
+        include: { paket: true, antarJemputOption: true },
       }),
       prisma.transaksi.findMany({
         take: 10,
@@ -45,7 +49,7 @@ async function getDashboardData() {
       }),
     ]);
 
-  const omzetBulanIni = omzetTransaksi.reduce((sum, t) => sum + t.hargaPaketTertagih, 0);
+  const omzetBulanIni = transaksiOmzetBulanIni.reduce((sum, t) => sum + omzetTransaksi(t), 0);
 
   return {
     transaksiAktif,
