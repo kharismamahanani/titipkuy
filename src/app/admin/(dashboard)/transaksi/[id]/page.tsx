@@ -14,6 +14,7 @@ import { PengambilanBarangSection } from "@/components/admin/pengambilan-barang-
 import { TandaiBarangTibaButton } from "@/components/admin/tandai-barang-tiba-button";
 import { TandaiLunasButton } from "@/components/admin/tandai-lunas-button";
 import { BatalkanTransaksiButton } from "@/components/admin/batalkan-transaksi-button";
+import { EditTanggalButton } from "@/components/admin/edit-tanggal-button";
 import { GeneratePdfButton } from "@/components/admin/generate-pdf-button";
 import { hargaAntarJemputTransaksi } from "@/lib/harga-antar-jemput";
 import type { TransaksiDetail } from "@/types/transaksi";
@@ -245,6 +246,12 @@ export default async function AdminTransaksiDetailPage({
           statusBayar={transaksi.statusBayar}
         />
         <GeneratePdfButton transaksiId={transaksi.id} pdfUrl={transaksi.pdfUrl} />
+        <EditTanggalButton
+          transaksiId={transaksi.id}
+          statusTransaksi={transaksi.statusTransaksi}
+          tanggalMasuk={transaksi.tanggalMasuk}
+          tanggalJatuhTempo={transaksi.tanggalJatuhTempo}
+        />
         <BatalkanTransaksiButton
           transaksiId={transaksi.id}
           statusTransaksi={transaksi.statusTransaksi}

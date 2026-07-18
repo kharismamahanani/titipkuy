@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import type { StatusBayar, StatusTransaksi } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { hitungHargaPaketTertagih } from "@/lib/harga-paket";
+import { terapkanDiskon } from "@/lib/voucher";
 
 export async function GET(
   _request: Request,
@@ -38,17 +40,62 @@ export async function PATCH(
 ) {
   try {
     const body = await request.json();
-    const { statusBayar, statusTransaksi, barangTibaMandiri, alasanPembatalan } = body ?? {};
+    const {
+      statusBayar,
+      statusTransaksi,
+      barangTibaMandiri,
+      alasanPembatalan,
+      tanggalMasuk,
+      tanggalJatuhTempo,
+    } = body ?? {};
 
     const data: {
       statusBayar?: StatusBayar;
       statusTransaksi?: StatusTransaksi;
       barangTibaMandiri?: boolean;
       alasanPembatalan?: string;
+      tanggalMasuk?: Date;
+      tanggalJatuhTempo?: Date;
+      hargaPaketTertagih?: number;
+      hargaSebelumDiskon?: number | null;
     } = {};
 
     if (barangTibaMandiri !== undefined) {
       data.barangTibaMandiri = !!barangTibaMandiri;
+    }
+
+    if (tanggalMasuk !== undefined || tanggalJatuhTempo !== undefined) {
+      const current = await prisma.transaksi.findUnique({
+        where: { id: params.id },
+        include: { paket: true },
+      });
+
+      if (!current) {
+        return NextResponse.json({ error: "Transaksi tidak ditemukan" }, { status: 404 });
+      }
+
+      const masukBaru = tanggalMasuk ? new Date(tanggalMasuk) : current.tanggalMasuk;
+      const jatuhTempoBaru = tanggalJatuhTempo
+        ? new Date(tanggalJatuhTempo)
+        : current.tanggalJatuhTempo;
+
+      if (jatuhTempoBaru <= masukBaru) {
+        return NextResponse.json(
+          { error: "Tanggal jatuh tempo harus setelah tanggal masuk" },
+          { status: 400 }
+        );
+      }
+
+      data.tanggalMasuk = masukBaru;
+      data.tanggalJatuhTempo = jatuhTempoBaru;
+
+      const hargaAsli = hitungHargaPaketTertagih(current.paket, masukBaru, jatuhTempoBaru);
+      if (current.persenDiskonTerpakai != null) {
+        data.hargaPaketTertagih = terapkanDiskon(hargaAsli, current.persenDiskonTerpakai);
+        data.hargaSebelumDiskon = hargaAsli;
+      } else {
+        data.hargaPaketTertagih = hargaAsli;
+      }
     }
 
     if (statusBayar !== undefined) {

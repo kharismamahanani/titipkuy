@@ -105,6 +105,9 @@ export const TransaksiManualSchema = z.object({
   penjemputan: PenjemputanSchema.optional().nullable(),
   catatanAdmin: z.string().optional().nullable(),
   kodeVoucher: z.string().optional().nullable(),
+  antarJemputId: z.string().cuid().optional().nullable(),
+  layananJemput: z.boolean().optional(),
+  layananAntar: z.boolean().optional(),
 });
 
 // POST /api/admin/pengeluaran

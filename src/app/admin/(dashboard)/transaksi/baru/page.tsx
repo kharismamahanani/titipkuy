@@ -32,7 +32,9 @@ import { ADMIN_NAME } from "@/constants/site";
 import { buildStoragePath, uploadToStorage } from "@/lib/supabase";
 import { AKTIF_HUB_KEYS, HUB_CONFIG } from "@/lib/constants";
 import { PenjemputanArmadaPicker } from "@/components/pesan/penjemputan-armada-picker";
+import { AntarJemputPickerAdmin } from "@/components/admin/antar-jemput-picker-admin";
 import { kodeTransaksi } from "@/lib/kode";
+import { hargaAntarJemput, type AntarJemputSelection } from "@/types/antar-jemput";
 import type { Paket } from "@/types/paket";
 import { EMPTY_PENJEMPUTAN, type Hub, type PenjemputanData } from "@/types/slot";
 
@@ -81,6 +83,9 @@ export default function AdminBuatOrderManualPage() {
 
   const [antarJemput, setAntarJemput] = useState(false);
   const [penjemputan, setPenjemputan] = useState<PenjemputanData>(EMPTY_PENJEMPUTAN);
+  const [antarJemputSelection, setAntarJemputSelection] = useState<AntarJemputSelection | null>(
+    null
+  );
 
   const [kodeVoucherInput, setKodeVoucherInput] = useState("");
   const [voucherState, setVoucherState] = useState<"idle" | "checking" | "valid" | "invalid">(
@@ -227,6 +232,15 @@ export default function AdminBuatOrderManualPage() {
             : undefined,
           catatanAdmin: catatanAdmin || undefined,
           kodeVoucher: voucherState === "valid" ? kodeVoucherInput.trim() : undefined,
+          antarJemputId: antarJemputSelection?.option.id,
+          layananJemput:
+            antarJemputSelection?.layanan === "jemput-saja" ||
+            antarJemputSelection?.layanan === "jemput-dan-antar" ||
+            undefined,
+          layananAntar:
+            antarJemputSelection?.layanan === "antar-saja" ||
+            antarJemputSelection?.layanan === "jemput-dan-antar" ||
+            undefined,
         }),
       });
 
@@ -403,6 +417,12 @@ export default function AdminBuatOrderManualPage() {
                     {formatRupiah(hargaSebelumDiskon)}
                   </span>
                 )}
+                {antarJemputSelection && (
+                  <span className="ml-2">
+                    + {formatRupiah(hargaAntarJemput(antarJemputSelection.option, antarJemputSelection.layanan))}{" "}
+                    <span className="text-tk-muted">(antar-jemput)</span>
+                  </span>
+                )}
               </span>
             </div>
           )}
@@ -561,11 +581,17 @@ export default function AdminBuatOrderManualPage() {
           </div>
 
           {antarJemput && (
-            <PenjemputanArmadaPicker
-              penjemputan={penjemputan}
-              onChange={setPenjemputan}
-              onKirimMandiri={() => setAntarJemput(false)}
-            />
+            <>
+              <AntarJemputPickerAdmin
+                value={antarJemputSelection}
+                onChange={setAntarJemputSelection}
+              />
+              <PenjemputanArmadaPicker
+                penjemputan={penjemputan}
+                onChange={setPenjemputan}
+                onKirimMandiri={() => setAntarJemput(false)}
+              />
+            </>
           )}
         </section>
 

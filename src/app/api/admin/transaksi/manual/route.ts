@@ -37,6 +37,9 @@ export async function POST(request: Request) {
       penjemputan,
       catatanAdmin,
       kodeVoucher,
+      antarJemputId,
+      layananJemput,
+      layananAntar,
     } = parsed.data;
 
     const paket = await prisma.paket.findUnique({ where: { id: paketId } });
@@ -130,6 +133,9 @@ export async function POST(request: Request) {
           hub,
           zonaRak: zonaRak || null,
           catatanAdmin: catatanAdmin || null,
+          antarJemputOption: antarJemputId ? { connect: { id: antarJemputId } } : undefined,
+          layananJemput: !!layananJemput,
+          layananAntar: !!layananAntar,
           armada:
             antarJemput && penjemputan
               ? { connect: { id: penjemputan.armadaId } }
