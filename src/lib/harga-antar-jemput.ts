@@ -19,3 +19,20 @@ export function hargaAntarJemputTransaksi(transaksi: {
   }
   return 0;
 }
+
+// Total omzet riil sebuah transaksi (dipakai Rekap Keuangan) — harga paket
+// SAJA tidak cukup karena mengabaikan biaya tambahan yang benar-benar
+// dibayar pelanggan: add-on antar-jemput dan premi perlindungan barang.
+export function omzetTransaksi(transaksi: {
+  hargaPaketTertagih: number;
+  premiGantiRugi: number | null;
+  antarJemputOption: AntarJemputOption | null;
+  layananJemput: boolean;
+  layananAntar: boolean;
+}): number {
+  return (
+    transaksi.hargaPaketTertagih +
+    (transaksi.premiGantiRugi ?? 0) +
+    hargaAntarJemputTransaksi(transaksi)
+  );
+}
