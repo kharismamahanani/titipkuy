@@ -43,6 +43,7 @@ interface Step2Props {
   metodePengiriman: MetodePengiriman;
   antarJemputSelection: AntarJemputSelection | null;
   jumlahHariHarian: number;
+  jumlahBarang: number;
   kodeVoucher: string;
   preselectedPaketId?: string;
   preselectedMode?: "harian" | "bulanan";
@@ -54,8 +55,11 @@ interface Step2Props {
   onAntarJemputSelectionChange: (selection: AntarJemputSelection | null) => void;
   onLokasiChange: (lat: number, lng: number) => void;
   onJumlahHariHarianChange: (jumlah: number) => void;
+  onJumlahBarangChange: (jumlah: number) => void;
   onKodeVoucherChange: (kode: string) => void;
 }
+
+const MAX_BARANG = 30;
 
 const MAX_HARI_HARIAN = 30;
 
@@ -68,6 +72,7 @@ export function Step2PaketTanggal({
   metodePengiriman,
   antarJemputSelection,
   jumlahHariHarian,
+  jumlahBarang,
   kodeVoucher,
   preselectedPaketId,
   preselectedMode,
@@ -78,6 +83,7 @@ export function Step2PaketTanggal({
   onMetodePengirimanChange,
   onAntarJemputSelectionChange,
   onJumlahHariHarianChange,
+  onJumlahBarangChange,
   onKodeVoucherChange,
   onLokasiChange,
 }: Step2Props) {
@@ -86,6 +92,7 @@ export function Step2PaketTanggal({
   const [tab, setTab] = useState<"harian" | "bulanan">(preselectedMode ?? "harian");
   const [pilihDeklarasi, setPilihDeklarasi] = useState(!!deklarasi.nilaiDeklarasi);
   const [jumlahHariInput, setJumlahHariInput] = useState(String(jumlahHariHarian));
+  const [jumlahBarangInput, setJumlahBarangInput] = useState(String(jumlahBarang));
   const [uploadingDokumen, setUploadingDokumen] = useState<
     Record<"ktp" | "stnk" | "bpkb", boolean>
   >({ ktp: false, stnk: false, bpkb: false });
@@ -172,10 +179,11 @@ export function Step2PaketTanggal({
   const tierGantiRugi = tentukanTier(nilaiDeklarasiNum);
   const premi =
     tierGantiRugi === "standar" ? 0 : hitungPremi(nilaiDeklarasiNum, jumlahHariEfektif);
+  const jumlahBarangEfektif = Math.max(1, jumlahBarang);
   const hargaSebelumDiskon = paket
-    ? paket.kategori === "harian" && paket.durasiHari == null
-      ? paket.harga * Math.max(1, jumlahHariEfektif)
-      : paket.harga
+    ? (paket.kategori === "harian" && paket.durasiHari == null
+        ? paket.harga * Math.max(1, jumlahHariEfektif)
+        : paket.harga) * jumlahBarangEfektif
     : 0;
   const hargaPaketTertagih =
     voucherState === "valid" && voucherPersen
@@ -207,6 +215,20 @@ export function Step2PaketTanggal({
     const clamped = Math.min(MAX_HARI_HARIAN, Math.max(1, Number(jumlahHariInput) || 1));
     setJumlahHariInput(String(clamped));
     onJumlahHariHarianChange(clamped);
+  }
+
+  function handleJumlahBarangChange(value: string) {
+    setJumlahBarangInput(value);
+    const parsed = Number(value);
+    if (value.trim() !== "" && Number.isFinite(parsed) && parsed > 0) {
+      onJumlahBarangChange(Math.min(MAX_BARANG, Math.floor(parsed)));
+    }
+  }
+
+  function handleJumlahBarangBlur() {
+    const clamped = Math.min(MAX_BARANG, Math.max(1, Number(jumlahBarangInput) || 1));
+    setJumlahBarangInput(String(clamped));
+    onJumlahBarangChange(clamped);
   }
 
   async function handleCekVoucher() {
@@ -347,6 +369,22 @@ export function Step2PaketTanggal({
             </div>
           )}
 
+          <div>
+            <Label htmlFor="jumlahBarang" className={tkLabelClass}>
+              Jumlah Barang
+            </Label>
+            <Input
+              id="jumlahBarang"
+              type="number"
+              min={1}
+              max={MAX_BARANG}
+              value={jumlahBarangInput}
+              onChange={(e) => handleJumlahBarangChange(e.target.value)}
+              onBlur={handleJumlahBarangBlur}
+              className={cn(tkInputClass, "max-w-[120px]")}
+            />
+          </div>
+
           {tanggalMasuk && tanggalJatuhTempo && (
             <p className="text-sm text-tk-muted">
               Masuk{" "}
@@ -364,7 +402,8 @@ export function Step2PaketTanggal({
                   <span className="font-bold text-tk-orange">
                     {formatRupiah(hargaPaketTertagih)}
                   </span>{" "}
-                  ({formatRupiah(paket?.harga ?? 0)}/hari &times; {jumlahHariEfektif} hari)
+                  ({formatRupiah(paket?.harga ?? 0)}/hari &times; {jumlahHariEfektif} hari
+                  {jumlahBarangEfektif > 1 && <> &times; {jumlahBarangEfektif} barang</>})
                 </>
               )}
             </p>

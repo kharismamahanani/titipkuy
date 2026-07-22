@@ -107,6 +107,7 @@ function PesanForm() {
           paketId: formData.paket.id,
           tanggalMasuk: formData.tanggalMasuk,
           jumlahHari: isHarianFleksibel ? formData.jumlahHariHarian : undefined,
+          jumlahBarang: formData.jumlahBarang,
           nilaiDeklarasi: tierGantiRugi === "standar" ? undefined : nilaiDeklarasiNum,
           tierGantiRugi,
           premiGantiRugi,
@@ -169,6 +170,7 @@ function PesanForm() {
               metodePengiriman={formData.metodePengiriman}
               antarJemputSelection={formData.antarJemputSelection}
               jumlahHariHarian={formData.jumlahHariHarian}
+              jumlahBarang={formData.jumlahBarang}
               kodeVoucher={formData.kodeVoucher}
               preselectedPaketId={preselectedPaketId}
               preselectedMode={preselectedMode}
@@ -192,6 +194,9 @@ function PesanForm() {
               }
               onJumlahHariHarianChange={(jumlahHariHarian) =>
                 setFormData((prev) => ({ ...prev, jumlahHariHarian }))
+              }
+              onJumlahBarangChange={(jumlahBarang) =>
+                setFormData((prev) => ({ ...prev, jumlahBarang }))
               }
               onKodeVoucherChange={(kodeVoucher) =>
                 setFormData((prev) => ({ ...prev, kodeVoucher }))

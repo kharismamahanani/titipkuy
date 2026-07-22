@@ -47,6 +47,7 @@ export async function PATCH(
       alasanPembatalan,
       tanggalMasuk,
       tanggalJatuhTempo,
+      jumlahBarang,
     } = body ?? {};
 
     const data: {
@@ -56,6 +57,7 @@ export async function PATCH(
       alasanPembatalan?: string;
       tanggalMasuk?: Date;
       tanggalJatuhTempo?: Date;
+      jumlahBarang?: number;
       hargaPaketTertagih?: number;
       hargaSebelumDiskon?: number | null;
     } = {};
@@ -64,7 +66,7 @@ export async function PATCH(
       data.barangTibaMandiri = !!barangTibaMandiri;
     }
 
-    if (tanggalMasuk !== undefined || tanggalJatuhTempo !== undefined) {
+    if (tanggalMasuk !== undefined || tanggalJatuhTempo !== undefined || jumlahBarang !== undefined) {
       const current = await prisma.transaksi.findUnique({
         where: { id: params.id },
         include: { paket: true },
@@ -78,6 +80,7 @@ export async function PATCH(
       const jatuhTempoBaru = tanggalJatuhTempo
         ? new Date(tanggalJatuhTempo)
         : current.tanggalJatuhTempo;
+      const jumlahBarangBaru = jumlahBarang ?? current.jumlahBarang;
 
       if (jatuhTempoBaru <= masukBaru) {
         return NextResponse.json(
@@ -88,8 +91,9 @@ export async function PATCH(
 
       data.tanggalMasuk = masukBaru;
       data.tanggalJatuhTempo = jatuhTempoBaru;
+      data.jumlahBarang = jumlahBarangBaru;
 
-      const hargaAsli = hitungHargaPaketTertagih(current.paket, masukBaru, jatuhTempoBaru);
+      const hargaAsli = hitungHargaPaketTertagih(current.paket, masukBaru, jatuhTempoBaru, jumlahBarangBaru);
       if (current.persenDiskonTerpakai != null) {
         data.hargaPaketTertagih = terapkanDiskon(hargaAsli, current.persenDiskonTerpakai);
         data.hargaSebelumDiskon = hargaAsli;

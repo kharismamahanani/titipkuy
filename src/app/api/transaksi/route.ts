@@ -41,6 +41,7 @@ export async function POST(request: Request) {
       paketId,
       tanggalMasuk,
       jumlahHari,
+      jumlahBarang,
       nilaiDeklarasi,
       deskripsiDeklarasi,
       buktiKepemilikanUrl,
@@ -206,7 +207,7 @@ export async function POST(request: Request) {
       orderBy: { createdAt: "desc" },
     });
 
-    const hargaAsli = hitungHargaPaketTertagih(paket, tanggalMasukDate, tanggalJatuhTempo);
+    const hargaAsli = hitungHargaPaketTertagih(paket, tanggalMasukDate, tanggalJatuhTempo, jumlahBarang);
     const hargaTertagih = voucherValid
       ? terapkanDiskon(hargaAsli, voucherValid.persenDiskon)
       : hargaAsli;
@@ -255,6 +256,7 @@ export async function POST(request: Request) {
           bpkbUrl: isMotor ? bpkbUrl || null : null,
           tanggalMasuk: tanggalMasukDate,
           tanggalJatuhTempo,
+          jumlahBarang,
           hargaPaketTertagih: hargaTertagih,
           voucher: voucherValid ? { connect: { id: voucherValid.id } } : undefined,
           hargaSebelumDiskon: voucherValid ? hargaAsli : null,

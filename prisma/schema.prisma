@@ -62,6 +62,11 @@ model Transaksi {
   voucherId        String?
   hargaSebelumDiskon   Int?
   persenDiskonTerpakai Int?
+  // Jumlah barang fisik yang menentukan pengali harga saat order dibuat
+  // (lihat src/lib/harga-paket.ts). TIDAK otomatis sinkron dengan hitungan
+  // BarangLabel di src/app/api/admin/barang-label/route.ts — itu pencatatan
+  // fisik per item yang diisi terpisah, konsep berbeda dari field ini.
+  jumlahBarang         Int         @default(1)
   nilaiDeklarasi   Int?        // diisi jika perluDeklarasi = true
   deskripsiDeklarasi String?   // merek, model, no seri barang bernilai tinggi
   buktiKepemilikanUrl String?  // URL bukti kepemilikan (STNK/BPKB/nota) di Supabase Storage

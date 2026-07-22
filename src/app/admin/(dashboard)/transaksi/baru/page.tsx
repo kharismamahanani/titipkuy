@@ -73,6 +73,7 @@ export default function AdminBuatOrderManualPage() {
     HUB_OPTIONS.length === 1 ? HUB_OPTIONS[0].value : ""
   );
   const [zonaRak, setZonaRak] = useState("");
+  const [jumlahBarang, setJumlahBarang] = useState("1");
 
   const [deklarasi, setDeklarasi] = useState({
     nilaiDeklarasi: "",
@@ -110,9 +111,11 @@ export default function AdminBuatOrderManualPage() {
 
   const paket = paketList.find((p) => p.id === paketId) ?? null;
 
+  const jumlahBarangNum = Math.max(1, Number(jumlahBarang) || 1);
+
   const hargaSebelumDiskon =
     paket && tanggalMasuk && tanggalJatuhTempo
-      ? hitungHargaPaketTertagih(paket, tanggalMasuk, tanggalJatuhTempo)
+      ? hitungHargaPaketTertagih(paket, tanggalMasuk, tanggalJatuhTempo, jumlahBarangNum)
       : null;
   const hargaPaketTertagih =
     hargaSebelumDiskon != null && voucherState === "valid" && voucherPersen
@@ -221,6 +224,7 @@ export default function AdminBuatOrderManualPage() {
           tanggalJatuhTempo,
           hub,
           zonaRak: zonaRak || undefined,
+          jumlahBarang: jumlahBarangNum,
           nilaiDeklarasi: deklarasi.nilaiDeklarasi ? Number(deklarasi.nilaiDeklarasi) : undefined,
           deskripsiDeklarasi: deklarasi.deskripsiDeklarasi || undefined,
           buktiKepemilikanUrl: deklarasi.buktiKepemilikanUrl || undefined,
@@ -405,6 +409,20 @@ export default function AdminBuatOrderManualPage() {
             </div>
           </div>
 
+          <div>
+            <Label htmlFor="jumlahBarang" className={tkLabelClass}>
+              Jumlah Barang *
+            </Label>
+            <Input
+              id="jumlahBarang"
+              type="number"
+              min="1"
+              value={jumlahBarang}
+              onChange={(e) => setJumlahBarang(e.target.value)}
+              className={cn(tkInputClass, "max-w-[120px]")}
+            />
+          </div>
+
           {hargaPaketTertagih != null && paket && (
             <div className="rounded-lg border-2 border-tk-orange bg-tk-orange/10 px-4 py-3 text-sm">
               <span className="text-tk-charcoal">
@@ -414,8 +432,14 @@ export default function AdminBuatOrderManualPage() {
                   <span className="text-tk-muted">
                     {" "}
                     ({formatRupiah(paket.harga)}/hari ×{" "}
-                    {Math.round((hargaSebelumDiskon ?? hargaPaketTertagih) / paket.harga)} hari)
+                    {Math.round(
+                      (hargaSebelumDiskon ?? hargaPaketTertagih) / paket.harga / jumlahBarangNum
+                    )}{" "}
+                    hari)
                   </span>
+                )}
+                {jumlahBarangNum > 1 && (
+                  <span className="text-tk-muted"> × {jumlahBarangNum} barang</span>
                 )}
                 {voucherState === "valid" && voucherPersen && hargaSebelumDiskon != null && (
                   <span className="ml-2 text-tk-muted line-through">

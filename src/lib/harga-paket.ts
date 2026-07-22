@@ -10,12 +10,15 @@ import { differenceInCalendarDays } from "date-fns";
 export function hitungHargaPaketTertagih(
   paket: { harga: number; kategori: string; durasiHari: number | null },
   tanggalMasuk: Date,
-  tanggalJatuhTempo: Date
+  tanggalJatuhTempo: Date,
+  jumlahBarang: number
 ): number {
+  const pengaliBarang = Math.max(1, jumlahBarang);
+
   if (paket.kategori !== "harian" || paket.durasiHari !== null) {
-    return paket.harga;
+    return paket.harga * pengaliBarang;
   }
 
   const jumlahHari = Math.max(1, differenceInCalendarDays(tanggalJatuhTempo, tanggalMasuk));
-  return paket.harga * jumlahHari;
+  return paket.harga * jumlahHari * pengaliBarang;
 }

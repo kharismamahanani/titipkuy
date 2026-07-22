@@ -51,6 +51,9 @@ export interface PesanFormData {
   // tarif per hari, jumlahnya ditentukan pelanggan. Diabaikan server untuk
   // paket berdurasi tetap (bulanan/magang/motor/promo N-hari).
   jumlahHariHarian: number;
+  // Jumlah barang fisik yang dititipkan — mengalikan harga paket (lihat
+  // hitungHargaPaketTertagih di src/lib/harga-paket.ts).
+  jumlahBarang: number;
   checklist: ChecklistData;
   tandaTanganDataUrl: string | null;
   // Kode voucher opsional; hanya dikirim ke server jika sudah tervalidasi
@@ -86,6 +89,7 @@ export const INITIAL_FORM_DATA: PesanFormData = {
   lokasiLat: null,
   lokasiLng: null,
   jumlahHariHarian: 1,
+  jumlahBarang: 1,
   checklist: {
     limitGantiRugi: false,
     barangTerlarang: false,

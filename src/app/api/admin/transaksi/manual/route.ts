@@ -30,6 +30,7 @@ export async function POST(request: Request) {
       tanggalJatuhTempo,
       hub,
       zonaRak,
+      jumlahBarang,
       nilaiDeklarasi,
       deskripsiDeklarasi,
       buktiKepemilikanUrl,
@@ -91,7 +92,7 @@ export async function POST(request: Request) {
     const konfirmasiToken = crypto.randomBytes(24).toString("hex");
     const konfirmasiTokenExpiresAt = new Date(Date.now() + TOKEN_VALID_MS);
 
-    const hargaAsli = hitungHargaPaketTertagih(paket, tanggalMasukDate, tanggalJatuhTempoDate);
+    const hargaAsli = hitungHargaPaketTertagih(paket, tanggalMasukDate, tanggalJatuhTempoDate, jumlahBarang);
     const hargaTertagih = voucherValid ? terapkanDiskon(hargaAsli, voucherValid.persenDiskon) : hargaAsli;
 
     const transaksi = await prisma.$transaction(async (tx) => {
@@ -134,6 +135,7 @@ export async function POST(request: Request) {
           persenDiskonTerpakai: voucherValid ? voucherValid.persenDiskon : null,
           hub,
           zonaRak: zonaRak || null,
+          jumlahBarang,
           catatanAdmin: catatanAdmin || null,
           antarJemputOption: antarJemputId ? { connect: { id: antarJemputId } } : undefined,
           layananJemput: !!layananJemput,
