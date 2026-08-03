@@ -18,7 +18,7 @@ import { AntarJemputPicker } from "@/components/pesan/antar-jemput-picker";
 import { armadaYangBisa } from "@/lib/armada-rules";
 import { HUB_CONFIG, JAM_DROP_OFF_MANDIRI } from "@/lib/constants";
 import type { Paket } from "@/types/paket";
-import type { DeklarasiData, DokumenMotorData, MetodePengiriman } from "@/types/pesan";
+import type { DeklarasiData, DokumenMotorData, MetodePengiriman, PesananItem } from "@/types/pesan";
 import type { AntarJemputSelection } from "@/types/antar-jemput";
 
 const MAX_UPLOAD_SIZE = 5 * 1024 * 1024; // 5MB
@@ -36,18 +36,17 @@ function isTanggalValidUntukArmada(tanggal: Date) {
 
 interface Step2Props {
   transactionId: string;
-  paket: Paket | null;
+  items: PesananItem[];
   tanggalMasuk: Date | null;
   deklarasi: DeklarasiData;
   dokumenMotor: DokumenMotorData;
   metodePengiriman: MetodePengiriman;
   antarJemputSelection: AntarJemputSelection | null;
   jumlahHariHarian: number;
-  jumlahBarang: number;
   kodeVoucher: string;
   preselectedPaketId?: string;
   preselectedMode?: "harian" | "bulanan";
-  onPaketChange: (paket: Paket) => void;
+  onItemsChange: (items: PesananItem[]) => void;
   onTanggalChange: (date: Date) => void;
   onDeklarasiChange: (data: DeklarasiData) => void;
   onDokumenMotorChange: (data: DokumenMotorData) => void;
@@ -55,7 +54,6 @@ interface Step2Props {
   onAntarJemputSelectionChange: (selection: AntarJemputSelection | null) => void;
   onLokasiChange: (lat: number, lng: number) => void;
   onJumlahHariHarianChange: (jumlah: number) => void;
-  onJumlahBarangChange: (jumlah: number) => void;
   onKodeVoucherChange: (kode: string) => void;
 }
 
@@ -65,34 +63,34 @@ const MAX_HARI_HARIAN = 30;
 
 export function Step2PaketTanggal({
   transactionId,
-  paket,
+  items,
   tanggalMasuk,
   deklarasi,
   dokumenMotor,
   metodePengiriman,
   antarJemputSelection,
   jumlahHariHarian,
-  jumlahBarang,
   kodeVoucher,
   preselectedPaketId,
   preselectedMode,
-  onPaketChange,
+  onItemsChange,
   onTanggalChange,
   onDeklarasiChange,
   onDokumenMotorChange,
   onMetodePengirimanChange,
   onAntarJemputSelectionChange,
   onJumlahHariHarianChange,
-  onJumlahBarangChange,
   onKodeVoucherChange,
   onLokasiChange,
 }: Step2Props) {
+  // Paket "utama" (item pertama di keranjang) — dipakai untuk logic yang
+  // inheren satu-transaksi-satu-jenis (durasi, motor, deklarasi, armada).
+  const paket = items[0]?.paket ?? null;
   const [paketList, setPaketList] = useState<Paket[]>([]);
   const [state, setState] = useState<"loading" | "success" | "error">("loading");
   const [tab, setTab] = useState<"harian" | "bulanan">(preselectedMode ?? "harian");
   const [pilihDeklarasi, setPilihDeklarasi] = useState(!!deklarasi.nilaiDeklarasi);
   const [jumlahHariInput, setJumlahHariInput] = useState(String(jumlahHariHarian));
-  const [jumlahBarangInput, setJumlahBarangInput] = useState(String(jumlahBarang));
   const [uploadingDokumen, setUploadingDokumen] = useState<
     Record<"ktp" | "stnk" | "bpkb", boolean>
   >({ ktp: false, stnk: false, bpkb: false });
@@ -116,10 +114,10 @@ export function Step2PaketTanggal({
           setPaketList(data);
           setState("success");
 
-          if (preselectedPaketId && !paket) {
+          if (preselectedPaketId && items.length === 0) {
             const match = data.find((item) => item.id === preselectedPaketId);
             if (match) {
-              onPaketChange(match);
+              onItemsChange([{ paket: match, jumlah: 1 }]);
               setTab(match.kategori === "harian" ? "harian" : "bulanan");
             }
           }
@@ -179,12 +177,18 @@ export function Step2PaketTanggal({
   const tierGantiRugi = tentukanTier(nilaiDeklarasiNum);
   const premi =
     tierGantiRugi === "standar" ? 0 : hitungPremi(nilaiDeklarasiNum, jumlahHariEfektif);
-  const jumlahBarangEfektif = Math.max(1, jumlahBarang);
-  const hargaSebelumDiskon = paket
-    ? (paket.kategori === "harian" && paket.durasiHari == null
-        ? paket.harga * Math.max(1, jumlahHariEfektif)
-        : paket.harga) * jumlahBarangEfektif
-    : 0;
+  // Total qty di seluruh keranjang (bisa lintas ukuran/jenis paket berbeda).
+  const jumlahBarangEfektif = items.reduce((sum, it) => sum + it.jumlah, 0) || 1;
+  // Setiap item dihitung dengan tarif harinya SENDIRI (paket harian fleksibel
+  // dalam keranjang yang sama tetap pakai jumlahHariHarian yang sama, karena
+  // satu transaksi cuma punya satu tanggal masuk-keluar), lalu dijumlah.
+  const hargaSebelumDiskon = items.reduce((sum, it) => {
+    const hargaSatuan =
+      it.paket.kategori === "harian" && it.paket.durasiHari == null
+        ? it.paket.harga * Math.max(1, jumlahHariEfektif)
+        : it.paket.harga;
+    return sum + hargaSatuan * it.jumlah;
+  }, 0);
   const hargaPaketTertagih =
     voucherState === "valid" && voucherPersen
       ? Math.round(hargaSebelumDiskon * (1 - voucherPersen / 100))
@@ -217,18 +221,17 @@ export function Step2PaketTanggal({
     onJumlahHariHarianChange(clamped);
   }
 
-  function handleJumlahBarangChange(value: string) {
-    setJumlahBarangInput(value);
-    const parsed = Number(value);
-    if (value.trim() !== "" && Number.isFinite(parsed) && parsed > 0) {
-      onJumlahBarangChange(Math.min(MAX_BARANG, Math.floor(parsed)));
+  // Ubah qty satu jenis paket di keranjang. qty 0 menghapus baris itu dari
+  // keranjang; qty>0 menambah baris baru kalau belum ada, atau update kalau
+  // sudah ada.
+  function handleQtyChange(item: Paket, qty: number) {
+    const clamped = Math.max(0, Math.min(MAX_BARANG, Math.floor(qty)));
+    const tanpaItemIni = items.filter((it) => it.paket.id !== item.id);
+    if (clamped <= 0) {
+      onItemsChange(tanpaItemIni);
+      return;
     }
-  }
-
-  function handleJumlahBarangBlur() {
-    const clamped = Math.min(MAX_BARANG, Math.max(1, Number(jumlahBarangInput) || 1));
-    setJumlahBarangInput(String(clamped));
-    onJumlahBarangChange(clamped);
+    onItemsChange([...tanpaItemIni, { paket: item, jumlah: clamped }]);
   }
 
   async function handleCekVoucher() {
@@ -302,30 +305,61 @@ export function Step2PaketTanggal({
       {state === "success" && (
         <div className="grid gap-4 sm:grid-cols-2">
           {filteredPaketList.map((item) => {
-            const isSelected = paket?.id === item.id;
+            const qty = items.find((it) => it.paket.id === item.id)?.jumlah ?? 0;
+            const isSelected = qty > 0;
             const isBlocked = isSaturday && item.durasiHari === 1;
             return (
-              <button
+              <div
                 key={item.id}
-                type="button"
-                disabled={isBlocked}
-                onClick={() => !isBlocked && onPaketChange(item)}
                 className={cn(
-                  "rounded-lg border-2 border-tk-charcoal bg-white p-4 text-left transition-all",
+                  "rounded-lg border-2 border-tk-charcoal bg-white p-4 transition-all",
                   isSelected
                     ? "bg-tk-orange/15 [box-shadow:3px_3px_0_var(--tk-charcoal)]"
                     : "hover:[box-shadow:3px_3px_0_var(--tk-charcoal)]",
                   isBlocked && "cursor-not-allowed opacity-40 hover:shadow-none"
                 )}
               >
-                <p className="font-extrabold text-tk-charcoal">{item.nama}</p>
-                <p className="text-xs text-tk-muted">
-                  {item.durasiHari ? `${item.durasiHari} hari` : "Harian"}
-                </p>
-                <p className="mt-2 text-lg font-extrabold text-tk-orange">
-                  {formatRupiah(item.harga)}
-                </p>
-              </button>
+                <button
+                  type="button"
+                  disabled={isBlocked}
+                  onClick={() => !isBlocked && handleQtyChange(item, isSelected ? 0 : 1)}
+                  className="w-full text-left"
+                >
+                  <p className="font-extrabold text-tk-charcoal">{item.nama}</p>
+                  <p className="text-xs text-tk-muted">
+                    {item.durasiHari ? `${item.durasiHari} hari` : "Harian"}
+                  </p>
+                  <p className="mt-2 text-lg font-extrabold text-tk-orange">
+                    {formatRupiah(item.harga)}
+                  </p>
+                </button>
+
+                {isSelected && !isBlocked && (
+                  <div className="mt-3 flex items-center justify-end gap-3">
+                    <span className="text-xs font-bold text-tk-muted">Jumlah</span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleQtyChange(item, qty - 1)}
+                        className="flex h-7 w-7 items-center justify-center rounded-md border-2 border-tk-charcoal bg-white font-extrabold text-tk-charcoal hover:bg-tk-cream-alt"
+                      >
+                        −
+                      </button>
+                      <span className="w-6 text-center font-extrabold text-tk-charcoal">
+                        {qty}
+                      </span>
+                      <button
+                        type="button"
+                        disabled={qty >= MAX_BARANG}
+                        onClick={() => handleQtyChange(item, qty + 1)}
+                        className="flex h-7 w-7 items-center justify-center rounded-md border-2 border-tk-charcoal bg-white font-extrabold text-tk-charcoal hover:bg-tk-cream-alt disabled:opacity-40"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             );
           })}
         </div>
@@ -369,21 +403,16 @@ export function Step2PaketTanggal({
             </div>
           )}
 
-          <div>
-            <Label htmlFor="jumlahBarang" className={tkLabelClass}>
-              Jumlah Barang
-            </Label>
-            <Input
-              id="jumlahBarang"
-              type="number"
-              min={1}
-              max={MAX_BARANG}
-              value={jumlahBarangInput}
-              onChange={(e) => handleJumlahBarangChange(e.target.value)}
-              onBlur={handleJumlahBarangBlur}
-              className={cn(tkInputClass, "max-w-[120px]")}
-            />
-          </div>
+          {items.length > 1 && (
+            <div className="rounded-lg border-2 border-tk-charcoal bg-tk-cream-alt p-3 text-xs text-tk-charcoal">
+              <p className="font-extrabold">Rincian paket dipilih:</p>
+              {items.map((it) => (
+                <p key={it.paket.id} className="mt-1">
+                  {it.jumlah}× {it.paket.nama}
+                </p>
+              ))}
+            </div>
+          )}
 
           {tanggalMasuk && tanggalJatuhTempo && (
             <p className="text-sm text-tk-muted">
@@ -402,8 +431,14 @@ export function Step2PaketTanggal({
                   <span className="font-bold text-tk-orange">
                     {formatRupiah(hargaPaketTertagih)}
                   </span>{" "}
-                  ({formatRupiah(paket?.harga ?? 0)}/hari &times; {jumlahHariEfektif} hari
-                  {jumlahBarangEfektif > 1 && <> &times; {jumlahBarangEfektif} barang</>})
+                  {items.length > 1 ? (
+                    <>({jumlahHariEfektif} hari, {jumlahBarangEfektif} barang total)</>
+                  ) : (
+                    <>
+                      ({formatRupiah(paket?.harga ?? 0)}/hari &times; {jumlahHariEfektif} hari
+                      {jumlahBarangEfektif > 1 && <> &times; {jumlahBarangEfektif} barang</>})
+                    </>
+                  )}
                 </>
               )}
             </p>

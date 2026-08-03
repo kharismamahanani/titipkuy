@@ -39,9 +39,24 @@ export interface ChecklistData {
 
 export type MetodePengiriman = "armada" | "mandiri";
 
+// Satu baris paket dalam keranjang pemesanan (mis. 1 Box S + 2 Box M
+// sekaligus dalam satu transaksi) — lihat ItemPesanan di prisma/schema.prisma.
+export interface PesananItem {
+  paket: Paket;
+  jumlah: number;
+}
+
 export interface PesanFormData {
   pelanggan: PelangganData;
+  // Paket "utama" (item pertama di keranjang) — tetap dipakai untuk logic
+  // yang inheren satu-transaksi-satu-jenis (tanggal jatuh tempo, cek motor,
+  // deklarasi, ukuran armada antar-jemput). Selalu disinkronkan otomatis
+  // dari items[0] setiap kali items berubah (lihat handleItemsChange di
+  // src/app/pesan/page.tsx) — jangan diubah manual terpisah dari items.
   paket: Paket | null;
+  // Keranjang paket (bisa berisi kombinasi ukuran/jenis berbeda). Kosong
+  // berarti belum ada paket dipilih sama sekali.
+  items: PesananItem[];
   tanggalMasuk: Date | null;
   deklarasi: DeklarasiData;
   dokumenMotor: DokumenMotorData;
@@ -75,6 +90,7 @@ export const INITIAL_FORM_DATA: PesanFormData = {
     noKtpKtm: "",
   },
   paket: null,
+  items: [],
   tanggalMasuk: null,
   deklarasi: {
     nilaiDeklarasi: "",

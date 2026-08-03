@@ -60,6 +60,7 @@ export async function POST(request: Request) {
       kodeVoucher,
       lokasiLat,
       lokasiLng,
+      items,
     } = parsed.data;
 
     const paket = await prisma.paket.findUnique({ where: { id: paketId } });
@@ -119,6 +120,29 @@ export async function POST(request: Request) {
     const tanggalJatuhTempo = addDays(tanggalMasukDate, jumlahHariEfektif);
     const ipAddress = request.headers.get("x-forwarded-for") ?? undefined;
     const userAgent = request.headers.get("user-agent") ?? undefined;
+
+    // Rincian multi-paket (opsional) — kalau dikirim, ini jadi sumber
+    // kebenaran harga & jumlahBarang, menggantikan paketId/jumlahBarang
+    // tunggal di atas untuk keperluan itu. paket/tanggalJatuhTempo di atas
+    // tetap dipakai sebagai acuan durasi/motor-check karena satu transaksi
+    // tetap satu tanggal masuk-keluar untuk semua paket di dalamnya.
+    let itemPaketRows: { paketId: string; jumlah: number; hargaSatuan: number }[] = [];
+    if (items && items.length > 0) {
+      const paketIds = Array.from(new Set(items.map((i) => i.paketId)));
+      const paketMap = await prisma.paket.findMany({ where: { id: { in: paketIds } } });
+      const byId = new Map(paketMap.map((p) => [p.id, p]));
+      for (const item of items) {
+        const itemPaket = byId.get(item.paketId);
+        if (!itemPaket || !itemPaket.aktif) {
+          return NextResponse.json({ error: "Salah satu paket tidak ditemukan" }, { status: 400 });
+        }
+      }
+      itemPaketRows = items.map((item) => {
+        const itemPaket = byId.get(item.paketId)!;
+        const hargaSatuan = hitungHargaPaketTertagih(itemPaket, tanggalMasukDate, tanggalJatuhTempo, 1);
+        return { paketId: item.paketId, jumlah: item.jumlah, hargaSatuan };
+      });
+    }
 
     let armadaTersediaId: string | null = null;
     let layananJemput = false;
@@ -207,7 +231,12 @@ export async function POST(request: Request) {
       orderBy: { createdAt: "desc" },
     });
 
-    const hargaAsli = hitungHargaPaketTertagih(paket, tanggalMasukDate, tanggalJatuhTempo, jumlahBarang);
+    const jumlahBarangEfektif = itemPaketRows.length > 0
+      ? itemPaketRows.reduce((sum, r) => sum + r.jumlah, 0)
+      : jumlahBarang;
+    const hargaAsli = itemPaketRows.length > 0
+      ? itemPaketRows.reduce((sum, r) => sum + r.hargaSatuan * r.jumlah, 0)
+      : hitungHargaPaketTertagih(paket, tanggalMasukDate, tanggalJatuhTempo, jumlahBarang);
     const hargaTertagih = voucherValid
       ? terapkanDiskon(hargaAsli, voucherValid.persenDiskon)
       : hargaAsli;
@@ -256,8 +285,11 @@ export async function POST(request: Request) {
           bpkbUrl: isMotor ? bpkbUrl || null : null,
           tanggalMasuk: tanggalMasukDate,
           tanggalJatuhTempo,
-          jumlahBarang,
+          jumlahBarang: jumlahBarangEfektif,
           hargaPaketTertagih: hargaTertagih,
+          itemPesanan: itemPaketRows.length > 0
+            ? { createMany: { data: itemPaketRows } }
+            : undefined,
           voucher: voucherValid ? { connect: { id: voucherValid.id } } : undefined,
           hargaSebelumDiskon: voucherValid ? hargaAsli : null,
           persenDiskonTerpakai: voucherValid ? voucherValid.persenDiskon : null,

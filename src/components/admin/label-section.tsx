@@ -52,6 +52,11 @@ export function LabelSection({ transaksi, barangLabel: initialBarangLabel }: Lab
   const [barangLabel, setBarangLabel] = useState(initialBarangLabel);
   const [deskripsiBarang, setDeskripsiBarang] = useState("");
   const [kategoriBarang, setKategoriBarang] = useState("kardus");
+  // Hanya relevan kalau transaksi ini punya beberapa jenis paket sekaligus
+  // (lihat Transaksi.itemPesanan) — supaya tiap label barang bisa ditandai
+  // milik paket ukuran/jenis yang mana.
+  const itemPesanan = transaksi.itemPesanan ?? [];
+  const [paketLabelId, setPaketLabelId] = useState(itemPesanan[0]?.paket.id ?? "");
   const [isAdding, setIsAdding] = useState(false);
   const [printMode, setPrintMode] = useState<PrintMode>(null);
   const [origin, setOrigin] = useState("");
@@ -91,6 +96,7 @@ export function LabelSection({ transaksi, barangLabel: initialBarangLabel }: Lab
           transaksiId: transaksi.id,
           deskripsi: deskripsiBarang,
           kategori: kategoriBarang,
+          paketId: itemPesanan.length > 1 ? paketLabelId || undefined : undefined,
         }),
       });
       const result = await res.json();
@@ -238,6 +244,31 @@ export function LabelSection({ transaksi, barangLabel: initialBarangLabel }: Lab
             Tambah
           </TkButton>
         </div>
+
+        {itemPesanan.length > 1 && (
+          <div>
+            <Label htmlFor="paketLabel" className={tkLabelClass}>
+              Barang ini milik paket
+            </Label>
+            <Select value={paketLabelId} onValueChange={(value) => value && setPaketLabelId(value)}>
+              <SelectTrigger id="paketLabel" className={tkSelectTriggerClass}>
+                <SelectValue placeholder="Pilih paket">
+                  {(v: string) => {
+                    const item = itemPesanan.find((it) => it.paket.id === v);
+                    return item ? `${item.jumlah}× ${item.paket.nama}` : "Pilih paket";
+                  }}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {itemPesanan.map((it) => (
+                  <SelectItem key={it.paket.id} value={it.paket.id}>
+                    {it.jumlah}× {it.paket.nama}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </form>
 
       <div className="space-y-3">
@@ -326,7 +357,10 @@ export function LabelSection({ transaksi, barangLabel: initialBarangLabel }: Lab
               <div key={b.id} className="flex items-center justify-between px-4 py-3 text-sm">
                 <div>
                   <p className="font-bold text-tk-charcoal">{b.deskripsi}</p>
-                  <p className="text-xs capitalize text-tk-muted">{b.kategori}</p>
+                  <p className="text-xs capitalize text-tk-muted">
+                    {b.kategori}
+                    {b.paket && <span className="normal-case"> · {b.paket.nama}</span>}
+                  </p>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="font-extrabold text-tk-orange">{b.kodeLabel}</span>

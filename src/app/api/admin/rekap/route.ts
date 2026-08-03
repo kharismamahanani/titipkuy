@@ -20,7 +20,7 @@ export async function GET(request: Request) {
 
     const transaksiBulan = await prisma.transaksi.findMany({
       where: { tanggalMasuk: { gte: start, lt: end } },
-      include: { paket: true, antarJemputOption: true },
+      include: { paket: true, antarJemputOption: true, itemPesanan: { include: { paket: true } } },
     });
 
     const lunas = transaksiBulan.filter((t) => t.statusBayar === "LUNAS");
@@ -33,7 +33,24 @@ export async function GET(request: Request) {
 
     const breakdownMap = new Map<string, number>();
     for (const t of lunas) {
-      breakdownMap.set(t.paket.nama, (breakdownMap.get(t.paket.nama) ?? 0) + omzetTransaksi(t));
+      if (t.itemPesanan.length > 0) {
+        // Multi-paket: pecah omzet transaksi ini ke tiap nama paket secara
+        // proporsional terhadap kontribusi harga aslinya (sebelum voucher),
+        // supaya total breakdown tetap sama dengan omzetTransaksi(t) —
+        // termasuk premi ganti rugi & antar-jemput yang tidak bisa diatribusi
+        // ke paket tertentu, jadi ikut disebar proporsional juga.
+        const totalAsli = t.itemPesanan.reduce((sum, it) => sum + it.hargaSatuan * it.jumlah, 0);
+        const totalOmzetTransaksi = omzetTransaksi(t);
+        for (const it of t.itemPesanan) {
+          const porsi = totalAsli > 0 ? (it.hargaSatuan * it.jumlah) / totalAsli : 1 / t.itemPesanan.length;
+          breakdownMap.set(
+            it.paket.nama,
+            (breakdownMap.get(it.paket.nama) ?? 0) + totalOmzetTransaksi * porsi
+          );
+        }
+      } else {
+        breakdownMap.set(t.paket.nama, (breakdownMap.get(t.paket.nama) ?? 0) + omzetTransaksi(t));
+      }
     }
     const breakdownPaket = Array.from(breakdownMap, ([nama, omzet]) => ({ nama, omzet }));
 

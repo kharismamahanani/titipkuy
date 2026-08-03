@@ -39,6 +39,8 @@ model Paket {
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
   transaksi        Transaksi[]
+  itemPesanan      ItemPesanan[]
+  barangLabel      BarangLabel[]
 }
 
 model Transaksi {
@@ -67,6 +69,11 @@ model Transaksi {
   // BarangLabel di src/app/api/admin/barang-label/route.ts — itu pencatatan
   // fisik per item yang diisi terpisah, konsep berbeda dari field ini.
   jumlahBarang         Int         @default(1)
+  // Rincian multi-paket per transaksi (mis. 1 Box S + 2 Box M sekaligus).
+  // Kosong untuk transaksi lama (single-paket) — paketId/jumlahBarang/
+  // hargaPaketTertagih di atas tetap jadi ringkasan/fallback yang diisi
+  // dari SUM item-item ini saat transaksi dibuat lewat alur multi-paket.
+  itemPesanan          ItemPesanan[]
   nilaiDeklarasi   Int?        // diisi jika perluDeklarasi = true
   deskripsiDeklarasi String?   // merek, model, no seri barang bernilai tinggi
   buktiKepemilikanUrl String?  // URL bukti kepemilikan (STNK/BPKB/nota) di Supabase Storage
@@ -178,6 +185,20 @@ model FotoBarang {
   uploadedAt      DateTime  @default(now())
 }
 
+// Rincian satu baris paket dalam transaksi multi-paket (lihat komentar
+// Transaksi.itemPesanan). hargaSatuan disnapshot saat transaksi dibuat
+// (bisa beda dari Paket.harga saat ini kalau harga paket berubah kemudian).
+model ItemPesanan {
+  id          String    @id @default(cuid())
+  transaksi   Transaksi @relation(fields: [transaksiId], references: [id], onDelete: Cascade)
+  transaksiId String
+  paket       Paket     @relation(fields: [paketId], references: [id])
+  paketId     String
+  jumlah      Int
+  hargaSatuan Int
+  createdAt   DateTime  @default(now())
+}
+
 model BarangLabel {
   id          String    @id @default(cuid())
   transaksi   Transaksi @relation(fields:[transaksiId], references:[id])
@@ -185,6 +206,12 @@ model BarangLabel {
   kodeLabel   String    @unique // TK-[HUB]-[PAKET]-[BARANG]-[XXXX]
   deskripsi   String    // "Kardus 1 - Pakaian", "Laptop Asus", dll
   kategori    String    // "kardus" | "elektronik" | "motor" | "lainnya"
+  // Paket asal label ini (opsional) — dipakai saat transaksi punya beberapa
+  // jenis paket sekaligus (lihat ItemPesanan), supaya label tahu box ini
+  // ukuran/jenis apa. Null untuk transaksi lama / single-paket (fallback ke
+  // transaksi.paket.nama saat ditampilkan).
+  paket       Paket?    @relation(fields:[paketId], references:[id])
+  paketId     String?
   createdAt   DateTime  @default(now())
 }
 

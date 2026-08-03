@@ -6,7 +6,7 @@ import { kodeLabel, MAX_BARANG_PER_TRANSAKSI } from "@/lib/kode";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { transaksiId, deskripsi, kategori } = body ?? {};
+    const { transaksiId, deskripsi, kategori, paketId } = body ?? {};
 
     if (!transaksiId || !deskripsi?.trim() || !kategori) {
       return NextResponse.json(
@@ -39,7 +39,9 @@ export async function POST(request: Request) {
           kodeLabel: kodeLabel(transaksi.nomorUrut, jumlahBarang),
           deskripsi,
           kategori,
+          paketId: paketId || undefined,
         },
+        include: { paket: true },
       });
 
       return NextResponse.json(barangLabel, { status: 201 });

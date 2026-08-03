@@ -17,6 +17,7 @@ export interface BarangLabel {
   kodeLabel: string;
   deskripsi: string;
   kategori: string;
+  paket?: Paket | null;
   createdAt: string;
 }
 
@@ -27,11 +28,19 @@ export interface Foto {
   uploadedAt: string;
 }
 
+export interface ItemPesananDetail {
+  id: string;
+  paket: Paket;
+  jumlah: number;
+  hargaSatuan: number;
+}
+
 export interface TransaksiDetail {
   id: string;
   nomorUrut: number;
   pelanggan: Pelanggan;
   paket: Paket;
+  itemPesanan?: ItemPesananDetail[];
   hargaPaketTertagih: number;
   nilaiDeklarasi: number | null;
   deskripsiDeklarasi: string | null;

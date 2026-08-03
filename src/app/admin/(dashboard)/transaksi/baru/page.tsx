@@ -67,13 +67,18 @@ export default function AdminBuatOrderManualPage() {
 
   const [paketList, setPaketList] = useState<Paket[]>([]);
   const [paketId, setPaketId] = useState("");
+  // Keranjang paket (bisa lebih dari satu jenis/ukuran sekaligus, mis. 1 Box
+  // S + 2 Box M) — lihat ItemPesanan di prisma/schema.prisma. Paket "utama"
+  // (items[0]) dipakai untuk logic yang inheren satu-transaksi-satu-jenis
+  // (durasi default, cek perluDeklarasi).
+  const [items, setItems] = useState<{ paket: Paket; jumlah: number }[]>([]);
+  const [jumlahTambah, setJumlahTambah] = useState("1");
   const [tanggalMasuk, setTanggalMasuk] = useState<Date | null>(null);
   const [tanggalJatuhTempo, setTanggalJatuhTempo] = useState<Date | null>(null);
   const [hub, setHub] = useState<Hub | "">(
     HUB_OPTIONS.length === 1 ? HUB_OPTIONS[0].value : ""
   );
   const [zonaRak, setZonaRak] = useState("");
-  const [jumlahBarang, setJumlahBarang] = useState("1");
 
   const [deklarasi, setDeklarasi] = useState({
     nilaiDeklarasi: "",
@@ -109,18 +114,37 @@ export default function AdminBuatOrderManualPage() {
       .catch(() => setPaketList([]));
   }, []);
 
-  const paket = paketList.find((p) => p.id === paketId) ?? null;
-
-  const jumlahBarangNum = Math.max(1, Number(jumlahBarang) || 1);
+  const paketDipilih = paketList.find((p) => p.id === paketId) ?? null;
+  // Paket "utama" keranjang — item pertama yang ditambahkan.
+  const paket = items[0]?.paket ?? null;
+  const jumlahBarangNum = items.reduce((sum, it) => sum + it.jumlah, 0) || 1;
 
   const hargaSebelumDiskon =
-    paket && tanggalMasuk && tanggalJatuhTempo
-      ? hitungHargaPaketTertagih(paket, tanggalMasuk, tanggalJatuhTempo, jumlahBarangNum)
+    items.length > 0 && tanggalMasuk && tanggalJatuhTempo
+      ? items.reduce(
+          (sum, it) => sum + hitungHargaPaketTertagih(it.paket, tanggalMasuk, tanggalJatuhTempo, it.jumlah),
+          0
+        )
       : null;
   const hargaPaketTertagih =
     hargaSebelumDiskon != null && voucherState === "valid" && voucherPersen
       ? Math.round(hargaSebelumDiskon * (1 - voucherPersen / 100))
       : hargaSebelumDiskon;
+
+  function handleTambahItem() {
+    if (!paketDipilih) return;
+    const qty = Math.max(1, Math.floor(Number(jumlahTambah) || 1));
+    setItems((prev) => {
+      const tanpaItemIni = prev.filter((it) => it.paket.id !== paketDipilih.id);
+      return [...tanpaItemIni, { paket: paketDipilih, jumlah: qty }];
+    });
+    setPaketId("");
+    setJumlahTambah("1");
+  }
+
+  function handleHapusItem(id: string) {
+    setItems((prev) => prev.filter((it) => it.paket.id !== id));
+  }
 
   async function handleCekVoucher() {
     const kode = kodeVoucherInput.trim();
@@ -152,7 +176,7 @@ export default function AdminBuatOrderManualPage() {
       setTanggalJatuhTempo(addDays(tanggalMasuk, paket.durasiHari ?? 1));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [paketId, tanggalMasuk]);
+  }, [paket?.id, tanggalMasuk]);
 
   async function handleBuktiUpload(file: File) {
     if (file.size > MAX_BUKTI_SIZE) {
@@ -181,7 +205,7 @@ export default function AdminBuatOrderManualPage() {
     if (!WHATSAPP_REGEX.test(pelanggan.whatsapp.trim())) {
       return "Format No WhatsApp harus 08xx atau +628xx";
     }
-    if (!paket) return "Pilih salah satu paket dahulu";
+    if (items.length === 0) return "Tambahkan minimal satu paket ke pesanan";
     if (!tanggalMasuk) return "Pilih tanggal masuk";
     if (!tanggalJatuhTempo) return "Tanggal jatuh tempo wajib diisi";
     if (!hub) return "Pilih hub penyimpanan";
@@ -225,6 +249,9 @@ export default function AdminBuatOrderManualPage() {
           hub,
           zonaRak: zonaRak || undefined,
           jumlahBarang: jumlahBarangNum,
+          items: items.length > 1
+            ? items.map((it) => ({ paketId: it.paket.id, jumlah: it.jumlah }))
+            : undefined,
           nilaiDeklarasi: deklarasi.nilaiDeklarasi ? Number(deklarasi.nilaiDeklarasi) : undefined,
           deskripsiDeklarasi: deklarasi.deskripsiDeklarasi || undefined,
           buktiKepemilikanUrl: deklarasi.buktiKepemilikanUrl || undefined,
@@ -362,23 +389,54 @@ export default function AdminBuatOrderManualPage() {
 
           <div>
             <Label htmlFor="paket" className={tkLabelClass}>
-              Pilih Paket *
+              Tambah Paket *
             </Label>
-            <Select value={paketId} onValueChange={(v) => v && setPaketId(v)}>
-              <SelectTrigger id="paket" className={tkSelectTriggerClass}>
-                <SelectValue placeholder="Pilih paket">
-                  {(v: string) => paketList.find((p) => p.id === v)?.nama ?? "Pilih paket"}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {paketList.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>
-                    {p.nama}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex gap-2">
+              <Select value={paketId} onValueChange={(v) => v && setPaketId(v)}>
+                <SelectTrigger id="paket" className={tkSelectTriggerClass}>
+                  <SelectValue placeholder="Pilih paket">
+                    {(v: string) => paketList.find((p) => p.id === v)?.nama ?? "Pilih paket"}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {paketList.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.nama}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Input
+                type="number"
+                min="1"
+                value={jumlahTambah}
+                onChange={(e) => setJumlahTambah(e.target.value)}
+                className={cn(tkInputClass, "w-20")}
+              />
+              <TkButton type="button" variant="secondary" disabled={!paketDipilih} onClick={handleTambahItem}>
+                + Tambah
+              </TkButton>
+            </div>
           </div>
+
+          {items.length > 0 && (
+            <div className="divide-y divide-[#D6CEC4] rounded-lg border-2 border-tk-charcoal bg-white text-sm">
+              {items.map((it) => (
+                <div key={it.paket.id} className="flex items-center justify-between px-4 py-2.5">
+                  <span className="font-bold text-tk-charcoal">
+                    {it.jumlah}× {it.paket.nama}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleHapusItem(it.paket.id)}
+                    className="text-xs font-bold text-[#C0392B] hover:underline"
+                  >
+                    Hapus
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
@@ -409,26 +467,12 @@ export default function AdminBuatOrderManualPage() {
             </div>
           </div>
 
-          <div>
-            <Label htmlFor="jumlahBarang" className={tkLabelClass}>
-              Jumlah Barang *
-            </Label>
-            <Input
-              id="jumlahBarang"
-              type="number"
-              min="1"
-              value={jumlahBarang}
-              onChange={(e) => setJumlahBarang(e.target.value)}
-              className={cn(tkInputClass, "max-w-[120px]")}
-            />
-          </div>
-
           {hargaPaketTertagih != null && paket && (
             <div className="rounded-lg border-2 border-tk-orange bg-tk-orange/10 px-4 py-3 text-sm">
               <span className="text-tk-charcoal">
                 Harga tertagih:{" "}
                 <span className="font-extrabold">{formatRupiah(hargaPaketTertagih)}</span>
-                {paket.kategori === "harian" && paket.durasiHari === null && (
+                {items.length <= 1 && paket.kategori === "harian" && paket.durasiHari === null && (
                   <span className="text-tk-muted">
                     {" "}
                     ({formatRupiah(paket.harga)}/hari ×{" "}
@@ -438,8 +482,11 @@ export default function AdminBuatOrderManualPage() {
                     hari)
                   </span>
                 )}
-                {jumlahBarangNum > 1 && (
+                {items.length <= 1 && jumlahBarangNum > 1 && (
                   <span className="text-tk-muted"> × {jumlahBarangNum} barang</span>
+                )}
+                {items.length > 1 && (
+                  <span className="text-tk-muted"> ({jumlahBarangNum} barang total)</span>
                 )}
                 {voucherState === "valid" && voucherPersen && hargaSebelumDiskon != null && (
                   <span className="ml-2 text-tk-muted line-through">

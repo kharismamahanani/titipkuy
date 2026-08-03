@@ -127,12 +127,28 @@ function AdminLabelPageContent() {
               <span className="text-tk-muted">Nama</span>
               <span className="font-bold text-tk-charcoal">{selected.pelanggan.nama}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-tk-muted">Paket</span>
-              <span className="font-bold text-tk-charcoal">
-                {selected.paket.nama} &middot; {formatRupiah(selected.hargaPaketTertagih)}
-              </span>
-            </div>
+            {(selected.itemPesanan?.length ?? 0) > 1 ? (
+              <div>
+                <div className="flex justify-between">
+                  <span className="text-tk-muted">Paket</span>
+                  <span className="font-bold text-tk-charcoal">
+                    {formatRupiah(selected.hargaPaketTertagih)}
+                  </span>
+                </div>
+                {selected.itemPesanan!.map((it) => (
+                  <p key={it.id} className="text-right text-xs text-tk-muted">
+                    {it.jumlah}× {it.paket.nama}
+                  </p>
+                ))}
+              </div>
+            ) : (
+              <div className="flex justify-between">
+                <span className="text-tk-muted">Paket</span>
+                <span className="font-bold text-tk-charcoal">
+                  {selected.paket.nama} &middot; {formatRupiah(selected.hargaPaketTertagih)}
+                </span>
+              </div>
+            )}
             <div className="flex justify-between">
               <span className="text-tk-muted">Masuk</span>
               <span className="font-bold text-tk-charcoal">

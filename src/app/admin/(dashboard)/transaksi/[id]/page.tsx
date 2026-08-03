@@ -31,7 +31,8 @@ async function getTransaksi(id: string) {
       fotoKeluar: true,
       antarJemputOption: true,
       armada: true,
-      barangLabel: true,
+      barangLabel: { include: { paket: true } },
+      itemPesanan: { include: { paket: true } },
     },
   });
 }
@@ -75,12 +76,22 @@ export default async function AdminTransaksiDetailPage({
   const barangLabel = transaksi.barangLabel.map((b) => ({
     ...b,
     createdAt: b.createdAt.toISOString(),
+    paket: b.paket
+      ? { ...b.paket, createdAt: b.paket.createdAt.toISOString(), updatedAt: b.paket.updatedAt.toISOString() }
+      : null,
+  }));
+  const itemPesanan = transaksi.itemPesanan.map((it) => ({
+    id: it.id,
+    jumlah: it.jumlah,
+    hargaSatuan: it.hargaSatuan,
+    paket: { ...it.paket, createdAt: it.paket.createdAt.toISOString(), updatedAt: it.paket.updatedAt.toISOString() },
   }));
   const transaksiDetail: TransaksiDetail = {
     id: transaksi.id,
     nomorUrut: transaksi.nomorUrut,
     pelanggan: { ...pelanggan, createdAt: pelanggan.createdAt.toISOString() },
     paket: { ...paket, createdAt: paket.createdAt.toISOString(), updatedAt: paket.updatedAt.toISOString() },
+    itemPesanan,
     hargaPaketTertagih: transaksi.hargaPaketTertagih,
     nilaiDeklarasi: transaksi.nilaiDeklarasi,
     deskripsiDeklarasi: transaksi.deskripsiDeklarasi,
@@ -122,7 +133,23 @@ export default async function AdminTransaksiDetailPage({
         <Row label="No. WhatsApp" value={pelanggan.whatsapp} />
         <Row label="Alamat Kos" value={pelanggan.alamatKos} />
         <Row label="Kampus" value={pelanggan.kampus ?? "-"} />
-        <Row label="Paket" value={`${paket.nama} · ${formatRupiah(transaksi.hargaPaketTertagih)}`} />
+        <Row
+          label="Paket"
+          value={
+            itemPesanan.length > 1 ? (
+              <div className="text-right">
+                <p>{formatRupiah(transaksi.hargaPaketTertagih)}</p>
+                {itemPesanan.map((it) => (
+                  <p key={it.id} className="text-xs text-tk-muted">
+                    {it.jumlah}× {it.paket.nama}
+                  </p>
+                ))}
+              </div>
+            ) : (
+              `${paket.nama} · ${formatRupiah(transaksi.hargaPaketTertagih)}`
+            )
+          }
+        />
         <Row
           label="Metode Pengiriman"
           value={

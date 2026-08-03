@@ -14,6 +14,14 @@ export const PelangganManualSchema = PelangganSchema.extend({
   alamatKos: z.string().max(300).optional(),
 });
 
+// Rincian multi-paket per transaksi (opsional — kalau dikirim, ini jadi
+// sumber kebenaran harga & paketId/jumlahBarang di API create, menggantikan
+// paketId/jumlahBarang tunggal di level atas). Kosong = alur lama single-paket.
+export const ItemPesananSchema = z.object({
+  paketId: z.string().cuid(),
+  jumlah: z.number().int().positive(),
+});
+
 export const PenjemputanSchema = z.object({
   hub: z.enum(["suhat", "tidar"]),
   tanggal: z.string().min(1),
@@ -32,6 +40,8 @@ export const TransaksiSchema = z.object({
   // (Paket.durasiHari null); diabaikan server untuk paket berdurasi tetap.
   jumlahHari: z.number().int().min(1).max(30).optional(),
   jumlahBarang: z.number().int().positive().default(1),
+  // Rincian multi-paket (opsional) — lihat komentar ItemPesananSchema.
+  items: z.array(ItemPesananSchema).optional(),
   nilaiDeklarasi: z.number().positive().optional().nullable(),
   deskripsiDeklarasi: z.string().optional().nullable(),
   buktiKepemilikanUrl: z.string().url().optional().nullable(),
@@ -102,6 +112,8 @@ export const TransaksiManualSchema = z.object({
   hub: z.enum(["suhat", "tidar"]),
   zonaRak: z.string().optional().nullable(),
   jumlahBarang: z.number().int().positive().default(1),
+  // Rincian multi-paket (opsional) — lihat komentar ItemPesananSchema.
+  items: z.array(ItemPesananSchema).optional(),
   nilaiDeklarasi: z.number().positive().optional().nullable(),
   deskripsiDeklarasi: z.string().optional().nullable(),
   buktiKepemilikanUrl: z.string().url().optional().nullable(),

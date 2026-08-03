@@ -205,8 +205,21 @@ export default function KonfirmasiPage({ params }: { params: { id: string } }) {
 
         <TkCard className="space-y-2 text-sm">
           <SummaryRow label="Nama" value={pelanggan.nama} />
-          <SummaryRow label="Paket" value={paket.nama} />
-          <SummaryRow label="Harga Paket" value={formatRupiah(transaksi.hargaPaketTertagih)} />
+          {(transaksi.itemPesanan?.length ?? 0) > 1 ? (
+            <div>
+              <SummaryRow label="Paket" value={formatRupiah(transaksi.hargaPaketTertagih)} />
+              {transaksi.itemPesanan!.map((it) => (
+                <p key={it.id} className="pl-3 text-xs text-tk-muted">
+                  {it.jumlah}× {it.paket.nama}
+                </p>
+              ))}
+            </div>
+          ) : (
+            <>
+              <SummaryRow label="Paket" value={paket.nama} />
+              <SummaryRow label="Harga Paket" value={formatRupiah(transaksi.hargaPaketTertagih)} />
+            </>
+          )}
           {!!transaksi.premiGantiRugi && (
             <SummaryRow
               label="Premi Perlindungan"

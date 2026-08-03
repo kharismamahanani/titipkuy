@@ -14,7 +14,8 @@ export async function GET(
       include: {
         pelanggan: true,
         paket: true,
-        barangLabel: true,
+        barangLabel: { include: { paket: true } },
+        itemPesanan: { include: { paket: true } },
         fotoMasuk: true,
         fotoKeluar: true,
       },

@@ -108,6 +108,9 @@ function PesanForm() {
           tanggalMasuk: formData.tanggalMasuk,
           jumlahHari: isHarianFleksibel ? formData.jumlahHariHarian : undefined,
           jumlahBarang: formData.jumlahBarang,
+          items: formData.items.length > 1
+            ? formData.items.map((it) => ({ paketId: it.paket.id, jumlah: it.jumlah }))
+            : undefined,
           nilaiDeklarasi: tierGantiRugi === "standar" ? undefined : nilaiDeklarasiNum,
           tierGantiRugi,
           premiGantiRugi,
@@ -163,19 +166,28 @@ function PesanForm() {
           {step === 2 && (
             <Step2PaketTanggal
               transactionId={transactionId}
-              paket={formData.paket}
+              items={formData.items}
               tanggalMasuk={formData.tanggalMasuk}
               deklarasi={formData.deklarasi}
               dokumenMotor={formData.dokumenMotor}
               metodePengiriman={formData.metodePengiriman}
               antarJemputSelection={formData.antarJemputSelection}
               jumlahHariHarian={formData.jumlahHariHarian}
-              jumlahBarang={formData.jumlahBarang}
               kodeVoucher={formData.kodeVoucher}
               preselectedPaketId={preselectedPaketId}
               preselectedMode={preselectedMode}
-              onPaketChange={(paket) =>
-                setFormData((prev) => ({ ...prev, paket, jumlahHariHarian: 1 }))
+              onItemsChange={(items) =>
+                setFormData((prev) => {
+                  const paketBaru = items[0]?.paket ?? null;
+                  const paketBerubah = paketBaru?.id !== prev.paket?.id;
+                  return {
+                    ...prev,
+                    items,
+                    paket: paketBaru,
+                    jumlahBarang: items.reduce((sum, it) => sum + it.jumlah, 0) || 1,
+                    jumlahHariHarian: paketBerubah ? 1 : prev.jumlahHariHarian,
+                  };
+                })
               }
               onTanggalChange={(tanggalMasuk) =>
                 setFormData((prev) => ({ ...prev, tanggalMasuk }))
@@ -194,9 +206,6 @@ function PesanForm() {
               }
               onJumlahHariHarianChange={(jumlahHariHarian) =>
                 setFormData((prev) => ({ ...prev, jumlahHariHarian }))
-              }
-              onJumlahBarangChange={(jumlahBarang) =>
-                setFormData((prev) => ({ ...prev, jumlahBarang }))
               }
               onKodeVoucherChange={(kodeVoucher) =>
                 setFormData((prev) => ({ ...prev, kodeVoucher }))

@@ -93,7 +93,7 @@ export function ThermalLabelPdf({ items, transaksi, qrDataUrls, paperSize }: Lab
 
           <View style={thermalStyles.info}>
             <Text style={thermalStyles.infoRow}>Nama : {namaDepan(transaksi.pelanggan.nama)}</Text>
-            <Text style={thermalStyles.infoRow}>Paket : {transaksi.paket.nama}</Text>
+            <Text style={thermalStyles.infoRow}>Paket : {barang.paket?.nama ?? transaksi.paket.nama}</Text>
             <Text style={thermalStyles.infoRow}>
               Masuk : {format(new Date(transaksi.tanggalMasuk), "d MMM yyyy", { locale: localeId })}
             </Text>
@@ -147,7 +147,7 @@ export function PrintableLabelPdf({ items, transaksi, qrDataUrls }: LabelPdfProp
             <View style={a4Styles.bottomRow}>
               <View style={a4Styles.infoCol}>
                 <Text style={a4Styles.infoRow}>{transaksi.pelanggan.nama}</Text>
-                <Text style={a4Styles.infoRow}>{transaksi.paket.nama}</Text>
+                <Text style={a4Styles.infoRow}>{barang.paket?.nama ?? transaksi.paket.nama}</Text>
                 <Text style={a4Styles.infoRow}>
                   Masuk: {format(new Date(transaksi.tanggalMasuk), "d MMM yyyy", { locale: localeId })}
                 </Text>

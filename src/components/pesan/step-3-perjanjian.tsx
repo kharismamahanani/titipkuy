@@ -45,11 +45,16 @@ export function Step3Perjanjian({
   const durasiHari = isHarianFleksibel ? formData.jumlahHariHarian : paket?.durasiHari ?? 1;
   const premi =
     tierGantiRugi === "standar" ? 0 : hitungPremi(nilaiDeklarasiNum, durasiHari);
-  const hargaPaketTertagih = paket
-    ? isHarianFleksibel
-      ? paket.harga * Math.max(1, formData.jumlahHariHarian)
-      : paket.harga
-    : 0;
+  // Jumlah dari SEMUA item di keranjang (bisa lintas ukuran/jenis paket),
+  // masing-masing dihitung dengan tarif hariannya sendiri lalu dijumlah —
+  // sama persis dengan formula di Step2PaketTanggal dan di server.
+  const hargaPaketTertagih = formData.items.reduce((sum, it) => {
+    const hargaSatuan =
+      it.paket.kategori === "harian" && it.paket.durasiHari == null
+        ? it.paket.harga * Math.max(1, formData.jumlahHariHarian)
+        : it.paket.harga;
+    return sum + hargaSatuan * it.jumlah;
+  }, 0);
 
   const items = [
     ...CHECKLIST_ITEMS,
@@ -99,13 +104,30 @@ export function Step3Perjanjian({
           <span className="text-tk-muted">Nama</span>
           <span className="font-bold text-tk-charcoal">{pelanggan.nama}</span>
         </div>
-        <div className="flex justify-between">
-          <span className="text-tk-muted">Paket</span>
-          <span className="font-bold text-tk-charcoal">
-            {paket?.nama} {paket ? `— ${formatRupiah(hargaPaketTertagih)}` : ""}
-            {isHarianFleksibel && ` (${durasiHari} hari)`}
-          </span>
-        </div>
+        {formData.items.length > 1 ? (
+          <div>
+            <div className="flex justify-between">
+              <span className="text-tk-muted">Paket</span>
+              <span className="font-bold text-tk-charcoal">
+                {formatRupiah(hargaPaketTertagih)}
+                {isHarianFleksibel && ` (${durasiHari} hari)`}
+              </span>
+            </div>
+            {formData.items.map((it) => (
+              <div key={it.paket.id} className="flex justify-between pl-3 text-xs text-tk-muted">
+                <span>{it.jumlah}× {it.paket.nama}</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="flex justify-between">
+            <span className="text-tk-muted">Paket</span>
+            <span className="font-bold text-tk-charcoal">
+              {paket?.nama} {paket ? `— ${formatRupiah(hargaPaketTertagih)}` : ""}
+              {isHarianFleksibel && ` (${durasiHari} hari)`}
+            </span>
+          </div>
+        )}
         {premi > 0 && (
           <div className="flex justify-between">
             <span className="text-tk-muted">

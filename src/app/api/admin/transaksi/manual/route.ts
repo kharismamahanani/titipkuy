@@ -43,6 +43,7 @@ export async function POST(request: Request) {
       layananAntar,
       lokasiLat,
       lokasiLng,
+      items,
     } = parsed.data;
 
     const paket = await prisma.paket.findUnique({ where: { id: paketId } });
@@ -92,7 +93,31 @@ export async function POST(request: Request) {
     const konfirmasiToken = crypto.randomBytes(24).toString("hex");
     const konfirmasiTokenExpiresAt = new Date(Date.now() + TOKEN_VALID_MS);
 
-    const hargaAsli = hitungHargaPaketTertagih(paket, tanggalMasukDate, tanggalJatuhTempoDate, jumlahBarang);
+    // Rincian multi-paket (opsional) — lihat komentar di api/transaksi/route.ts.
+    let itemPaketRows: { paketId: string; jumlah: number; hargaSatuan: number }[] = [];
+    if (items && items.length > 0) {
+      const paketIds = Array.from(new Set(items.map((i) => i.paketId)));
+      const paketMap = await prisma.paket.findMany({ where: { id: { in: paketIds } } });
+      const byId = new Map(paketMap.map((p) => [p.id, p]));
+      for (const item of items) {
+        const itemPaket = byId.get(item.paketId);
+        if (!itemPaket || !itemPaket.aktif) {
+          return NextResponse.json({ error: "Salah satu paket tidak ditemukan" }, { status: 400 });
+        }
+      }
+      itemPaketRows = items.map((item) => {
+        const itemPaket = byId.get(item.paketId)!;
+        const hargaSatuan = hitungHargaPaketTertagih(itemPaket, tanggalMasukDate, tanggalJatuhTempoDate, 1);
+        return { paketId: item.paketId, jumlah: item.jumlah, hargaSatuan };
+      });
+    }
+
+    const jumlahBarangEfektif = itemPaketRows.length > 0
+      ? itemPaketRows.reduce((sum, r) => sum + r.jumlah, 0)
+      : jumlahBarang;
+    const hargaAsli = itemPaketRows.length > 0
+      ? itemPaketRows.reduce((sum, r) => sum + r.hargaSatuan * r.jumlah, 0)
+      : hitungHargaPaketTertagih(paket, tanggalMasukDate, tanggalJatuhTempoDate, jumlahBarang);
     const hargaTertagih = voucherValid ? terapkanDiskon(hargaAsli, voucherValid.persenDiskon) : hargaAsli;
 
     const transaksi = await prisma.$transaction(async (tx) => {
@@ -135,7 +160,10 @@ export async function POST(request: Request) {
           persenDiskonTerpakai: voucherValid ? voucherValid.persenDiskon : null,
           hub,
           zonaRak: zonaRak || null,
-          jumlahBarang,
+          jumlahBarang: jumlahBarangEfektif,
+          itemPesanan: itemPaketRows.length > 0
+            ? { createMany: { data: itemPaketRows } }
+            : undefined,
           catatanAdmin: catatanAdmin || null,
           antarJemputOption: antarJemputId ? { connect: { id: antarJemputId } } : undefined,
           layananJemput: !!layananJemput,

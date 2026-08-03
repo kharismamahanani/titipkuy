@@ -44,7 +44,7 @@ export function ThermalLabel({ barang, transaksi, verifyUrl }: ThermalLabelProps
 
       <div className="thermal-label-info space-y-0.5 px-1.5 py-1.5 text-[10px] leading-tight">
         <p>Nama : {namaDepan(transaksi.pelanggan.nama)}</p>
-        <p>Paket : {transaksi.paket.nama}</p>
+        <p>Paket : {barang.paket?.nama ?? transaksi.paket.nama}</p>
         <p>Masuk : {format(new Date(transaksi.tanggalMasuk), "d MMM yyyy", { locale: localeId })}</p>
         <p>Tempo : {format(new Date(transaksi.tanggalJatuhTempo), "d MMM yyyy", { locale: localeId })}</p>
         <p>Barang: {potongDeskripsi(barang.deskripsi)}</p>

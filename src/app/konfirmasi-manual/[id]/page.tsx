@@ -200,8 +200,21 @@ function KonfirmasiManualContent() {
 
           <TkCard className="space-y-2 text-sm">
             <SummaryRow label="Nama" value={pelanggan.nama} />
-            <SummaryRow label="Paket" value={paket.nama} />
-            <SummaryRow label="Harga Paket" value={formatRupiah(data.hargaPaketTertagih)} />
+            {(data.itemPesanan?.length ?? 0) > 1 ? (
+              <div>
+                <SummaryRow label="Paket" value={formatRupiah(data.hargaPaketTertagih)} />
+                {data.itemPesanan!.map((it) => (
+                  <p key={it.id} className="pl-3 text-xs text-tk-muted">
+                    {it.jumlah}× {it.paket.nama}
+                  </p>
+                ))}
+              </div>
+            ) : (
+              <>
+                <SummaryRow label="Paket" value={paket.nama} />
+                <SummaryRow label="Harga Paket" value={formatRupiah(data.hargaPaketTertagih)} />
+              </>
+            )}
             {data.antarJemputOption && (
               <SummaryRow
                 label="Antar-Jemput"
@@ -281,8 +294,21 @@ function KonfirmasiManualContent() {
         <TkCard className="space-y-2 text-sm">
           <SummaryRow label="Kode Transaksi" value={kodeTransaksi(data.nomorUrut)} />
           <SummaryRow label="Nama" value={pelanggan.nama} />
-          <SummaryRow label="Paket" value={paket.nama} />
-          <SummaryRow label="Harga Paket" value={formatRupiah(data.hargaPaketTertagih)} />
+          {(data.itemPesanan?.length ?? 0) > 1 ? (
+            <div>
+              <SummaryRow label="Paket" value={formatRupiah(data.hargaPaketTertagih)} />
+              {data.itemPesanan!.map((it) => (
+                <p key={it.id} className="pl-3 text-xs text-tk-muted">
+                  {it.jumlah}× {it.paket.nama}
+                </p>
+              ))}
+            </div>
+          ) : (
+            <>
+              <SummaryRow label="Paket" value={paket.nama} />
+              <SummaryRow label="Harga Paket" value={formatRupiah(data.hargaPaketTertagih)} />
+            </>
+          )}
           {data.antarJemputOption && (
             <SummaryRow
               label="Antar-Jemput"

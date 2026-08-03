@@ -24,7 +24,7 @@ export function PrintableLabel({ barang, transaksi, verifyUrl }: PrintableLabelP
       <div className="flex items-end justify-between gap-2">
         <div className="flex-1 space-y-0.5 text-[9px] leading-tight">
           <p className="font-semibold">{transaksi.pelanggan.nama}</p>
-          <p>{transaksi.paket.nama}</p>
+          <p>{barang.paket?.nama ?? transaksi.paket.nama}</p>
           <p>Masuk: {format(new Date(transaksi.tanggalMasuk), "d MMM yyyy", { locale: localeId })}</p>
           <p>Tempo: {format(new Date(transaksi.tanggalJatuhTempo), "d MMM yyyy", { locale: localeId })}</p>
           <p className="mt-1 italic">{barang.deskripsi}</p>

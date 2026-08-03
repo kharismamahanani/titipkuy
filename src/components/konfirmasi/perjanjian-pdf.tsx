@@ -104,7 +104,14 @@ export function PerjanjianPdfDocument({ transaksi }: PerjanjianPdfDocumentProps)
           <Row label="No WhatsApp" value={pelanggan.whatsapp} />
           <Row label="Alamat Kos" value={pelanggan.alamatKos} />
           <Row label="Kampus" value={pelanggan.kampus ?? "-"} />
-          <Row label="Paket" value={paket.nama} />
+          <Row
+            label="Paket"
+            value={
+              (transaksi.itemPesanan?.length ?? 0) > 1
+                ? transaksi.itemPesanan!.map((it) => `${it.jumlah}x ${it.paket.nama}`).join(", ")
+                : paket.nama
+            }
+          />
           <Row label="Harga Paket" value={formatRupiah(transaksi.hargaPaketTertagih)} />
           <Row
             label="Antar-Jemput"
