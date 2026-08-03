@@ -120,15 +120,25 @@ export function PengambilanBarangSection({
             diserahkan.
           </p>
 
-          <TkButton
-            type="button"
-            variant="primary"
-            disabled={isSending}
-            onClick={handleKirimOtp}
-          >
-            {isSending && <Loader2 className="mr-1.5 animate-spin" size={16} />}
-            Kirim OTP ke WA Pelanggan
-          </TkButton>
+          <div className="flex flex-wrap gap-2">
+            <TkButton
+              type="button"
+              variant="primary"
+              disabled={isSending}
+              onClick={handleKirimOtp}
+            >
+              {isSending && <Loader2 className="mr-1.5 animate-spin" size={16} />}
+              Kirim OTP ke WA Pelanggan
+            </TkButton>
+
+            <TkButton
+              type="button"
+              variant="secondary"
+              onClick={() => setTerverifikasi(true)}
+            >
+              Lewati verifikasi (pelanggan ambil langsung)
+            </TkButton>
+          </div>
 
           {otpTerkirim && (
             <div className="space-y-3 rounded-lg border-2 border-tk-orange bg-tk-orange/10 p-4">
