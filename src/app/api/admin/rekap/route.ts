@@ -152,6 +152,11 @@ export async function GET(request: Request) {
       rataLaba3Bulan,
       estimasiBulanBEP,
       bepTercapai: targetModal === 0 || sudahKembali >= targetModal,
+      // Rincian angka sepanjang waktu di balik "sudahKembali" — supaya admin
+      // bisa lihat sendiri rumusnya, bukan cuma hasil akhir.
+      totalPenerimaan: omzetSepanjangWaktu,
+      totalPengeluaran: pengeluaranSepanjangWaktu,
+      labaKumulatif,
     };
 
     return NextResponse.json({

@@ -21,6 +21,9 @@ export interface BepTracker {
   rataLaba3Bulan: number;
   estimasiBulanBEP: number | null;
   bepTercapai: boolean;
+  totalPenerimaan: number;
+  totalPengeluaran: number;
+  labaKumulatif: number;
 }
 
 export interface RekapData {

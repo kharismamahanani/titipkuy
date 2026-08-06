@@ -81,6 +81,42 @@ export function BepTrackerCard({ data }: { data: BepTracker }) {
           <p className="text-[11px] text-tk-light">
             (berdasarkan rata-rata laba 3 bulan terakhir: {formatRupiah(data.rataLaba3Bulan)}/bulan)
           </p>
+
+          <details className="rounded-lg border-2 border-dashed border-tk-charcoal/30 bg-tk-cream-alt p-3 text-xs text-tk-charcoal">
+            <summary className="cursor-pointer font-bold text-tk-muted">
+              Lihat rumus & rincian angka
+            </summary>
+            <div className="mt-2 space-y-1.5">
+              <p className="font-mono">
+                Sudah kembali = MIN(MAX(Penerimaan − Pengeluaran, 0), Modal Awal)
+              </p>
+              <div className="grid gap-1 pl-3 sm:grid-cols-2">
+                <p>
+                  Total Penerimaan (sepanjang waktu):{" "}
+                  <span className="font-bold">{formatRupiah(data.totalPenerimaan)}</span>
+                </p>
+                <p>
+                  Total Pengeluaran (sepanjang waktu):{" "}
+                  <span className="font-bold">{formatRupiah(data.totalPengeluaran)}</span>
+                </p>
+                <p>
+                  Laba Kumulatif (Penerimaan − Pengeluaran):{" "}
+                  <span className="font-bold">{formatRupiah(data.labaKumulatif)}</span>
+                </p>
+                <p>
+                  Modal Awal (target balik modal):{" "}
+                  <span className="font-bold">{formatRupiah(data.totalModalAwal)}</span>
+                </p>
+              </div>
+              <p className="pt-1 text-tk-light">
+                Penerimaan = total omzet transaksi berstatus Lunas sejak awal usaha (harga paket +
+                premi ganti rugi + antar-jemput). Pengeluaran = seluruh catatan pengeluaran
+                operasional sejak awal usaha. Kalau laba kumulatif sudah melebihi modal awal,
+                &quot;Sudah kembali&quot; dibatasi maksimal sebesar modal awal — sisanya jadi laba
+                bersih, bukan progress balik modal lagi.
+              </p>
+            </div>
+          </details>
         </>
       )}
     </TkCard>
