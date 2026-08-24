@@ -24,7 +24,9 @@ export async function GET(request: Request) {
     });
 
     const lunas = transaksiBulan.filter((t) => t.statusBayar === "LUNAS");
-    const belumBayar = transaksiBulan.filter((t) => t.statusBayar === "BELUM_BAYAR");
+    const belumBayar = transaksiBulan.filter(
+      (t) => t.statusBayar === "BELUM_BAYAR" && t.statusTransaksi !== "DIBATALKAN"
+    );
 
     const omzetBulanIni = lunas.reduce((sum, t) => sum + omzetTransaksi(t), 0);
     const jumlahTransaksi = transaksiBulan.length;
