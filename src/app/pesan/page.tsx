@@ -11,6 +11,7 @@ import { Step2PaketTanggal } from "@/components/pesan/step-2-paket-tanggal";
 import { Step3Perjanjian } from "@/components/pesan/step-3-perjanjian";
 import { uploadViaApi } from "@/lib/upload-via-api";
 import { validateStep1, validateStep2 } from "@/lib/pesan-validation";
+import { isPaketHarianFleksibel } from "@/lib/harga-paket";
 import { hitungPremi, tentukanTier } from "@/lib/ganti-rugi";
 import { INITIAL_FORM_DATA, type ChecklistData, type PesanFormData } from "@/types/pesan";
 import type { PelangganData } from "@/types/pesan";
@@ -30,7 +31,9 @@ function PesanForm() {
   const preselectedPaketId = searchParams.get("paketId") ?? undefined;
   const preselectedModeParam = searchParams.get("mode");
   const preselectedMode =
-    preselectedModeParam === "harian" || preselectedModeParam === "bulanan"
+    preselectedModeParam === "harian" ||
+    preselectedModeParam === "mingguan" ||
+    preselectedModeParam === "bulanan"
       ? preselectedModeParam
       : undefined;
 
@@ -90,8 +93,7 @@ function PesanForm() {
       const signatureBlob = await signatureBlobRes.blob();
       const tandaTanganUrl = await uploadViaApi(signatureBlob, "ttd", "ttd", transactionId);
 
-      const isHarianFleksibel =
-        formData.paket.kategori === "harian" && formData.paket.durasiHari == null;
+      const isHarianFleksibel = isPaketHarianFleksibel(formData.paket);
       const durasiHari = isHarianFleksibel
         ? formData.jumlahHariHarian
         : formData.paket.durasiHari ?? 1;

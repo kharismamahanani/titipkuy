@@ -17,6 +17,7 @@ import { tkErrorClass } from "@/lib/form-style";
 import { formatRupiah } from "@/lib/utils";
 import { CHECKLIST_ITEMS, DEKLARASI_ITEM, MOTOR_ITEM } from "@/lib/checklist-items";
 import { hitungPremi, tentukanTier } from "@/lib/ganti-rugi";
+import { isPaketHarianFleksibel } from "@/lib/harga-paket";
 import { hargaAntarJemput, labelLayananAntarJemput } from "@/types/antar-jemput";
 import type { ChecklistData, PesanFormData } from "@/types/pesan";
 
@@ -41,7 +42,7 @@ export function Step3Perjanjian({
   const isMotor = paket?.kategori === "motor";
   const nilaiDeklarasiNum = Number(formData.deklarasi.nilaiDeklarasi) || 0;
   const tierGantiRugi = tentukanTier(nilaiDeklarasiNum);
-  const isHarianFleksibel = paket?.kategori === "harian" && paket?.durasiHari == null;
+  const isHarianFleksibel = !!paket && isPaketHarianFleksibel(paket);
   const durasiHari = isHarianFleksibel ? formData.jumlahHariHarian : paket?.durasiHari ?? 1;
   const premi =
     tierGantiRugi === "standar" ? 0 : hitungPremi(nilaiDeklarasiNum, durasiHari);

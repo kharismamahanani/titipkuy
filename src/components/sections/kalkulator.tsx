@@ -28,10 +28,27 @@ const JENIS_HARIAN = [
   { value: "ransel", label: "Ransel/Sling (Box S)", harga: 10000 },
 ];
 
+const JENIS_MINGGUAN = [
+  { value: "box-s", label: "Box S", harga: 30000 },
+  { value: "box-m", label: "Box M", harga: 45000 },
+  { value: "box-l", label: "Box L", harga: 60000 },
+  { value: "koper-besar", label: "Koper Besar / Carrier", harga: 65000 },
+  { value: "elektronik-s", label: "Elektronik S", harga: 25000 },
+  { value: "elektronik-l", label: "Elektronik L", harga: 60000 },
+  { value: "motor", label: "Motor", harga: 50000 },
+];
+
+const DURASI_MINGGUAN = [
+  { value: "1", label: "1 Minggu" },
+  { value: "2", label: "2 Minggu" },
+  { value: "3", label: "3 Minggu" },
+];
+
 const JENIS_BULANAN = [
   { value: "box-s", label: "Box S", harga: 45000 },
+  { value: "box-m", label: "Box M", harga: 60000 },
   { value: "box-l", label: "Box L", harga: 70000 },
-  { value: "koper-besar", label: "Koper Besar", harga: 80000 },
+  { value: "koper-besar", label: "Koper Besar / Carrier", harga: 80000 },
   { value: "elektronik-s", label: "Elektronik S", harga: 40000 },
   { value: "elektronik-l", label: "Elektronik L", harga: 95000 },
   { value: "motor", label: "Motor", harga: 150000 },
@@ -78,6 +95,9 @@ export function Kalkulator({ mode, onModeChange }: KalkulatorProps) {
   const [jenisHarian, setJenisHarian] = useState(JENIS_HARIAN[0].value);
   const [durasiHariInput, setDurasiHariInput] = useState("1");
   const durasiHari = Number(durasiHariInput) || 0;
+  const [jenisMingguan, setJenisMingguan] = useState(JENIS_MINGGUAN[0].value);
+  const [jumlahMingguan, setJumlahMingguan] = useState(1);
+  const [durasiMingguan, setDurasiMingguan] = useState(DURASI_MINGGUAN[0].value);
   const [jenisBulanan, setJenisBulanan] = useState(JENIS_BULANAN[0].value);
   const [jumlah, setJumlah] = useState(1);
   const [durasiBulanan, setDurasiBulanan] = useState(DURASI_BULANAN[0].value);
@@ -97,12 +117,21 @@ export function Kalkulator({ mode, onModeChange }: KalkulatorProps) {
   const disabledByJarak = lokasiResult?.kategori === "jauh";
 
   const jenisHarianOpt = JENIS_HARIAN.find((j) => j.value === jenisHarian)!;
+  const jenisMingguanOpt = JENIS_MINGGUAN.find((j) => j.value === jenisMingguan)!;
   const jenisBulananOpt = JENIS_BULANAN.find((j) => j.value === jenisBulanan)!;
+  const durasiMingguanNum = Number(durasiMingguan);
   const durasiBulananNum = Number(durasiBulanan);
 
-  const isMotorPaket = mode === "bulanan" && jenisBulanan === "motor";
+  const isMotorPaket =
+    (mode === "mingguan" && jenisMingguan === "motor") ||
+    (mode === "bulanan" && jenisBulanan === "motor");
   const armadaBisa = armadaYangBisa({
-    nama: mode === "harian" ? jenisHarianOpt.label : jenisBulananOpt.label,
+    nama:
+      mode === "harian"
+        ? jenisHarianOpt.label
+        : mode === "mingguan"
+          ? jenisMingguanOpt.label
+          : jenisBulananOpt.label,
     kategori: isMotorPaket ? "motor" : mode,
   });
   const armadaTipeOptions =
@@ -116,8 +145,19 @@ export function Kalkulator({ mode, onModeChange }: KalkulatorProps) {
 
   const subtotal = useMemo(() => {
     if (mode === "harian") return jenisHarianOpt.harga * durasiHari;
+    if (mode === "mingguan") return jenisMingguanOpt.harga * jumlahMingguan * durasiMingguanNum;
     return jenisBulananOpt.harga * jumlah * durasiBulananNum;
-  }, [mode, jenisHarianOpt, durasiHari, jenisBulananOpt, jumlah, durasiBulananNum]);
+  }, [
+    mode,
+    jenisHarianOpt,
+    durasiHari,
+    jenisMingguanOpt,
+    jumlahMingguan,
+    durasiMingguanNum,
+    jenisBulananOpt,
+    jumlah,
+    durasiBulananNum,
+  ]);
 
   const antarJemputFee =
     antarJemput && !disabledByJarak ? ANTAR_JEMPUT_HARGA[armadaTipe][radius] : 0;
@@ -126,7 +166,9 @@ export function Kalkulator({ mode, onModeChange }: KalkulatorProps) {
   const rincianLabel =
     mode === "harian"
       ? `${jenisHarianOpt.label} × ${durasiHari} hari`
-      : `${jenisBulananOpt.label} × ${jumlah} unit × ${durasiBulananNum} bulan`;
+      : mode === "mingguan"
+        ? `${jenisMingguanOpt.label} × ${jumlahMingguan} unit × ${durasiMingguanNum} minggu`
+        : `${jenisBulananOpt.label} × ${jumlah} unit × ${durasiBulananNum} bulan`;
 
   return (
     <section id="kalkulator" className="bg-tk-cream px-4 py-24 sm:px-6">
@@ -139,7 +181,7 @@ export function Kalkulator({ mode, onModeChange }: KalkulatorProps) {
         </div>
 
         <div className="mt-8 flex justify-center gap-3">
-          {(["harian", "bulanan"] as const).map((m) => (
+          {(["harian", "mingguan", "bulanan"] as const).map((m) => (
             <button
               key={m}
               type="button"
@@ -149,7 +191,7 @@ export function Kalkulator({ mode, onModeChange }: KalkulatorProps) {
                 mode === m ? "bg-tk-charcoal text-tk-cream" : "bg-tk-cream text-tk-charcoal"
               )}
             >
-              {m === "harian" ? "🧳 Harian" : "🎓 Bulanan"}
+              {m === "harian" ? "🧳 Harian" : m === "mingguan" ? "📅 Mingguan" : "🎓 Bulanan"}
             </button>
           ))}
         </div>
@@ -191,6 +233,62 @@ export function Kalkulator({ mode, onModeChange }: KalkulatorProps) {
                     }
                     className={inputClass}
                   />
+                </div>
+              </>
+            ) : mode === "mingguan" ? (
+              <>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-tk-charcoal">Jenis</label>
+                  <Select value={jenisMingguan} onValueChange={(v) => v && setJenisMingguan(v)}>
+                    <SelectTrigger className={triggerClass}>
+                      <SelectValue>
+                        {(v: string) =>
+                          JENIS_MINGGUAN.find((opt) => opt.value === v)?.label ?? v
+                        }
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {JENIS_MINGGUAN.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label} — {formatRupiah(opt.harga)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-tk-charcoal">Jumlah Unit</label>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={20}
+                    value={jumlahMingguan}
+                    onChange={(e) =>
+                      setJumlahMingguan(Math.min(20, Math.max(1, Number(e.target.value) || 1)))
+                    }
+                    className={inputClass}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-tk-charcoal">Durasi</label>
+                  <Select value={durasiMingguan} onValueChange={(v) => v && setDurasiMingguan(v)}>
+                    <SelectTrigger className={triggerClass}>
+                      <SelectValue>
+                        {(v: string) =>
+                          DURASI_MINGGUAN.find((opt) => opt.value === v)?.label ?? v
+                        }
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {DURASI_MINGGUAN.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </>
             ) : (

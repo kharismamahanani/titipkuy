@@ -1,1 +1,1 @@
-export type KalkulatorMode = "harian" | "bulanan";
+export type KalkulatorMode = "harian" | "mingguan" | "bulanan";

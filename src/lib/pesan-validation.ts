@@ -1,5 +1,6 @@
 import type { Paket } from "@/types/paket";
 import type { DeklarasiData, DokumenMotorData, PelangganData } from "@/types/pesan";
+import { isPaketHarianFleksibel } from "@/lib/harga-paket";
 
 const WHATSAPP_REGEX = /^08\d{8,11}$/;
 
@@ -39,7 +40,7 @@ export function validateStep2(
     errors.push("Hub tutup di hari Minggu. Silakan pilih hari lain.");
   }
 
-  const isHarianFleksibel = paket?.kategori === "harian" && paket?.durasiHari == null;
+  const isHarianFleksibel = !!paket && isPaketHarianFleksibel(paket);
   const durasiEfektif = isHarianFleksibel ? jumlahHariHarian : paket?.durasiHari;
 
   if (tanggalMasuk?.getDay() === 6 && durasiEfektif === 1) {

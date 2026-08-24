@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/select";
 import { tkInputClass, tkLabelClass, tkSelectTriggerClass } from "@/lib/form-style";
 import { cn, normalizeWhatsAppNumber, formatRupiah } from "@/lib/utils";
-import { hitungHargaPaketTertagih } from "@/lib/harga-paket";
+import { hitungHargaPaketTertagih, isPaketHarianFleksibel } from "@/lib/harga-paket";
 import { ADMIN_NAME } from "@/constants/site";
 import { buildStoragePath, uploadToStorage } from "@/lib/supabase";
 import { AKTIF_HUB_KEYS, HUB_CONFIG } from "@/lib/constants";
@@ -472,7 +472,7 @@ export default function AdminBuatOrderManualPage() {
               <span className="text-tk-charcoal">
                 Harga tertagih:{" "}
                 <span className="font-extrabold">{formatRupiah(hargaPaketTertagih)}</span>
-                {items.length <= 1 && paket.kategori === "harian" && paket.durasiHari === null && (
+                {items.length <= 1 && isPaketHarianFleksibel(paket) && (
                   <span className="text-tk-muted">
                     {" "}
                     ({formatRupiah(paket.harga)}/hari ×{" "}

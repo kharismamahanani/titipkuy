@@ -17,6 +17,7 @@ import { GANTI_RUGI, hitungPremi, tentukanTier } from "@/lib/ganti-rugi";
 import { AntarJemputPicker } from "@/components/pesan/antar-jemput-picker";
 import { armadaYangBisa } from "@/lib/armada-rules";
 import { HUB_CONFIG, JAM_DROP_OFF_MANDIRI } from "@/lib/constants";
+import { getPaketDurasiTier, isPaketHarianFleksibel } from "@/lib/harga-paket";
 import type { Paket } from "@/types/paket";
 import type { DeklarasiData, DokumenMotorData, MetodePengiriman, PesananItem } from "@/types/pesan";
 import type { AntarJemputSelection } from "@/types/antar-jemput";
@@ -45,7 +46,7 @@ interface Step2Props {
   jumlahHariHarian: number;
   kodeVoucher: string;
   preselectedPaketId?: string;
-  preselectedMode?: "harian" | "bulanan";
+  preselectedMode?: "harian" | "mingguan" | "bulanan";
   onItemsChange: (items: PesananItem[]) => void;
   onTanggalChange: (date: Date) => void;
   onDeklarasiChange: (data: DeklarasiData) => void;
@@ -88,7 +89,7 @@ export function Step2PaketTanggal({
   const paket = items[0]?.paket ?? null;
   const [paketList, setPaketList] = useState<Paket[]>([]);
   const [state, setState] = useState<"loading" | "success" | "error">("loading");
-  const [tab, setTab] = useState<"harian" | "bulanan">(preselectedMode ?? "harian");
+  const [tab, setTab] = useState<"harian" | "mingguan" | "bulanan">(preselectedMode ?? "harian");
   const [pilihDeklarasi, setPilihDeklarasi] = useState(!!deklarasi.nilaiDeklarasi);
   const [jumlahHariInput, setJumlahHariInput] = useState(String(jumlahHariHarian));
   const [uploadingDokumen, setUploadingDokumen] = useState<
@@ -118,7 +119,7 @@ export function Step2PaketTanggal({
             const match = data.find((item) => item.id === preselectedPaketId);
             if (match) {
               onItemsChange([{ paket: match, jumlah: 1 }]);
-              setTab(match.kategori === "harian" ? "harian" : "bulanan");
+              setTab(getPaketDurasiTier(match));
             }
           }
         }
@@ -156,15 +157,13 @@ export function Step2PaketTanggal({
   // hari ditentukan pelanggan sendiri, bukan fixed 1 hari (lihat
   // hitungHargaPaketTertagih di src/lib/harga-paket.ts untuk perhitungan
   // harga yang sama persis di sisi server).
-  const isHarianFleksibel = paket?.kategori === "harian" && paket?.durasiHari == null;
+  const isHarianFleksibel = !!paket && isPaketHarianFleksibel(paket);
   const jumlahHariEfektif = isHarianFleksibel ? jumlahHariHarian : paket?.durasiHari ?? 1;
 
   const tanggalJatuhTempo =
     tanggalMasuk && paket ? addDays(tanggalMasuk, jumlahHariEfektif) : null;
 
-  const filteredPaketList = paketList.filter((item) =>
-    tab === "harian" ? item.kategori === "harian" : item.kategori !== "harian"
-  );
+  const filteredPaketList = paketList.filter((item) => getPaketDurasiTier(item) === tab);
 
   const isSunday = tanggalMasuk ? tanggalMasuk.getDay() === 0 : false;
   const isSaturday = tanggalMasuk ? tanggalMasuk.getDay() === 6 : false;
@@ -183,10 +182,9 @@ export function Step2PaketTanggal({
   // dalam keranjang yang sama tetap pakai jumlahHariHarian yang sama, karena
   // satu transaksi cuma punya satu tanggal masuk-keluar), lalu dijumlah.
   const hargaSebelumDiskon = items.reduce((sum, it) => {
-    const hargaSatuan =
-      it.paket.kategori === "harian" && it.paket.durasiHari == null
-        ? it.paket.harga * Math.max(1, jumlahHariEfektif)
-        : it.paket.harga;
+    const hargaSatuan = isPaketHarianFleksibel(it.paket)
+      ? it.paket.harga * Math.max(1, jumlahHariEfektif)
+      : it.paket.harga;
     return sum + hargaSatuan * it.jumlah;
   }, 0);
   const hargaPaketTertagih =
@@ -280,7 +278,7 @@ export function Step2PaketTanggal({
       </div>
 
       <div className="flex justify-center gap-3">
-        {(["harian", "bulanan"] as const).map((t) => (
+        {(["harian", "mingguan", "bulanan"] as const).map((t) => (
           <button
             key={t}
             type="button"
@@ -290,7 +288,7 @@ export function Step2PaketTanggal({
               tab === t ? "bg-tk-charcoal text-tk-cream" : "bg-tk-cream text-tk-charcoal"
             )}
           >
-            {t === "harian" ? "🧳 Harian" : "🎓 Bulanan"}
+            {t === "harian" ? "🧳 Harian" : t === "mingguan" ? "📅 Mingguan" : "🎓 Bulanan"}
           </button>
         ))}
       </div>

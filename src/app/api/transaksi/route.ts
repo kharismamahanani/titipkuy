@@ -6,7 +6,7 @@ import { cariSesiTersedia, incrementSlotUsage } from "@/lib/slot";
 import { bookingRatelimit, getClientIp } from "@/lib/rate-limit";
 import { toUtcMidnightFromLocalDate } from "@/lib/date-utils";
 import { AKTIF_HUB_KEYS } from "@/lib/constants";
-import { hitungHargaPaketTertagih } from "@/lib/harga-paket";
+import { hitungHargaPaketTertagih, isPaketHarianFleksibel } from "@/lib/harga-paket";
 import { normalizeWhatsapp } from "@/lib/whatsapp";
 import { validasiVoucher, terapkanDiskon } from "@/lib/voucher";
 import { TransaksiSchema } from "@/lib/schemas";
@@ -115,7 +115,7 @@ export async function POST(request: Request) {
     // Paket "harian" murni (durasiHari null) adalah tarif per-hari — jumlah
     // hari ditentukan pelanggan lewat jumlahHari, bukan fixed 1 hari.
     // Diabaikan untuk paket berdurasi tetap (bulanan/magang/motor/promo).
-    const isHarianFleksibel = paket.kategori === "harian" && paket.durasiHari === null;
+    const isHarianFleksibel = isPaketHarianFleksibel(paket);
     const jumlahHariEfektif = isHarianFleksibel ? jumlahHari ?? 1 : paket.durasiHari ?? 1;
     const tanggalJatuhTempo = addDays(tanggalMasukDate, jumlahHariEfektif);
     const ipAddress = request.headers.get("x-forwarded-for") ?? undefined;

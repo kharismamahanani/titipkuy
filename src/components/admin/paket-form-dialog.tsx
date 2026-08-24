@@ -26,7 +26,7 @@ import { tkInputClass, tkLabelClass, tkSelectTriggerClass } from "@/lib/form-sty
 import { cn } from "@/lib/utils";
 import type { Paket } from "@/types/paket";
 
-const KATEGORI_OPTIONS = ["harian", "bulanan", "magang", "pindahan", "motor"];
+const KATEGORI_OPTIONS = ["harian", "mingguan", "bulanan", "magang", "pindahan", "motor"];
 
 const EMPTY_FORM = {
   nama: "",

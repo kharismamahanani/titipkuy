@@ -85,7 +85,7 @@ export const PaketSchema = z.object({
   deskripsi: z.string().optional().nullable(),
   harga: z.number().int().positive(),
   durasiHari: z.number().int().positive().optional().nullable(),
-  kategori: z.enum(["harian", "bulanan", "magang", "pindahan", "motor"]),
+  kategori: z.enum(["harian", "mingguan", "bulanan", "magang", "pindahan", "motor"]),
   perluDeklarasi: z.boolean().default(false),
   aktif: z.boolean().default(true),
   urutan: z.number().int().default(0),

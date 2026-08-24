@@ -6,10 +6,11 @@ import { cn, formatRupiah } from "@/lib/utils";
 import { getWhatsAppUrl } from "@/constants/site";
 import { TkCard } from "@/components/ui/tk-card";
 import { tkButtonVariants } from "@/components/ui/tk-button";
+import { getPaketDurasiTier } from "@/lib/harga-paket";
 import type { Paket } from "@/types/paket";
 
 type FetchState = "loading" | "success" | "error";
-type Tab = "harian" | "bulanan";
+type Tab = "harian" | "mingguan" | "bulanan";
 
 function isPromo(paket: Paket) {
   return paket.nama.toUpperCase().includes("PROMO");
@@ -47,11 +48,7 @@ export function PaketSection() {
     };
   }, []);
 
-  const filteredPaket = paketList.filter((p) =>
-    tab === "harian"
-      ? p.kategori === "harian"
-      : p.kategori === "bulanan" || p.kategori === "magang" || p.kategori === "motor"
-  );
+  const filteredPaket = paketList.filter((p) => getPaketDurasiTier(p) === tab);
 
   return (
     <section id="paket" className="bg-tk-card px-4 py-24 sm:px-6">
@@ -62,7 +59,7 @@ export function PaketSection() {
         </div>
 
         <div className="mt-8 flex justify-center gap-3">
-          {(["harian", "bulanan"] as const).map((t) => (
+          {(["harian", "mingguan", "bulanan"] as const).map((t) => (
             <button
               key={t}
               type="button"
@@ -72,7 +69,7 @@ export function PaketSection() {
                 tab === t ? "bg-tk-charcoal text-tk-cream" : "bg-tk-cream text-tk-charcoal"
               )}
             >
-              {t === "harian" ? "🧳 Harian" : "🎓 Bulanan/Magang"}
+              {t === "harian" ? "🧳 Harian" : t === "mingguan" ? "📅 Mingguan" : "🎓 Bulanan/Magang"}
             </button>
           ))}
         </div>
