@@ -229,9 +229,13 @@ export default function AdminTransaksiPage() {
                   {format(new Date(t.tanggalJatuhTempo), "d MMM yyyy", { locale: localeId })}
                 </td>
                 <td className="px-4 py-3">
-                  <StatusBadge status={t.statusBayar}>
-                    {t.statusBayar === "LUNAS" ? "Lunas" : "Belum Lunas"}
-                  </StatusBadge>
+                  {t.statusTransaksi === "DIBATALKAN" ? (
+                    "-"
+                  ) : (
+                    <StatusBadge status={t.statusBayar}>
+                      {t.statusBayar === "LUNAS" ? "Lunas" : "Belum Lunas"}
+                    </StatusBadge>
+                  )}
                 </td>
                 <td className="px-4 py-3">
                   <StatusBadge status={t.statusTransaksi}>
@@ -255,16 +259,18 @@ export default function AdminTransaksiPage() {
                     >
                       Detail
                     </Link>
-                    <TandaiLunasButton
-                      id={t.id}
-                      nomorUrut={t.nomorUrut}
-                      pelanggan={t.pelanggan}
-                      hargaPaketTertagih={t.hargaPaketTertagih}
-                      antarJemputHarga={hargaAntarJemputTransaksi(t)}
-                      tanggalJatuhTempo={t.tanggalJatuhTempo}
-                      statusBayar={t.statusBayar}
-                      onSuccess={() => fetchData()}
-                    />
+                    {t.statusTransaksi !== "DIBATALKAN" && (
+                      <TandaiLunasButton
+                        id={t.id}
+                        nomorUrut={t.nomorUrut}
+                        pelanggan={t.pelanggan}
+                        hargaPaketTertagih={t.hargaPaketTertagih}
+                        antarJemputHarga={hargaAntarJemputTransaksi(t)}
+                        tanggalJatuhTempo={t.tanggalJatuhTempo}
+                        statusBayar={t.statusBayar}
+                        onSuccess={() => fetchData()}
+                      />
+                    )}
                   </div>
                 </td>
               </tr>
