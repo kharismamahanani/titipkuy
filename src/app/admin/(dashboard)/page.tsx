@@ -34,7 +34,9 @@ async function getDashboardData() {
         include: { pelanggan: true },
         orderBy: { tanggalJatuhTempo: "asc" },
       }),
-      prisma.transaksi.count({ where: { statusBayar: "BELUM_BAYAR" } }),
+      prisma.transaksi.count({
+        where: { statusBayar: "BELUM_BAYAR", statusTransaksi: { not: "DIBATALKAN" } },
+      }),
       // Sama persis dengan filter & rumus /api/admin/rekap (bulan berjalan,
       // hanya yang LUNAS, hargaPaketTertagih + premi + biaya antar-jemput)
       // supaya angka omzet di Dashboard dan Rekap Keuangan selalu konsisten.
@@ -173,21 +175,27 @@ export default async function AdminDashboardPage() {
                     {format(t.tanggalJatuhTempo, "d MMM yyyy", { locale: localeId })}
                   </td>
                   <td className="px-4 py-3">
-                    <StatusBadge status={t.statusBayar}>
-                      {t.statusBayar === "LUNAS" ? "Lunas" : "Belum Lunas"}
-                    </StatusBadge>
+                    {t.statusTransaksi === "DIBATALKAN" ? (
+                      "-"
+                    ) : (
+                      <StatusBadge status={t.statusBayar}>
+                        {t.statusBayar === "LUNAS" ? "Lunas" : "Belum Lunas"}
+                      </StatusBadge>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-2">
-                      <TandaiLunasButton
-                        id={t.id}
-                        nomorUrut={t.nomorUrut}
-                        pelanggan={t.pelanggan}
-                        hargaPaketTertagih={t.hargaPaketTertagih}
-                        antarJemputHarga={hargaAntarJemputTransaksi(t)}
-                        tanggalJatuhTempo={t.tanggalJatuhTempo}
-                        statusBayar={t.statusBayar}
-                      />
+                      {t.statusTransaksi !== "DIBATALKAN" && (
+                        <TandaiLunasButton
+                          id={t.id}
+                          nomorUrut={t.nomorUrut}
+                          pelanggan={t.pelanggan}
+                          hargaPaketTertagih={t.hargaPaketTertagih}
+                          antarJemputHarga={hargaAntarJemputTransaksi(t)}
+                          tanggalJatuhTempo={t.tanggalJatuhTempo}
+                          statusBayar={t.statusBayar}
+                        />
+                      )}
                       <Link href={`/admin/transaksi/${t.id}`} className={linkButtonClass}>
                         Lihat Detail
                       </Link>
