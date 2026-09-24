@@ -44,6 +44,7 @@ export function hitungHargaPaketTertagih(
     return paket.harga * pengaliBarang;
   }
 
-  const jumlahHari = Math.max(1, differenceInCalendarDays(tanggalJatuhTempo, tanggalMasuk));
+  // Inklusif: tgl masuk sudah dihitung 1 hari (mis. 25 = 1 hari, 25-28 = 4 hari).
+  const jumlahHari = Math.max(1, differenceInCalendarDays(tanggalJatuhTempo, tanggalMasuk) + 1);
   return paket.harga * jumlahHari * pengaliBarang;
 }

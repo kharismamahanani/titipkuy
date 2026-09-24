@@ -3,6 +3,7 @@ import type { StatusBayar, StatusTransaksi } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { hitungHargaPaketTertagih } from "@/lib/harga-paket";
 import { terapkanDiskon } from "@/lib/voucher";
+import { toUtcMidnightFromLocalDate } from "@/lib/date-utils";
 
 export async function GET(
   _request: Request,
@@ -70,22 +71,31 @@ export async function PATCH(
     if (tanggalMasuk !== undefined || tanggalJatuhTempo !== undefined || jumlahBarang !== undefined) {
       const current = await prisma.transaksi.findUnique({
         where: { id: params.id },
-        include: { paket: true },
+        include: { paket: true, itemPesanan: { include: { paket: true } } },
       });
 
       if (!current) {
         return NextResponse.json({ error: "Transaksi tidak ditemukan" }, { status: 404 });
       }
 
-      const masukBaru = tanggalMasuk ? new Date(tanggalMasuk) : current.tanggalMasuk;
+      // Normalisasi ke UTC midnight dari tanggal kalender WIB (lihat
+      // komentar di date-utils.ts) — dipakai juga saat transaksi dibuat,
+      // supaya edit tanggal tidak menggeser hitungan hari saat kode ini
+      // dieksekusi di server yang berjalan di UTC (Vercel).
+      const masukBaru = tanggalMasuk
+        ? toUtcMidnightFromLocalDate(new Date(tanggalMasuk))
+        : current.tanggalMasuk;
       const jatuhTempoBaru = tanggalJatuhTempo
-        ? new Date(tanggalJatuhTempo)
+        ? toUtcMidnightFromLocalDate(new Date(tanggalJatuhTempo))
         : current.tanggalJatuhTempo;
       const jumlahBarangBaru = jumlahBarang ?? current.jumlahBarang;
 
-      if (jatuhTempoBaru <= masukBaru) {
+      // Sama dengan tanggal masuk itu valid (berarti 1 hari, dihitung
+      // inklusif — lihat hitungHargaPaketTertagih) — yang tidak valid cuma
+      // jatuh tempo SEBELUM tanggal masuk.
+      if (jatuhTempoBaru < masukBaru) {
         return NextResponse.json(
-          { error: "Tanggal jatuh tempo harus setelah tanggal masuk" },
+          { error: "Tanggal jatuh tempo tidak boleh sebelum tanggal masuk" },
           { status: 400 }
         );
       }
@@ -94,7 +104,34 @@ export async function PATCH(
       data.tanggalJatuhTempo = jatuhTempoBaru;
       data.jumlahBarang = jumlahBarangBaru;
 
-      const hargaAsli = hitungHargaPaketTertagih(current.paket, masukBaru, jatuhTempoBaru, jumlahBarangBaru);
+      // Transaksi multi-paket (itemPesanan terisi) — itemPesanan adalah
+      // sumber kebenaran harga (lihat komentar di schema.prisma & di
+      // src/app/api/transaksi/route.ts saat transaksi dibuat), jadi tiap
+      // item dihitung ulang per paketnya sendiri lalu dijumlah. Memakai
+      // current.paket/jumlahBarang saja (seperti sebelumnya) salah untuk
+      // kasus ini karena mengabaikan harga & jumlah item lain.
+      let hargaAsli: number;
+      if (current.itemPesanan.length > 0) {
+        const itemUpdates = current.itemPesanan.map((item) => ({
+          id: item.id,
+          hargaSatuan: hitungHargaPaketTertagih(item.paket, masukBaru, jatuhTempoBaru, 1),
+        }));
+        hargaAsli = itemUpdates.reduce((sum, item, i) => {
+          const jumlah = current.itemPesanan[i].jumlah;
+          return sum + item.hargaSatuan * jumlah;
+        }, 0);
+        await prisma.$transaction(
+          itemUpdates.map((item) =>
+            prisma.itemPesanan.update({
+              where: { id: item.id },
+              data: { hargaSatuan: item.hargaSatuan },
+            })
+          )
+        );
+      } else {
+        hargaAsli = hitungHargaPaketTertagih(current.paket, masukBaru, jatuhTempoBaru, jumlahBarangBaru);
+      }
+
       if (current.persenDiskonTerpakai != null) {
         data.hargaPaketTertagih = terapkanDiskon(hargaAsli, current.persenDiskonTerpakai);
         data.hargaSebelumDiskon = hargaAsli;

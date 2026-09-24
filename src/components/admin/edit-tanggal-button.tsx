@@ -48,8 +48,8 @@ export function EditTanggalButton({
   }
 
   async function handleConfirm() {
-    if (jatuhTempo <= masuk) {
-      toast.error("Tanggal jatuh tempo harus setelah tanggal masuk");
+    if (jatuhTempo < masuk) {
+      toast.error("Tanggal jatuh tempo tidak boleh sebelum tanggal masuk");
       return;
     }
 

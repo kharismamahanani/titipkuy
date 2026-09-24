@@ -160,8 +160,13 @@ export function Step2PaketTanggal({
   const isHarianFleksibel = !!paket && isPaketHarianFleksibel(paket);
   const jumlahHariEfektif = isHarianFleksibel ? jumlahHariHarian : paket?.durasiHari ?? 1;
 
+  // Inklusif untuk paket harian fleksibel (lihat komentar di
+  // src/app/api/transaksi/route.ts) — masuk + (N-1) hari supaya tanggal
+  // yang ditampilkan di sini sama dengan yang benar-benar tersimpan.
   const tanggalJatuhTempo =
-    tanggalMasuk && paket ? addDays(tanggalMasuk, jumlahHariEfektif) : null;
+    tanggalMasuk && paket
+      ? addDays(tanggalMasuk, isHarianFleksibel ? jumlahHariEfektif - 1 : jumlahHariEfektif)
+      : null;
 
   const filteredPaketList = paketList.filter((item) => getPaketDurasiTier(item) === tab);
 

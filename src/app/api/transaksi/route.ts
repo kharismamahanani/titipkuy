@@ -117,7 +117,14 @@ export async function POST(request: Request) {
     // Diabaikan untuk paket berdurasi tetap (bulanan/magang/motor/promo).
     const isHarianFleksibel = isPaketHarianFleksibel(paket);
     const jumlahHariEfektif = isHarianFleksibel ? jumlahHari ?? 1 : paket.durasiHari ?? 1;
-    const tanggalJatuhTempo = addDays(tanggalMasukDate, jumlahHariEfektif);
+    // Untuk paket harian fleksibel, hitungHargaPaketTertagih menghitung hari
+    // secara inklusif (tgl masuk = jatuh tempo berarti 1 hari) — jadi jatuh
+    // tempo di sini harus masuk + (N-1) hari supaya tetap pas N hari saat
+    // dihitung ulang. Paket berdurasi tetap tidak terpengaruh (harga flat,
+    // tidak dihitung dari selisih tanggal) jadi tetap pakai +N seperti semula.
+    const tanggalJatuhTempo = isHarianFleksibel
+      ? addDays(tanggalMasukDate, jumlahHariEfektif - 1)
+      : addDays(tanggalMasukDate, jumlahHariEfektif);
     const ipAddress = request.headers.get("x-forwarded-for") ?? undefined;
     const userAgent = request.headers.get("user-agent") ?? undefined;
 
