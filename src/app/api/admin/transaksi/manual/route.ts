@@ -82,9 +82,11 @@ export async function POST(request: Request) {
     // (server, biasanya UTC) bisa mundur sehari dibanding tanggal kalender
     // WIB yang sebenarnya dipilih.
     const tanggalMasukDate = toUtcMidnightFromLocalDate(new Date(tanggalMasuk));
+    // Fallback saat admin tidak mengirim tanggalJatuhTempo eksplisit —
+    // inklusif sama seperti di /api/transaksi/route.ts (durasiHari - 1).
     const tanggalJatuhTempoDate = tanggalJatuhTempo
       ? toUtcMidnightFromLocalDate(new Date(tanggalJatuhTempo))
-      : addDays(tanggalMasukDate, paket.durasiHari ?? 1);
+      : addDays(tanggalMasukDate, (paket.durasiHari ?? 1) - 1);
 
     const existingPelanggan = await prisma.pelanggan.findFirst({
       where: { whatsapp: pelanggan.whatsapp },

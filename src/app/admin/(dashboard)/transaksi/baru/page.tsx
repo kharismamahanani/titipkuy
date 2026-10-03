@@ -174,11 +174,11 @@ export default function AdminBuatOrderManualPage() {
   useEffect(() => {
     if (paket && tanggalMasuk) {
       // Default awal saja — admin bisa geser lewat kalender Jatuh Tempo di
-      // bawah. Untuk paket harian fleksibel, hitungHargaPaketTertagih
-      // menghitung hari secara inklusif (masuk = jatuh tempo berarti 1
-      // hari), jadi default-nya sama dengan tanggal masuk, bukan +1 hari.
+      // bawah. Inklusif untuk semua kategori (masuk = jatuh tempo berarti 1
+      // hari): paket fleksibel default 1 hari (0 selisih), paket berdurasi
+      // tetap default durasiHari - 1 selisih (mis. mingguan 7 hari → +6).
       const isFleksibel = isPaketHarianFleksibel(paket);
-      setTanggalJatuhTempo(addDays(tanggalMasuk, isFleksibel ? 0 : paket.durasiHari ?? 1));
+      setTanggalJatuhTempo(addDays(tanggalMasuk, isFleksibel ? 0 : (paket.durasiHari ?? 1) - 1));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paket?.id, tanggalMasuk]);

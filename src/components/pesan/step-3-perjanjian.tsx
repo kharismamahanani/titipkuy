@@ -88,8 +88,13 @@ export function Step3Perjanjian({
     onSubmit(dataUrl);
   }
 
+  // Pakai durasiHari (sudah benar memperhitungkan jumlahHariHarian untuk
+  // paket fleksibel, lihat atas) dan inklusif N-1 (lihat komentar di
+  // src/app/api/transaksi/route.ts) — sebelumnya selalu pakai
+  // paket.durasiHari mentah, salah untuk paket fleksibel (selalu masuk+1
+  // hari berapa pun durasi yang dipilih pelanggan).
   const tanggalJatuhTempo =
-    tanggalMasuk && paket ? addDays(tanggalMasuk, paket.durasiHari ?? 1) : null;
+    tanggalMasuk && paket ? addDays(tanggalMasuk, durasiHari - 1) : null;
 
   return (
     <div className="space-y-6">
